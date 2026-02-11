@@ -1,0 +1,24 @@
+import { FirebaseFestivalRepository } from '../data/repositories/firebase-festival.repository';
+import { CreateFestivalUseCase } from '../domain/usecases/create-festival.usecase';
+import { GetUpcomingFestivalsUseCase } from '../domain/usecases/get-upcoming-festivals.usecase';
+
+class FestivalContainer {
+  private _festivalRepository: FirebaseFestivalRepository | null = null;
+
+  festivalRepository(): FirebaseFestivalRepository {
+    if (!this._festivalRepository) {
+      this._festivalRepository = new FirebaseFestivalRepository();
+    }
+    return this._festivalRepository;
+  }
+
+  createFestivalUseCase(): CreateFestivalUseCase {
+    return new CreateFestivalUseCase(this.festivalRepository());
+  }
+
+  getUpcomingFestivalsUseCase(): GetUpcomingFestivalsUseCase {
+    return new GetUpcomingFestivalsUseCase(this.festivalRepository());
+  }
+}
+
+export const festivalContainer = new FestivalContainer();
