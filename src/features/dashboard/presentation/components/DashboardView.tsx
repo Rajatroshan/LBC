@@ -14,20 +14,21 @@ export const DashboardView: React.FC = () => {
   const getDashboardStatsUseCase = dashboardContainer.getDashboardStatsUseCase();
 
   useEffect(() => {
-    loadStats();
-  }, []);
+    const loadStats = async () => {
+      setLoading(true);
+      try {
+        const data = await getDashboardStatsUseCase.execute();
+        setStats(data);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Unknown error');
+        setError(error.message || 'Failed to load dashboard stats');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const loadStats = async () => {
-    setLoading(true);
-    try {
-      const data = await getDashboardStatsUseCase.execute();
-      setStats(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load dashboard stats');
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadStats();
+  }, [getDashboardStatsUseCase]);
 
   if (loading) {
     return (

@@ -17,20 +17,21 @@ export const FamilyList: React.FC = () => {
   const getFamiliesUseCase = familyContainer.getFamiliesUseCase();
 
   useEffect(() => {
-    loadFamilies();
-  }, []);
+    const loadFamilies = async () => {
+      setLoading(true);
+      try {
+        const data = await getFamiliesUseCase.execute({ isActive: true });
+        setFamilies(data);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Unknown error');
+        setError(error.message || 'Failed to load families');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const loadFamilies = async () => {
-    setLoading(true);
-    try {
-      const data = await getFamiliesUseCase.execute({ isActive: true });
-      setFamilies(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load families');
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadFamilies();
+  }, [getFamiliesUseCase]);
 
   if (loading) {
     return (

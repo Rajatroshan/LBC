@@ -18,20 +18,21 @@ export const FestivalList: React.FC = () => {
   const getUpcomingFestivalsUseCase = festivalContainer.getUpcomingFestivalsUseCase();
 
   useEffect(() => {
-    loadFestivals();
-  }, []);
+    const loadFestivals = async () => {
+      setLoading(true);
+      try {
+        const data = await getUpcomingFestivalsUseCase.execute(20);
+        setFestivals(data);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Unknown error');
+        setError(error.message || 'Failed to load festivals');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const loadFestivals = async () => {
-    setLoading(true);
-    try {
-      const data = await getUpcomingFestivalsUseCase.execute(20);
-      setFestivals(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load festivals');
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadFestivals();
+  }, [getUpcomingFestivalsUseCase]);
 
   if (loading) {
     return (

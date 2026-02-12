@@ -60,7 +60,7 @@ export default function AboutSection() {
                 <p>
                   With LBC, every family contribution is recorded, every payment
                   is tracked, and every member can access information anytime,
-                  anywhere. We're building a digital bridge between tradition
+                  anywhere. We&apos;re building a digital bridge between tradition
                   and technology.
                 </p>
               </div>

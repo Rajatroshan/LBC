@@ -1,4 +1,4 @@
-import { DocumentData, where, orderBy } from 'firebase/firestore';
+import { DocumentData, where } from 'firebase/firestore';
 import { BaseFirestoreRepository } from '@/core/shared/base-repository';
 import { Festival, FestivalFilter } from '@/core/types';
 import { COLLECTIONS } from '@/core/constants';

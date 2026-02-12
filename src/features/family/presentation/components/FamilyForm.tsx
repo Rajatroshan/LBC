@@ -30,8 +30,9 @@ export const FamilyForm: React.FC<{ familyId?: string }> = ({ familyId }) => {
         address,
       });
       router.push(APP_ROUTES.FAMILIES);
-    } catch (err: any) {
-      setError(err.message || 'Failed to create family');
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error');
+      setError(error.message || 'Failed to create family');
     } finally {
       setLoading(false);
     }

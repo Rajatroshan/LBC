@@ -19,9 +19,10 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const config = await getEnvironmentConfig();
         initializeFirebase(config.firebase);
         setInitialized(true);
-      } catch (err: any) {
-        console.error('Failed to initialize Firebase:', err);
-        setError(err.message || 'Failed to initialize Firebase');
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Unknown error');
+        console.error('Failed to initialize Firebase:', error);
+        setError(error.message || 'Failed to initialize Firebase');
       }
     };
 

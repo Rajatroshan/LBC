@@ -3,6 +3,10 @@ import autoTable from 'jspdf-autotable';
 import { Payment, Family, Festival } from '@/core/types';
 import { formatDate, formatCurrency } from '@/utils';
 
+interface JsPDFWithTable extends jsPDF {
+  lastAutoTable?: { finalY: number };
+}
+
 /**
  * Generate PDF receipt for a payment
  */
@@ -63,7 +67,7 @@ export const generatePaymentReceipt = (
   });
 
   // Footer
-  const finalY = (doc as any).lastAutoTable.finalY || 140;
+  const finalY = (doc as JsPDFWithTable).lastAutoTable?.finalY || 140;
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
   doc.text('Thank you for your contribution!', 105, finalY + 20, {
