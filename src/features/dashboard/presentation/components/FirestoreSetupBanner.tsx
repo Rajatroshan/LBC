@@ -48,7 +48,7 @@ export const FirestoreSetupBanner: React.FC = () => {
               <div>
                 <strong>Create Admin User:</strong>
                 <p className="text-xs mt-1">
-                  In Firestore Data tab, add your user to the <code className="bg-blue-100 px-1 rounded">users</code> collection with <code className="bg-blue-100 px-1 rounded">role: "ADMIN"</code>
+                  In Firestore Data tab, add your user to the <code className="bg-blue-100 px-1 rounded">users</code> collection with <code className="bg-blue-100 px-1 rounded">role: &quot;ADMIN&quot;</code>
                 </p>
               </div>
             </div>
@@ -57,7 +57,7 @@ export const FirestoreSetupBanner: React.FC = () => {
               <div>
                 <strong>Start Adding Data:</strong>
                 <p className="text-xs mt-1">
-                  Use the "Create" or "Add" buttons in each section to populate your database
+                  Use the &quot;Create&quot; or &quot;Add&quot; buttons in each section to populate your database
                 </p>
               </div>
             </div>

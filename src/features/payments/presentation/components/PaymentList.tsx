@@ -15,12 +15,10 @@ export const PaymentList: React.FC<{ festivalId?: string }> = ({ festivalId }) =
   const [familiesMap, setFamiliesMap] = useState<Map<string, Family>>(new Map());
   const [festivalsMap, setFestivalsMap] = useState<Map<string, Festival>>(new Map());
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'PAID' | 'UNPAID' | 'PENDING'>('ALL');
 
   const loadPayments = useCallback(async () => {
     setLoading(true);
-    setError('');
     try {
       const getPaymentsByFestivalUseCase = paymentContainer.getPaymentsByFestivalUseCase();
       const getFamiliesUseCase = familyContainer.getFamiliesUseCase();
@@ -38,7 +36,7 @@ export const PaymentList: React.FC<{ festivalId?: string }> = ({ festivalId }) =
             const festivalPayments = await getPaymentsByFestivalUseCase.execute(festival.id);
             paymentsData = [...paymentsData, ...festivalPayments];
           }
-        } catch (err) {
+        } catch {
           // Empty collections are okay
           console.log('No festivals or payments found yet');
         }
@@ -139,7 +137,7 @@ export const PaymentList: React.FC<{ festivalId?: string }> = ({ festivalId }) =
           <div className="text-center py-12">
             <p className="text-gray-600 mb-2">No payments recorded yet.</p>
             <p className="text-sm text-gray-500">
-              Click "Record Payment" to add your first payment.
+              Click &quot;Record Payment&quot; to add your first payment.
             </p>
           </div>
         ) : (

@@ -12,12 +12,10 @@ export const ExpenseList: React.FC<{ festivalId?: string }> = ({ festivalId }) =
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [festivalsMap, setFestivalsMap] = useState<Map<string, Festival>>(new Map());
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('ALL');
 
   const loadExpenses = useCallback(async () => {
     setLoading(true);
-    setError('');
     try {
       const getExpensesUseCase = expenseContainer.getExpensesUseCase();
       const getFestivalsUseCase = festivalContainer.getFestivalsUseCase();
@@ -114,7 +112,7 @@ export const ExpenseList: React.FC<{ festivalId?: string }> = ({ festivalId }) =
           <div className="text-center py-12">
             <p className="text-gray-600 mb-2">No expenses recorded yet.</p>
             <p className="text-sm text-gray-500">
-              Click "Record Expense" to track your first expense.
+              Click &quot;Record Expense&quot; to track your first expense.
             </p>
           </div>
         ) : (
