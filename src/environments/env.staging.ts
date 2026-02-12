@@ -1,4 +1,4 @@
-import { EnvironmentConfig } from './environment.interface';
+import { EnvironmentConfig } from '@/core/config/environment.interface';
 
 export const envConfig: EnvironmentConfig = {
   apiUrl: 'https://staging.lbc.com',
