@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Festival } from '@/core/types';
 import { festivalContainer } from '../../di/festival.container';
 import { Card, Button, Loader } from '@/core/ui';
@@ -15,24 +15,23 @@ export const FestivalList: React.FC = () => {
   const [error, setError] = useState('');
   const { isAdmin } = useAuth();
 
-  const getUpcomingFestivalsUseCase = festivalContainer.getUpcomingFestivalsUseCase();
+  const loadFestivals = useCallback(async () => {
+    setLoading(true);
+    try {
+      const getUpcomingFestivalsUseCase = festivalContainer.getUpcomingFestivalsUseCase();
+      const data = await getUpcomingFestivalsUseCase.execute(20);
+      setFestivals(data);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error');
+      setError(error.message || 'Failed to load festivals');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const loadFestivals = async () => {
-      setLoading(true);
-      try {
-        const data = await getUpcomingFestivalsUseCase.execute(20);
-        setFestivals(data);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Unknown error');
-        setError(error.message || 'Failed to load festivals');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadFestivals();
-  }, [getUpcomingFestivalsUseCase]);
+  }, [loadFestivals]);
 
   if (loading) {
     return (

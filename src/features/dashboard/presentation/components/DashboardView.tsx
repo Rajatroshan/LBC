@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { DashboardStats } from '@/core/types';
 import { dashboardContainer } from '../../di/dashboard.container';
 import { Card, Loader } from '@/core/ui';
@@ -11,24 +11,23 @@ export const DashboardView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const getDashboardStatsUseCase = dashboardContainer.getDashboardStatsUseCase();
+  const loadStats = useCallback(async () => {
+    setLoading(true);
+    try {
+      const getDashboardStatsUseCase = dashboardContainer.getDashboardStatsUseCase();
+      const data = await getDashboardStatsUseCase.execute();
+      setStats(data);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error');
+      setError(error.message || 'Failed to load dashboard stats');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const loadStats = async () => {
-      setLoading(true);
-      try {
-        const data = await getDashboardStatsUseCase.execute();
-        setStats(data);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Unknown error');
-        setError(error.message || 'Failed to load dashboard stats');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadStats();
-  }, [getDashboardStatsUseCase]);
+  }, [loadStats]);
 
   if (loading) {
     return (

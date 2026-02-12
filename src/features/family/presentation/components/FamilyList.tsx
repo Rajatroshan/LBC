@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Family } from '@/core/types';
 import { familyContainer } from '../../di/family.container';
 import { Card, Button, Loader } from '@/core/ui';
@@ -14,24 +14,23 @@ export const FamilyList: React.FC = () => {
   const [error, setError] = useState('');
   const { isAdmin } = useAuth();
 
-  const getFamiliesUseCase = familyContainer.getFamiliesUseCase();
+  const loadFamilies = useCallback(async () => {
+    setLoading(true);
+    try {
+      const getFamiliesUseCase = familyContainer.getFamiliesUseCase();
+      const data = await getFamiliesUseCase.execute({ isActive: true });
+      setFamilies(data);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error');
+      setError(error.message || 'Failed to load families');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const loadFamilies = async () => {
-      setLoading(true);
-      try {
-        const data = await getFamiliesUseCase.execute({ isActive: true });
-        setFamilies(data);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Unknown error');
-        setError(error.message || 'Failed to load families');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadFamilies();
-  }, [getFamiliesUseCase]);
+  }, [loadFamilies]);
 
   if (loading) {
     return (

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useCallback, useEffect, useState } from 'react';
 import { User } from '@/core/types';
 import { authContainer } from '../../di/auth.container';
 
@@ -19,56 +19,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const getCurrentUserUseCase = authContainer.getCurrentUserUseCase();
-  const loginUseCase = authContainer.loginUseCase();
-  const registerUseCase = authContainer.registerUseCase();
-  const logoutUseCase = authContainer.logoutUseCase();
+  const loadUser = useCallback(async () => {
+    try {
+      const getCurrentUserUseCase = authContainer.getCurrentUserUseCase();
+      const currentUser = await getCurrentUserUseCase.execute();
+      setUser(currentUser);
+    } catch (error) {
+      console.error('Failed to load user:', error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const currentUser = await getCurrentUserUseCase.execute();
-        setUser(currentUser);
-      } catch (error) {
-        console.error('Failed to load user:', error);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadUser();
-  }, [getCurrentUserUseCase]);
+  }, [loadUser]);
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
+      const loginUseCase = authContainer.loginUseCase();
       const user = await loginUseCase.execute({ email, password });
       setUser(user);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const register = async (email: string, password: string, name: string) => {
+  const register = useCallback(async (email: string, password: string, name: string) => {
     setLoading(true);
     try {
+      const registerUseCase = authContainer.registerUseCase();
       const user = await registerUseCase.execute({ email, password, name });
       setUser(user);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     setLoading(true);
     try {
+      const logoutUseCase = authContainer.logoutUseCase();
       await logoutUseCase.execute();
       setUser(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const isAdmin = user?.role === 'ADMIN';
 
