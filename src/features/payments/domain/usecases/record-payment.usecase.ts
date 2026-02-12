@@ -1,6 +1,5 @@
 import { IUseCase } from '@/core/shared/interfaces';
 import { Payment } from '@/core/types';
-import { PaymentStatus } from '@/core/constants';
 import { IPaymentRepository } from '../repositories/payment.repository.interface';
 
 export interface RecordPaymentInput {
@@ -8,6 +7,7 @@ export interface RecordPaymentInput {
   festivalId: string;
   amount: number;
   paidDate: Date;
+  status?: 'PAID' | 'UNPAID' | 'PENDING';
   notes?: string;
 }
 
@@ -18,9 +18,13 @@ export class RecordPaymentUseCase implements IUseCase<RecordPaymentInput, Paymen
     const receiptNumber = this.generateReceiptNumber();
     
     return await this.paymentRepository.create({
-      ...input,
-      status: PaymentStatus.PAID,
+      familyId: input.familyId,
+      festivalId: input.festivalId,
+      amount: input.amount,
+      paidDate: input.paidDate,
+      status: input.status || 'PAID',
       receiptNumber,
+      notes: input.notes,
     });
   }
 

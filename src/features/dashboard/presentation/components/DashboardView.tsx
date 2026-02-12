@@ -5,6 +5,7 @@ import { DashboardStats } from '@/core/types';
 import { dashboardContainer } from '../../di/dashboard.container';
 import { Card, Loader } from '@/core/ui';
 import { formatCurrency } from '@/utils';
+import { FirestoreSetupBanner } from './FirestoreSetupBanner';
 
 export const DashboardView: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -48,6 +49,9 @@ export const DashboardView: React.FC = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
+
+      {/* First Time Setup Banner */}
+      <FirestoreSetupBanner />
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

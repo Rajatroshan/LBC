@@ -19,6 +19,17 @@ export const initializeFirebase = (config: {
   messagingSenderId: string;
   appId: string;
 }) => {
+  // Validate configuration
+  const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+  const missingFields = requiredFields.filter(field => !config[field as keyof typeof config]);
+  
+  if (missingFields.length > 0) {
+    throw new Error(
+      `Firebase configuration is incomplete. Missing fields: ${missingFields.join(', ')}. ` +
+      'Please check your .env.local file and ensure all NEXT_PUBLIC_FIREBASE_* variables are set.'
+    );
+  }
+
   // Check if Firebase is already initialized
   if (getApps().length === 0) {
     app = initializeApp(config);
@@ -28,11 +39,13 @@ export const initializeFirebase = (config: {
 
     // Enable offline persistence
     if (typeof window !== 'undefined') {
-      enableIndexedDbPersistence(db).catch((err) => {
+      enableIndexedDbPersistence(db).catch((err: Record<string, unknown>) => {
         if (err.code === 'failed-precondition') {
-          console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+          // Multiple tabs open
+          return;
         } else if (err.code === 'unimplemented') {
-          console.warn('The current browser does not support offline persistence');
+          // Browser doesn't support offline persistence
+          return;
         }
       });
     }

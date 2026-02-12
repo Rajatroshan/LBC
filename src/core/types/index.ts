@@ -101,6 +101,26 @@ export interface PaymentFilter {
   endDate?: Date;
 }
 
+// Expense Types (for tracking outgoing payments)
+export interface Expense extends BaseEntity {
+  purpose: string;
+  category: 'TENT' | 'FOOD' | 'DECORATION' | 'ENTERTAINMENT' | 'UTILITIES' | 'OTHER';
+  amount: number;
+  expenseDate: Date;
+  paidTo: string;
+  contactNumber?: string;
+  festivalId?: string;
+  notes?: string;
+  receiptUrl?: string;
+}
+
+export interface ExpenseFilter {
+  festivalId?: string;
+  category?: string;
+  startDate?: Date;
+  endDate?: Date;
+}
+
 // Report Types
 export interface FestivalReport {
   festivalId: string;

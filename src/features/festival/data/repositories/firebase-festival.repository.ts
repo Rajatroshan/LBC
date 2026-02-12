@@ -1,4 +1,4 @@
-import { DocumentData, where } from 'firebase/firestore';
+import { DocumentData, where, Timestamp } from 'firebase/firestore';
 import { BaseFirestoreRepository } from '@/core/shared/base-repository';
 import { Festival, FestivalFilter } from '@/core/types';
 import { COLLECTIONS } from '@/core/constants';
@@ -57,9 +57,10 @@ export class FirebaseFestivalRepository
 
   async getUpcoming(limit: number = 10): Promise<Festival[]> {
     const now = new Date();
+    const nowTimestamp = Timestamp.fromDate(now);
     const festivals = await this.queryWithFilters([
       where('isActive', '==', true),
-      where('date', '>=', now),
+      where('date', '>=', nowTimestamp),
     ]);
 
     return festivals

@@ -27,6 +27,7 @@ export const COLLECTIONS = {
   FESTIVALS: 'festivals',
   PAYMENTS: 'payments',
   RECEIPTS: 'receipts',
+  EXPENSES: 'expenses',
 } as const;
 
 // App Constants

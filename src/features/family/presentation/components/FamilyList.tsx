@@ -12,17 +12,20 @@ export const FamilyList: React.FC = () => {
   const [families, setFamilies] = useState<Family[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const { isAdmin } = useAuth();
 
   const loadFamilies = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
       const getFamiliesUseCase = familyContainer.getFamiliesUseCase();
       const data = await getFamiliesUseCase.execute({ isActive: true });
       setFamilies(data);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Unknown error');
-      setError(error.message || 'Failed to load families');
+      console.error('Failed to load families:', err);
+      setError('Could not load families. Please check your connection.');
+      setFamilies([]);
     } finally {
       setLoading(false);
     }
@@ -31,6 +34,25 @@ export const FamilyList: React.FC = () => {
   useEffect(() => {
     loadFamilies();
   }, [loadFamilies]);
+
+  const handleDelete = async (id: string, headName: string) => {
+    if (!confirm(`Are you sure you want to delete the family "${headName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingId(id);
+    try {
+      const deleteFamilyUseCase = familyContainer.deleteFamilyUseCase();
+      await deleteFamilyUseCase.execute(id);
+      // Reload the list after deletion
+      await loadFamilies();
+    } catch (err) {
+      console.error('Failed to delete family:', err);
+      alert('Failed to delete family. Please try again.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -44,6 +66,7 @@ export const FamilyList: React.FC = () => {
     return (
       <Card>
         <p className="text-red-600">{error}</p>
+        <Button onClick={loadFamilies} className="mt-4">Retry</Button>
       </Card>
     );
   }
@@ -72,11 +95,24 @@ export const FamilyList: React.FC = () => {
             </div>
             {isAdmin && (
               <div className="mt-4 flex gap-2">
+                <Link href={APP_ROUTES.FAMILY_DETAIL(family.id)}>
+                  <Button size="sm" variant="outline">
+                    View
+                  </Button>
+                </Link>
                 <Link href={APP_ROUTES.FAMILY_EDIT(family.id)}>
                   <Button size="sm" variant="outline">
                     Edit
                   </Button>
                 </Link>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleDelete(family.id, family.headName)}
+                  disabled={deletingId === family.id}
+                >
+                  {deletingId === family.id ? 'Deleting...' : 'Delete'}
+                </Button>
               </div>
             )}
           </Card>
