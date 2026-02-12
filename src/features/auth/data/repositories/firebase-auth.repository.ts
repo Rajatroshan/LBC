@@ -3,8 +3,8 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  User as FirebaseUser,
   updateProfile,
+  AuthError,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { getFirebaseAuth, getFirebaseDb } from '@/core/network/firebase';
@@ -25,11 +25,12 @@ export class FirebaseAuthRepository implements IAuthRepository {
       }
       
       return user;
-    } catch (error: any) {
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+    } catch (error) {
+      const fireError = error as AuthError;
+      if (fireError.code === 'auth/user-not-found' || fireError.code === 'auth/wrong-password') {
         throw new AuthenticationError('Invalid email or password');
       }
-      throw new AuthenticationError(error.message);
+      throw new AuthenticationError(fireError.message || 'Login failed');
     }
   }
 
@@ -59,11 +60,12 @@ export class FirebaseAuthRepository implements IAuthRepository {
         id: firebaseUser.uid,
         ...userData,
       };
-    } catch (error: any) {
-      if (error.code === 'auth/email-already-in-use') {
+    } catch (error) {
+      const fireError = error as AuthError;
+      if (fireError.code === 'auth/email-already-in-use') {
         throw new AuthenticationError('Email already in use');
       }
-      throw new AuthenticationError(error.message);
+      throw new AuthenticationError(fireError.message || 'Registration failed');
     }
   }
 
@@ -71,8 +73,9 @@ export class FirebaseAuthRepository implements IAuthRepository {
     try {
       const auth = getFirebaseAuth();
       await signOut(auth);
-    } catch (error: any) {
-      throw new AuthenticationError(error.message);
+    } catch (error) {
+      const fireError = error as AuthError;
+      throw new AuthenticationError(fireError.message || 'Logout failed');
     }
   }
 
@@ -121,8 +124,9 @@ export class FirebaseAuthRepository implements IAuthRepository {
       }
 
       return user;
-    } catch (error: any) {
-      throw new DatabaseError(error.message);
+    } catch (error) {
+      const dbError = error as Error;
+      throw new DatabaseError(dbError.message);
     }
   }
 
@@ -146,8 +150,9 @@ export class FirebaseAuthRepository implements IAuthRepository {
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date(),
       };
-    } catch (error: any) {
-      throw new DatabaseError(error.message);
+    } catch (error) {
+      const dbError = error as Error;
+      throw new DatabaseError(dbError.message);
     }
   }
 }

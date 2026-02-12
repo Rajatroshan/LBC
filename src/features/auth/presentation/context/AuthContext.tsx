@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     loadUser();
-  }, []);
+  }, [getCurrentUserUseCase]);
 
   const login = async (email: string, password: string) => {
     setLoading(true);

@@ -36,8 +36,9 @@ export const RegisterForm: React.FC = () => {
     try {
       await register(email, password, name);
       router.push(APP_ROUTES.DASHBOARD);
-    } catch (err: any) {
-      setError(err.message || 'Registration failed');
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error');
+      setError(error.message || 'Registration failed');
     } finally {
       setLoading(false);
     }

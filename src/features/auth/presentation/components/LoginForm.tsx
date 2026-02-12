@@ -23,8 +23,9 @@ export const LoginForm: React.FC = () => {
     try {
       await login(email, password);
       router.push(APP_ROUTES.DASHBOARD);
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error');
+      setError(error.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -67,7 +68,7 @@ export const LoginForm: React.FC = () => {
       </form>
 
       <p className="mt-4 text-center text-sm text-gray-600">
-        Don't have an account?{' '}
+        Don&apos;t have an account?{' '}
         <a href={APP_ROUTES.REGISTER} className="text-primary-600 hover:underline">
           Register here
         </a>
