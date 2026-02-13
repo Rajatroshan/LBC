@@ -1,0 +1,66 @@
+﻿  Γû▓ Next.js 14.2.35
+  - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+
+./src/lib/firebase.ts
+38:50  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+59:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/services/expense.service.ts
+72:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+89:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/family.service.ts
+108:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/festival.service.ts
+89:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+109:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/payment.service.ts
+94:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+111:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/17) ...
+   Generating static pages (4/17) 
+   Generating static pages (8/17) 
+   Generating static pages (12/17) 
+ Γ£ô Generating static pages (17/17)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+Γöî Γùï /                                    8.35 kB        95.7 kB
+Γö£ Γùï /_not-found                          873 B          88.2 kB
+Γö£ Γùï /auth/login                          4.01 kB         231 kB
+Γö£ Γùï /auth/register                       4.11 kB         231 kB
+Γö£ Γùï /calendar                            714 B            88 kB
+Γö£ Γùï /dashboard                           4.44 kB         238 kB
+Γö£ Γùï /expenses/record                     5.21 kB         223 kB
+Γö£ Γùï /families                            4.08 kB         231 kB
+Γö£ ╞Æ /families/[id]                       3.91 kB         231 kB
+Γö£ ╞Æ /families/[id]/edit                  318 B           222 kB
+Γö£ Γùï /families/create                     289 B           222 kB
+Γö£ Γùï /festivals                           4.02 kB         237 kB
+Γö£ ╞Æ /festivals/[id]                      1.79 kB         239 kB
+Γö£ ╞Æ /festivals/[id]/edit                 374 B           223 kB
+Γö£ Γùï /festivals/create                    291 B           223 kB
+Γö£ Γùï /payments                            1.92 kB         239 kB
+Γö£ Γùï /payments/record                     5.45 kB         223 kB
+Γö£ Γùï /reports                             4.03 kB         237 kB
+Γö£ ╞Æ /reports/festival/[id]               4.71 kB         229 kB
+Γöö Γùï /settings                            702 B            88 kB
++ First Load JS shared by all            87.3 kB
+  Γö£ chunks/117-743e21536a25a5c1.js       31.7 kB
+  Γö£ chunks/fd9d1056-8bd365657de5b7d8.js  53.6 kB
+  Γöö other shared chunks (total)          1.95 kB
+
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

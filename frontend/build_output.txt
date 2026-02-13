@@ -1,0 +1,85 @@
+﻿  Γû▓ Next.js 14.2.35
+  - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+node.exe : 
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\rajat\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Failed to compile.
+
+./src/components/expenses/ExpenseForm.tsx
+54:31  Warning: Unexpected any. Specify a different type.  
+@typescript-eslint/no-explicit-any
+
+./src/components/family/FamilyForm.tsx
+6:10  Warning: 'Family' is defined but never used.  
+@typescript-eslint/no-unused-vars
+37:18  Warning: 'err' is defined but never used.  
+@typescript-eslint/no-unused-vars
+
+./src/components/festival/FestivalForm.tsx
+39:18  Warning: 'err' is defined but never used.  
+@typescript-eslint/no-unused-vars
+
+./src/components/payments/PaymentList.tsx
+11:10  Warning: 'APP_ROUTES' is defined but never used.  
+@typescript-eslint/no-unused-vars
+
+./src/components/reports/FestivalPaymentReport.tsx
+9:10  Warning: 'Button' is defined but never used.  
+@typescript-eslint/no-unused-vars
+
+./src/controllers/auth.controller.ts
+57:39  Warning: Unexpected any. Specify a different type.  
+@typescript-eslint/no-explicit-any
+
+./src/environments/index.ts
+11:14  Error: A `require()` style import is forbidden.  
+@typescript-eslint/no-require-imports
+13:14  Error: A `require()` style import is forbidden.  
+@typescript-eslint/no-require-imports
+16:14  Error: A `require()` style import is forbidden.  
+@typescript-eslint/no-require-imports
+20:1  Error: 'envConfig' is never reassigned. Use 'const' instead.  
+prefer-const
+
+./src/lib/firebase.ts
+38:50  Warning: Unexpected any. Specify a different type.  
+@typescript-eslint/no-explicit-any
+59:1  Warning: Assign object to a variable before exporting as module default  
+import/no-anonymous-default-export
+
+./src/services/expense.service.ts
+72:23  Warning: Unexpected any. Specify a different type.  
+@typescript-eslint/no-explicit-any
+89:25  Warning: Unexpected any. Specify a different type.  
+@typescript-eslint/no-explicit-any
+
+./src/services/family.service.ts
+11:3  Warning: 'orderBy' is defined but never used.  
+@typescript-eslint/no-unused-vars
+109:25  Warning: Unexpected any. Specify a different type.  
+@typescript-eslint/no-explicit-any
+
+./src/services/festival.service.ts
+8:3  Warning: 'deleteDoc' is defined but never used.  
+@typescript-eslint/no-unused-vars
+90:23  Warning: Unexpected any. Specify a different type.  
+@typescript-eslint/no-explicit-any
+110:25  Warning: Unexpected any. Specify a different type.  
+@typescript-eslint/no-explicit-any
+
+./src/services/payment.service.ts
+94:23  Warning: Unexpected any. Specify a different type.  
+@typescript-eslint/no-explicit-any
+111:25  Warning: Unexpected any. Specify a different type.  
+@typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: 
+https://nextjs.org/docs/basic-features/eslint#disabling-rules

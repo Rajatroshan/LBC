@@ -1,102 +1,93 @@
-# LBC (Luhuren Bae Club) - Village Chanda Management System
+# LBC - Luhuren Bae Club
 
-A modern Next.js application for managing festival-wise village family contributions.
+Village Chanda (contribution) Management System for managing family contributions during festivals.
 
-## 🌟 Features
-
-- **Role-Based Access Control**: Admin and User roles with specific permissions
-- **Festival Management**: Create and manage village festivals
-- **Family Management**: CRUD operations for village families
-- **Payment Tracking**: Track Chanda payments per festival
-- **Receipt Generation**: Digital PDF receipts
-- **Reports**: Festival-wise collection reports
-- **Calendar**: Festival date calendar
-- **Dashboard**: Overview of collections and pending families
-
-## 🏗 Architecture
-
-This project follows **Clean Architecture** principles with:
-- Feature-based folder structure
-- Separation of concerns (Data, Domain, Presentation)
-- Dependency Injection
-- Centralized core modules
-
-## 📦 Tech Stack
-
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Authentication**: Firebase Authentication
-- **Database**: Firebase Firestore
-- **Styling**: Tailwind CSS
-- **PDF Generation**: jsPDF
-- **Forms**: React Hook Form + Zod
-
-## 🚀 Getting Started
-
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-2. **Configure environment:**
-   ```bash
-   cp .env.example .env
-   # Add your Firebase credentials
-   ```
-
-3. **Run development server:**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open browser:**
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## 📂 Project Structure
+## Project Structure
 
 ```
-src/
-├── core/              # Shared core modules
-├── features/          # Feature modules (auth, family, festival, etc.)
-├── theme/             # Theme configuration
-├── utils/             # Utility functions
-├── app/               # Next.js App Router pages
-└── environments/      # Environment configs
+LBC-next/
+├── frontend/          # Next.js 14 App (React + TypeScript)
+│   ├── src/
+│   │   ├── app/           # Next.js App Router pages
+│   │   ├── components/    # React UI components
+│   │   ├── contexts/      # React contexts (Auth)
+│   │   ├── controllers/   # Business logic controllers
+│   │   ├── services/      # Firebase client SDK services
+│   │   ├── models/        # Type re-exports from shared
+│   │   ├── lib/           # Firebase client initialization
+│   │   ├── core/          # Config, providers, routes, errors
+│   │   ├── environments/  # Dev/staging/prod configs
+│   │   ├── hooks/         # Custom React hooks
+│   │   ├── utils/         # Utility functions
+│   │   └── theme/         # Theme configuration
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── next.config.js
+│   └── tailwind.config.ts
+│
+├── backend/           # Firebase Cloud Functions (Express.js)
+│   ├── src/
+│   │   ├── controllers/   # API request handlers
+│   │   ├── repositories/  # Firestore data access (Admin SDK)
+│   │   ├── routes/        # Express route definitions
+│   │   ├── middlewares/   # Auth middleware
+│   │   ├── config/        # Firebase Admin config
+│   │   └── index.ts       # Entry point
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── shared/            # Shared between frontend & backend
+│   ├── models/        # TypeScript interfaces
+│   └── constants/     # Enums & constants
+│
+├── firebase.json      # Firebase hosting/functions config
+└── package.json       # Root workspace scripts
 ```
 
-## 🔐 Default Admin Credentials
+## Quick Start
 
-Create admin user through Firebase Console or registration flow.
+### Prerequisites
+- Node.js 18+
+- Firebase CLI (`npm install -g firebase-tools`)
 
-## 📱 Roles
-
-### Admin
-- Manage families and festivals
-- Set Chanda amounts
-- Mark payments
-- Generate receipts
-- View reports
-
-### User
-- View festivals
-- View payment history
-- View festival calendar
-- View collection summaries
-
-## 🛠 Build
+### Setup
 
 ```bash
-# Development
-npm run build:dev
+# Install all dependencies
+npm run install:all
 
-# Staging
-npm run build:staging
+# Set up environment variables
+cp frontend/.env.example frontend/.env.local
+# Edit frontend/.env.local with your Firebase config
 
-# Production
-npm run build:prod
+# Start frontend dev server
+npm run dev
+
+# Start backend emulator (separate terminal)
+npm run backend:serve
 ```
 
-## 📄 License
+## Architecture
 
-MIT
-#
+**Frontend (MVC Pattern)**
+- **Controllers** — Business logic, validation, orchestration
+- **Services** — Firebase Client SDK operations (Firestore, Auth)
+- **Components** — React UI components
+- **Contexts** — React state management (AuthContext)
+
+**Backend (MVC Pattern)**
+- **Controllers** — API request handling, validation
+- **Repositories** — Firebase Admin SDK data access
+- **Routes** — Express.js route definitions
+
+**Shared**
+- **Models** — TypeScript interfaces used by both frontend & backend
+- **Constants** — Enums, collection names, validation rules
+
+## Tech Stack
+
+- **Frontend:** Next.js 14, React 18, TypeScript, Tailwind CSS
+- **Backend:** Express.js on Firebase Functions
+- **Database:** Cloud Firestore
+- **Auth:** Firebase Authentication
+- **Storage:** Firebase Storage
