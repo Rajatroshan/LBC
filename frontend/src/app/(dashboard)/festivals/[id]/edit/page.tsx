@@ -2,6 +2,8 @@
 
 import { FestivalForm } from '@/components/festival/FestivalForm';
 
+export const dynamic = 'force-dynamic';
+
 export default function EditFestivalPage({ params }: { params: { id: string } }) {
   return (
     <div className="max-w-2xl mx-auto py-8">

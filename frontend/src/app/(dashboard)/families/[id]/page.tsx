@@ -10,6 +10,8 @@ import { Loader } from '@/components/ui/Loader';
 import { APP_ROUTES } from '@/core/routes';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default function FamilyDetailPage({ params }: { params: { id: string } }) {
   const [family, setFamily] = useState<Family | null>(null);
   const [loading, setLoading] = useState(true);
