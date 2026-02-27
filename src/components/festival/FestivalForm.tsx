@@ -67,8 +67,8 @@ export const FestivalForm: React.FC<FestivalFormProps> = ({ festivalId }) => {
       }
       router.push(APP_ROUTES.FESTIVALS);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Operation failed');
-      setError(error.message);
+      const errorMessage = err instanceof Error ? err.message : 'Operation failed';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

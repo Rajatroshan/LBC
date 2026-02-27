@@ -56,8 +56,8 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({ familyId }) => {
       }
       router.push(APP_ROUTES.FAMILIES);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Operation failed');
-      setError(error.message);
+      const errorMessage = err instanceof Error ? err.message : 'Operation failed';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

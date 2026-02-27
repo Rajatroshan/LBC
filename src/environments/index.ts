@@ -17,5 +17,6 @@ const getConfig = (): EnvironmentConfig => {
   }
 };
 
-export const environment = getConfig();
+const environment = getConfig();
+export { environment };
 export const envConfig = environment;
