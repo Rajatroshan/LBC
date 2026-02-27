@@ -167,7 +167,7 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
                           View
                         </button>
                         <button
-                          onClick={() => handleDownloadReceipt(payment.id, payment.receiptNumber)}
+                          onClick={() => handleDownloadReceipt(payment.id)}
                           disabled={loadingReceipt === payment.id}
                           className="text-green-600 hover:text-green-800 disabled:opacity-50 flex items-center gap-1 text-sm"
                           title="Download Receipt"
