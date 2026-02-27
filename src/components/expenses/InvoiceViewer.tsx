@@ -42,7 +42,7 @@ export const InvoiceViewer: React.FC<InvoiceViewerProps> = ({ invoice, onClose }
         URL.revokeObjectURL(pdfBlobUrl);
       }
     };
-  }, [invoice]);
+  }, [invoice, pdfBlobUrl]);
 
   const handleDownload = () => {
     if (pdfBlob) {

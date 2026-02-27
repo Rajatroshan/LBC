@@ -42,7 +42,7 @@ export const ReceiptViewer: React.FC<ReceiptViewerProps> = ({ receipt, onClose }
         URL.revokeObjectURL(pdfBlobUrl);
       }
     };
-  }, [receipt]);
+  }, [receipt, pdfBlobUrl]);
 
   const handleDownload = () => {
     if (pdfBlob) {

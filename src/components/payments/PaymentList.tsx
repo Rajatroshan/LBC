@@ -60,7 +60,7 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
     }
   };
 
-  const handleDownloadReceipt = async (paymentId: string, receiptNumber?: string) => {
+  const handleDownloadReceipt = async (paymentId: string) => {
     setLoadingReceipt(paymentId);
     try {
       const result = await paymentController.downloadReceiptForPayment(paymentId);

@@ -50,9 +50,9 @@ export const DashboardView: React.FC = () => {
             This might be because:
           </p>
           <ul className="list-disc list-inside text-sm text-gray-600 mt-2 space-y-1">
-            <li>Firestore security rules haven't been deployed</li>
+            <li>Firestore security rules haven&apos;t been deployed</li>
             <li>Your database collections are not set up</li>
-            <li>You don't have the required permissions</li>
+            <li>You don&apos;t have the required permissions</li>
           </ul>
           <p className="text-sm text-gray-500 mt-4">
             Check the browser console (F12) for detailed error messages.
