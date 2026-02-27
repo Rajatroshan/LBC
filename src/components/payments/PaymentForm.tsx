@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Loader } from '@/components/ui/Loader';
+import { useAuth } from '@/contexts/AuthContext';
 import { APP_ROUTES } from '@/core/routes';
 
 export const PaymentForm: React.FC = () => {
@@ -24,7 +25,9 @@ export const PaymentForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState('');
+  const [generatingReceipt, setGeneratingReceipt] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,20 +63,67 @@ export const PaymentForm: React.FC = () => {
     setLoading(true);
 
     try {
-      await paymentController.createPayment({
+      // Create payment first
+      const payment = await paymentController.createPayment({
         familyId,
         festivalId,
         amount,
         paidDate: new Date(paidDate),
         status: 'PAID',
         notes: notes || undefined,
+        generateReceipt: false, // We'll generate it separately to show UI feedback
+        generatedBy: user?.id,
       });
-      router.push(APP_ROUTES.PAYMENTS);
+
+      setLoading(false);
+
+      // Generate receipt with UI feedback
+      if (user?.id) {
+        setGeneratingReceipt(true);
+        try {
+          console.log('Starting receipt generation for payment:', payment.id);
+          const { receipt, pdfBlob } = await paymentController.generateReceiptWithoutStorage(
+            payment.id,
+            user.id
+          );
+          console.log('Receipt generated successfully:', receipt);
+          
+          // Download PDF immediately
+          const url = URL.createObjectURL(pdfBlob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${receipt.receiptNumber}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          
+          // Show success message and redirect
+          alert(`Payment recorded successfully!\nReceipt ${receipt.receiptNumber} has been downloaded.`);
+          router.push(APP_ROUTES.PAYMENTS);
+        } catch (receiptError) {
+          console.error('Failed to generate receipt:', receiptError);
+          setGeneratingReceipt(false);
+          // Payment is still successful, just show warning
+          const errorMessage = receiptError instanceof Error 
+            ? receiptError.message 
+            : 'Unknown error occurred';
+          alert(`Payment recorded but receipt generation failed: ${errorMessage}\n\nYou can generate it later from the payments list.`);
+          router.push(APP_ROUTES.PAYMENTS);
+        } finally {
+          setGeneratingReceipt(false);
+        }
+      } else {
+        // No user, just redirect
+        alert('Payment recorded successfully! (No user logged in for receipt generation)');
+        router.push(APP_ROUTES.PAYMENTS);
+      }
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to record payment');
+      console.error('Payment error:', error);
       setError(error.message);
-    } finally {
       setLoading(false);
+      setGeneratingReceipt(false);
     }
   };
 
@@ -156,13 +206,18 @@ export const PaymentForm: React.FC = () => {
         />
 
         <div className="flex gap-4">
-          <Button type="submit" isLoading={loading} disabled={loading}>
-            Record Payment
+          <Button 
+            type="submit" 
+            isLoading={loading || generatingReceipt} 
+            disabled={loading || generatingReceipt}
+          >
+            {generatingReceipt ? 'Generating Receipt...' : 'Record Payment'}
           </Button>
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push(APP_ROUTES.PAYMENTS)}
+            disabled={loading || generatingReceipt}
           >
             Cancel
           </Button>

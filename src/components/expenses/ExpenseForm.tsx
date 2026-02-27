@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { expenseController } from '@/controllers/expense.controller';
+import { invoiceController } from '@/controllers/invoice.controller';
 import { festivalController } from '@/controllers/festival.controller';
 import { Festival } from '@/models';
 import { Card } from '@/components/ui/Card';
@@ -10,12 +11,11 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Loader } from '@/components/ui/Loader';
+import { useAuth } from '@/contexts/AuthContext';
 import { APP_ROUTES } from '@/core/routes';
-import { ExpenseCategory } from '@/constants';
 
 export const ExpenseForm: React.FC = () => {
   const [purpose, setPurpose] = useState('');
-  const [category, setCategory] = useState<string>(ExpenseCategory.OTHER);
   const [amount, setAmount] = useState(0);
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0]);
   const [paidTo, setPaidTo] = useState('');
@@ -26,6 +26,8 @@ export const ExpenseForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState('');
+  const [generatingInvoice, setGeneratingInvoice] = useState(false);
+  const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -49,9 +51,9 @@ export const ExpenseForm: React.FC = () => {
     setLoading(true);
 
     try {
-      await expenseController.createExpense({
+      const expense = await expenseController.createExpense({
         purpose,
-        category: category as 'TENT' | 'FOOD' | 'DECORATION' | 'ENTERTAINMENT' | 'UTILITIES' | 'OTHER',
+        category: 'OTHER', // Default category for vendor payments
         amount,
         expenseDate: new Date(expenseDate),
         paidTo,
@@ -59,12 +61,55 @@ export const ExpenseForm: React.FC = () => {
         festivalId: festivalId || undefined,
         notes: notes || undefined,
       });
-      router.push(APP_ROUTES.PAYMENTS);
+
+      setLoading(false);
+
+      // Generate invoice with UI feedback
+      if (user?.id) {
+        setGeneratingInvoice(true);
+        try {
+          console.log('Starting invoice generation for expense:', expense.id);
+          const { invoice, pdfBlob } = await invoiceController.generateInvoiceForExpense(
+            expense.id,
+            user.id
+          );
+          console.log('Invoice generated successfully:', invoice);
+          
+          // Download PDF immediately
+          const url = URL.createObjectURL(pdfBlob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${invoice.invoiceNumber}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          
+          // Show success message and redirect
+          alert(`Expense recorded successfully!\nInvoice ${invoice.invoiceNumber} has been downloaded.`);
+          router.push(APP_ROUTES.PAYMENTS);
+        } catch (invoiceError) {
+          console.error('Failed to generate invoice:', invoiceError);
+          setGeneratingInvoice(false);
+          // Expense is still successful, just show warning
+          const errorMessage = invoiceError instanceof Error 
+            ? invoiceError.message 
+            : 'Unknown error occurred';
+          alert(`Expense recorded but invoice generation failed: ${errorMessage}\n\nYou can generate it later from the expenses list.`);
+          router.push(APP_ROUTES.PAYMENTS);
+        } finally {
+          setGeneratingInvoice(false);
+        }
+      } else {
+        // No user, just redirect
+        alert('Expense recorded successfully! (No user logged in for invoice generation)');
+        router.push(APP_ROUTES.PAYMENTS);
+      }
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to record expense');
       setError(error.message);
-    } finally {
       setLoading(false);
+      setGeneratingInvoice(false);
     }
   };
 
@@ -78,6 +123,8 @@ export const ExpenseForm: React.FC = () => {
 
   return (
     <Card>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Record Expense</h2>
+
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
           {error}
@@ -86,28 +133,12 @@ export const ExpenseForm: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Input
-          label="Purpose"
+          label="Title"
           value={purpose}
           onChange={(e) => setPurpose(e.target.value)}
-          placeholder="Enter expense purpose"
+          placeholder="e.g., DJ Service, Lights, Catering, Decoration"
           required
         />
-
-        <div className="w-full">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Category <span className="text-red-500 ml-1">*</span>
-          </label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            required
-          >
-            {Object.values(ExpenseCategory).map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </div>
 
         <Input
           label="Amount (₹)"
@@ -127,10 +158,10 @@ export const ExpenseForm: React.FC = () => {
         />
 
         <Input
-          label="Paid To"
+          label="Paid To (Vendor Name)"
           value={paidTo}
           onChange={(e) => setPaidTo(e.target.value)}
-          placeholder="Enter recipient name"
+          placeholder="Enter vendor/recipient name"
           required
         />
 
@@ -165,13 +196,18 @@ export const ExpenseForm: React.FC = () => {
         />
 
         <div className="flex gap-4">
-          <Button type="submit" isLoading={loading} disabled={loading}>
-            Record Expense
+          <Button 
+            type="submit" 
+            isLoading={loading || generatingInvoice} 
+            disabled={loading || generatingInvoice}
+          >
+            {generatingInvoice ? 'Generating Invoice...' : 'Record Expense'}
           </Button>
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push(APP_ROUTES.PAYMENTS)}
+            disabled={loading || generatingInvoice}
           >
             Cancel
           </Button>

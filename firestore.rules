@@ -65,5 +65,29 @@ service cloud.firestore {
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
+    
+    // Invoices collection (for expense invoices)
+    match /invoices/{invoiceId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Account collection (main account balance)
+    match /account/{accountId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if false; // Never delete account
+    }
+    
+    // Transactions collection (account history)
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if false; // Transactions are immutable
+      allow delete: if isAdmin();
+    }
   }
 }

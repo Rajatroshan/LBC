@@ -40,31 +40,38 @@ export class ExpenseService {
   }
 
   async getAll(filter?: ExpenseFilter): Promise<Expense[]> {
-    const constraints: QueryConstraint[] = [];
+    try {
+      const constraints: QueryConstraint[] = [];
 
-    if (filter?.festivalId) {
-      constraints.push(where('festivalId', '==', filter.festivalId));
+      if (filter?.festivalId) {
+        constraints.push(where('festivalId', '==', filter.festivalId));
+      }
+
+      if (filter?.category) {
+        constraints.push(where('category', '==', filter.category));
+      }
+
+      const q = query(this.collectionRef, ...constraints);
+      const snapshot = await getDocs(q);
+      
+      console.log('Expenses fetched:', snapshot.size);
+      let expenses = snapshot.docs.map((doc) => this.toEntity(doc));
+
+      // Client-side date filtering
+      if (filter?.startDate) {
+        expenses = expenses.filter((e) => e.expenseDate >= filter.startDate!);
+      }
+
+      if (filter?.endDate) {
+        expenses = expenses.filter((e) => e.expenseDate <= filter.endDate!);
+      }
+
+      return expenses;
+    } catch (error) {
+      console.error('Error fetching expenses:', error);
+      // Return empty array instead of throwing, since no expenses is a valid state
+      return [];
     }
-
-    if (filter?.category) {
-      constraints.push(where('category', '==', filter.category));
-    }
-
-    const q = query(this.collectionRef, ...constraints);
-    const snapshot = await getDocs(q);
-    
-    let expenses = snapshot.docs.map((doc) => this.toEntity(doc));
-
-    // Client-side date filtering
-    if (filter?.startDate) {
-      expenses = expenses.filter((e) => e.expenseDate >= filter.startDate!);
-    }
-
-    if (filter?.endDate) {
-      expenses = expenses.filter((e) => e.expenseDate <= filter.endDate!);
-    }
-
-    return expenses;
   }
 
   async update(id: string, data: Partial<Expense>): Promise<void> {

@@ -1,4 +1,5 @@
 import { expenseService } from '../services/expense.service';
+import { accountService } from '../services/account.service';
 import { Expense, ExpenseFilter } from '../models';
 
 export class ExpenseController {
@@ -22,7 +23,24 @@ export class ExpenseController {
       throw new Error('Amount must be positive');
     }
 
-    return await expenseService.create(data);
+    const expense = await expenseService.create(data);
+
+    // Deduct from account
+    try {
+      const description = `Expense: ${data.purpose} - Paid to ${data.paidTo}`;
+      
+      await accountService.deductExpense({
+        amount: data.amount,
+        description,
+        referenceId: expense.id,
+        date: data.expenseDate,
+      });
+    } catch (error) {
+      console.error('Error deducting expense from account:', error);
+      // Expense still created even if account update fails
+    }
+
+    return expense;
   }
 
   async getExpenseById(id: string): Promise<Expense> {

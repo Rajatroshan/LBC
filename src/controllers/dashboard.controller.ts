@@ -1,6 +1,8 @@
 import { familyService } from '../services/family.service';
 import { festivalService } from '../services/festival.service';
 import { paymentService } from '../services/payment.service';
+import { expenseService } from '../services/expense.service';
+import { accountService } from '../services/account.service';
 import { DashboardStats } from '../models';
 
 export class DashboardController {
@@ -13,12 +15,18 @@ export class DashboardController {
         upcomingFestivals,
         recentPayments,
         allPayments,
+        allExpenses,
+        mainAccount,
+        recentTransactions,
       ] = await Promise.all([
         familyService.getAll(),
         festivalService.getAll(),
         festivalService.getUpcoming(5),
         paymentService.getRecent(10),
         paymentService.getAll(),
+        expenseService.getAll(),
+        accountService.getMainAccount(),
+        accountService.getRecentTransactions(10),
       ]);
 
       // Calculate stats
@@ -36,6 +44,15 @@ export class DashboardController {
         0
       );
 
+      const expensesThisYear = allExpenses.filter(
+        (e) => e.expenseDate.getFullYear() === currentYear
+      );
+      
+      const totalExpenseThisYear = expensesThisYear.reduce(
+        (sum, e) => sum + e.amount,
+        0
+      );
+
       const pendingPayments = allPayments.filter((p) => p.status !== 'PAID').length;
 
       return {
@@ -44,9 +61,12 @@ export class DashboardController {
         totalFestivals: activeFestivals.length,
         upcomingFestivals: upcomingFestivals.length,
         totalCollectionThisYear,
+        totalExpenseThisYear,
+        currentBalance: mainAccount.balance,
         pendingPayments,
         recentPayments,
         upcomingFestivalsList: upcomingFestivals,
+        recentTransactions,
       };
     } catch (error) {
       console.error('Error in DashboardController.getStats:', error);

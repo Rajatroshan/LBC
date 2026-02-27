@@ -69,28 +69,38 @@ export interface Expense extends BaseEntity {
   receiptUrl?: string;
 }
 
-// Pagination Types
-export interface PaginationParams {
-  page: number;
-  limit: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+// Invoice Types (for expense invoices)
+export interface Invoice extends BaseEntity {
+  expenseId: string;
+  invoiceNumber: string;
+  vendorName: string;
+  purpose: string;
+  amount: number;
+  expenseDate: Date;
+  generatedBy: string;
+  contactNumber?: string;
+  notes?: string;
+  pdfUrl?: string;
 }
 
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+// Account/Wallet Types (for tracking main account balance)
+export interface Account extends BaseEntity {
+  balance: number;
+  totalIncome: number;
+  totalExpense: number;
+  lastTransactionDate?: Date;
 }
 
-// API Response Types
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
+// Transaction Types (for tracking account history)
+export interface Transaction extends BaseEntity {
+  type: 'INCOME' | 'EXPENSE';
+  amount: number;
+  balanceBefore: number;
+  balanceAfter: number;
+  description: string;
+  referenceId?: string; // Payment ID or Expense ID
+  referenceType?: 'PAYMENT' | 'EXPENSE';
+  date: Date;
 }
 
 // Filter Types
@@ -121,27 +131,6 @@ export interface ExpenseFilter {
   endDate?: Date;
 }
 
-// Report Types
-export interface FestivalReport {
-  festivalId: string;
-  festivalName: string;
-  festivalDate: Date;
-  totalFamilies: number;
-  paidFamilies: number;
-  unpaidFamilies: number;
-  totalAmount: number;
-  collectedAmount: number;
-  pendingAmount: number;
-  payments: PaymentDetail[];
-}
-
-export interface PaymentDetail {
-  familyName: string;
-  amount: number;
-  paidDate: Date;
-  status: string;
-}
-
 // Dashboard Types
 export interface DashboardStats {
   totalFamilies: number;
@@ -149,7 +138,10 @@ export interface DashboardStats {
   totalFestivals: number;
   upcomingFestivals: number;
   totalCollectionThisYear: number;
+  totalExpenseThisYear: number;
+  currentBalance: number;
   pendingPayments: number;
   recentPayments: Payment[];
   upcomingFestivalsList: Festival[];
+  recentTransactions: Transaction[];
 }

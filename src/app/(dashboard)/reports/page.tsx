@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Festival } from '@/models';
 import { festivalController } from '@/controllers/festival.controller';
 import { Card } from '@/components/ui/Card';

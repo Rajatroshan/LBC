@@ -101,8 +101,31 @@ export const DashboardView: React.FC = () => {
 
         <Card>
           <div className="text-center">
-            <p className="text-sm text-gray-500">Pending Payments</p>
-            <p className="text-3xl font-bold text-red-600">{stats.pendingPayments}</p>
+            <p className="text-sm text-gray-500">Expenses This Year</p>
+            <p className="text-3xl font-bold text-red-600">{formatCurrency(stats.totalExpenseThisYear)}</p>
+          </div>
+        </Card>
+      </div>
+
+      {/* Account Balance & Net Balance */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <div className="text-center">
+            <p className="text-sm text-gray-500">Current Account Balance</p>
+            <p className={`text-4xl font-bold ${stats.currentBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {formatCurrency(stats.currentBalance)}
+            </p>
+            <p className="text-xs text-gray-400 mt-2">Available in main account</p>
+          </div>
+        </Card>
+
+        <Card>
+          <div className="text-center">
+            <p className="text-sm text-gray-500">Net This Year</p>
+            <p className={`text-4xl font-bold ${(stats.totalCollectionThisYear - stats.totalExpenseThisYear) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {formatCurrency(stats.totalCollectionThisYear - stats.totalExpenseThisYear)}
+            </p>
+            <p className="text-xs text-gray-400 mt-2">Income - Expenses</p>
           </div>
         </Card>
       </div>
@@ -170,6 +193,40 @@ export const DashboardView: React.FC = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+      </Card>
+
+      {/* Recent Transactions */}
+      <Card>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-800">Recent Transactions</h2>
+        </div>
+        {stats.recentTransactions.length === 0 ? (
+          <p className="text-gray-500">No recent transactions</p>
+        ) : (
+          <div className="space-y-3">
+            {stats.recentTransactions.map((transaction) => (
+              <div key={transaction.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      transaction.type === 'INCOME' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {transaction.type}
+                    </span>
+                    <p className="text-sm text-gray-800">{transaction.description}</p>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{formatDate(transaction.date)}</p>
+                </div>
+                <div className="text-right">
+                  <p className={`font-semibold ${transaction.type === 'INCOME' ? 'text-green-600' : 'text-red-600'}`}>
+                    {transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                  </p>
+                  <p className="text-xs text-gray-500">Bal: {formatCurrency(transaction.balanceAfter)}</p>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </Card>

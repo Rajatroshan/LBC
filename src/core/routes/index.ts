@@ -19,12 +19,13 @@ export const APP_ROUTES = {
   
   // Payment routes
   PAYMENTS: '/payments',
-  PAYMENT_CREATE: '/payments/create',
-  PAYMENT_HISTORY: '/payments/history',
+  
+  // Expense routes
+  EXPENSES: '/expenses',
+  EXPENSE_RECORD: '/expenses/record',
   
   // Receipt routes
   RECEIPTS: '/receipts',
-  RECEIPT_GENERATE: (paymentId: string) => `/receipts/${paymentId}`,
   
   // Calendar routes
   CALENDAR: '/calendar',
@@ -35,14 +36,4 @@ export const APP_ROUTES = {
   
   // Settings routes
   SETTINGS: '/settings',
-  PROFILE: '/settings/profile',
-} as const;
-
-// API Routes (if needed)
-export const API_ROUTES = {
-  AUTH: {
-    LOGIN: '/api/auth/login',
-    LOGOUT: '/api/auth/logout',
-    REGISTER: '/api/auth/register',
-  },
 } as const;
