@@ -9,7 +9,7 @@ import {
 import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { User } from '../models';
-import { COLLECTIONS } from '@shared/constants';
+import { COLLECTIONS } from '@/constants';
 
 export class AuthService {
   /**

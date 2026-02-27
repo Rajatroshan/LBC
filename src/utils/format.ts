@@ -1,4 +1,4 @@
-import { APP_CONSTANTS } from '@shared/constants';
+import { APP_CONSTANTS } from '@/constants';
 
 /**
  * Format currency amount

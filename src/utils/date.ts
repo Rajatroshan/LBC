@@ -1,5 +1,5 @@
 import { format, parseISO } from 'date-fns';
-import { APP_CONSTANTS } from '@shared/constants';
+import { APP_CONSTANTS } from '@/constants';
 
 /**
  * Format date to app standard format

@@ -1,4 +1,4 @@
-import { VALIDATION } from '@shared/constants';
+import { VALIDATION } from '@/constants';
 
 /**
  * Validate phone number

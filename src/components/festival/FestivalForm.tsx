@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Loader } from '@/components/ui/Loader';
 import { APP_ROUTES } from '@/core/routes';
-import { FestivalType } from '@shared/constants';
+import { FestivalType } from '@/constants';
 
 interface FestivalFormProps {
   festivalId?: string;

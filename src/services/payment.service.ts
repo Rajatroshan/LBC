@@ -15,7 +15,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Payment, PaymentFilter } from '../models';
-import { COLLECTIONS } from '@shared/constants';
+import { COLLECTIONS } from '@/constants';
 
 export class PaymentService {
   private collectionRef = collection(db, COLLECTIONS.PAYMENTS);

@@ -13,7 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Expense, ExpenseFilter } from '../models';
-import { COLLECTIONS } from '@shared/constants';
+import { COLLECTIONS } from '@/constants';
 
 export class ExpenseService {
   private collectionRef = collection(db, COLLECTIONS.EXPENSES);

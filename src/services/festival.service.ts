@@ -13,7 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Festival, FestivalFilter } from '../models';
-import { COLLECTIONS } from '@shared/constants';
+import { COLLECTIONS } from '@/constants';
 
 export class FestivalService {
   private collectionRef = collection(db, COLLECTIONS.FESTIVALS);
