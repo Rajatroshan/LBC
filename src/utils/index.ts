@@ -9,3 +9,11 @@ export {
   type ReceiptData,
   type InvoiceData
 } from './pdf';
+export { 
+  isValidPhone, 
+  sanitizePhone, 
+  isValidName, 
+  isValidAmount, 
+  isValidAddress, 
+  formatPhone 
+} from './validation';

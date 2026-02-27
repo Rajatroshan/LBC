@@ -59,7 +59,7 @@ export interface Receipt extends BaseEntity {
 // Expense Types (for tracking outgoing payments)
 export interface Expense extends BaseEntity {
   purpose: string;
-  category: 'TENT' | 'FOOD' | 'DECORATION' | 'ENTERTAINMENT' | 'UTILITIES' | 'OTHER';
+  category: 'TENT' | 'FOOD' | 'DECORATION' | 'ENTERTAINMENT' | 'UTILITIES' | 'TRANSPORT' | 'SOUND_LIGHT' | 'PRIEST' | 'OTHER';
   amount: number;
   expenseDate: Date;
   paidTo: string;

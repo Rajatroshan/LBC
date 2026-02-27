@@ -1,5 +1,6 @@
 import { familyService } from '../services/family.service';
 import { Family, FamilyFilter } from '../models';
+import { VALIDATION } from '@/constants';
 
 export class FamilyController {
   /**
@@ -18,6 +19,10 @@ export class FamilyController {
 
     if (data.members < 1) {
       throw new Error('Members must be at least 1');
+    }
+
+    if (!VALIDATION.PHONE_REGEX.test(data.phone)) {
+      throw new Error('Phone number must be 10-15 digits (numbers only)');
     }
 
     return await familyService.create({

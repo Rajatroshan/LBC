@@ -13,9 +13,12 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Loader } from '@/components/ui/Loader';
 import { useAuth } from '@/contexts/AuthContext';
 import { APP_ROUTES } from '@/core/routes';
+import { ExpenseCategory, EXPENSE_CATEGORY_LABELS } from '@/constants';
+import { sanitizePhone } from '@/utils/validation';
 
 export const ExpenseForm: React.FC = () => {
   const [purpose, setPurpose] = useState('');
+  const [category, setCategory] = useState<string>(ExpenseCategory.OTHER);
   const [amount, setAmount] = useState(0);
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0]);
   const [paidTo, setPaidTo] = useState('');
@@ -53,7 +56,7 @@ export const ExpenseForm: React.FC = () => {
     try {
       const expense = await expenseController.createExpense({
         purpose,
-        category: 'OTHER', // Default category for vendor payments
+        category: category as 'TENT' | 'FOOD' | 'DECORATION' | 'ENTERTAINMENT' | 'UTILITIES' | 'TRANSPORT' | 'SOUND_LIGHT' | 'PRIEST' | 'OTHER',
         amount,
         expenseDate: new Date(expenseDate),
         paidTo,
@@ -169,9 +172,28 @@ export const ExpenseForm: React.FC = () => {
           label="Contact Number"
           type="tel"
           value={contactNumber}
-          onChange={(e) => setContactNumber(e.target.value)}
+          onChange={(e) => setContactNumber(sanitizePhone(e.target.value))}
           placeholder="Enter contact number (optional)"
+          maxLength={15}
+          pattern="[0-9]*"
+          inputMode="numeric"
         />
+
+        <div className="w-full">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Category <span className="text-red-500 ml-1">*</span>
+          </label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            required
+          >
+            {Object.values(ExpenseCategory).map((cat) => (
+              <option key={cat} value={cat}>{EXPENSE_CATEGORY_LABELS[cat]}</option>
+            ))}
+          </select>
+        </div>
 
         <div className="w-full">
           <label className="block text-sm font-medium text-gray-700 mb-1">Festival (Optional)</label>

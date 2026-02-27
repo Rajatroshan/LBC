@@ -10,6 +10,7 @@ import { Loader } from '@/components/ui/Loader';
 import { InvoiceViewer } from './InvoiceViewer';
 import { formatCurrency, formatDate } from '@/utils';
 import { APP_ROUTES } from '@/core/routes';
+import { EXPENSE_CATEGORY_LABELS } from '@/constants';
 import { Eye, Download } from 'lucide-react';
 import Link from 'next/link';
 
@@ -134,6 +135,7 @@ export const ExpenseList: React.FC = () => {
               <tr className="bg-gray-50 border-b">
                 <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Date</th>
                 <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Title</th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Category</th>
                 <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Paid To</th>
                 <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Contact</th>
                 <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Amount</th>
@@ -145,6 +147,11 @@ export const ExpenseList: React.FC = () => {
                 <tr key={expense.id} className="border-b last:border-0 hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm">{formatDate(expense.expenseDate)}</td>
                   <td className="px-4 py-3 text-sm font-medium text-gray-800">{expense.purpose}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                      {EXPENSE_CATEGORY_LABELS[expense.category] || expense.category}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-sm text-gray-600">{expense.paidTo}</td>
                   <td className="px-4 py-3 text-sm text-gray-500">
                     {expense.contactNumber || '-'}

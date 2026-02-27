@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Loader } from '@/components/ui/Loader';
 import { APP_ROUTES } from '@/core/routes';
+import { sanitizePhone, isValidPhone } from '@/utils/validation';
 
 interface FamilyFormProps {
   familyId?: string;
@@ -43,9 +44,20 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({ familyId }) => {
     }
   }, [familyId]);
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numericValue = sanitizePhone(e.target.value);
+    setPhone(numericValue);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!isValidPhone(phone)) {
+      setError('Phone number must be 10-15 digits (numbers only)');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -105,9 +117,13 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({ familyId }) => {
           label="Phone Number"
           type="tel"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="Enter phone number"
+          onChange={handlePhoneChange}
+          placeholder="Enter 10-digit phone number"
           required
+          maxLength={15}
+          pattern="[0-9]*"
+          inputMode="numeric"
+          helperText="Numbers only, 10-15 digits"
         />
 
         <Textarea

@@ -7,6 +7,32 @@ export enum FestivalType {
   OTHER = 'OTHER',
 }
 
+// Expense Categories
+export enum ExpenseCategory {
+  TENT = 'TENT',
+  FOOD = 'FOOD',
+  DECORATION = 'DECORATION',
+  ENTERTAINMENT = 'ENTERTAINMENT',
+  UTILITIES = 'UTILITIES',
+  TRANSPORT = 'TRANSPORT',
+  SOUND_LIGHT = 'SOUND_LIGHT',
+  PRIEST = 'PRIEST',
+  OTHER = 'OTHER',
+}
+
+// Expense Category Labels (for display)
+export const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
+  TENT: 'Tent & Pandal',
+  FOOD: 'Food & Catering',
+  DECORATION: 'Decoration',
+  ENTERTAINMENT: 'Entertainment (DJ, Band)',
+  UTILITIES: 'Utilities (Electricity, Water)',
+  TRANSPORT: 'Transport',
+  SOUND_LIGHT: 'Sound & Lighting',
+  PRIEST: 'Priest & Rituals',
+  OTHER: 'Other',
+};
+
 // Collection Names for Firestore
 export const COLLECTIONS = {
   USERS: 'users',
@@ -34,6 +60,7 @@ export const APP_CONSTANTS = {
 export const VALIDATION = {
   PHONE_MIN_LENGTH: 10,
   PHONE_MAX_LENGTH: 15,
+  PHONE_REGEX: /^[0-9]{10,15}$/,
   NAME_MIN_LENGTH: 2,
   NAME_MAX_LENGTH: 100,
   ADDRESS_MAX_LENGTH: 500,

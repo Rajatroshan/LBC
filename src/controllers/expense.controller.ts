@@ -5,7 +5,7 @@ import { Expense, ExpenseFilter } from '../models';
 export class ExpenseController {
   async createExpense(data: {
     purpose: string;
-    category: 'TENT' | 'FOOD' | 'DECORATION' | 'ENTERTAINMENT' | 'UTILITIES' | 'OTHER';
+    category: 'TENT' | 'FOOD' | 'DECORATION' | 'ENTERTAINMENT' | 'UTILITIES' | 'TRANSPORT' | 'SOUND_LIGHT' | 'PRIEST' | 'OTHER';
     amount: number;
     expenseDate: Date;
     paidTo: string;
