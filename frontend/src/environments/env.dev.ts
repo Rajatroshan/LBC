@@ -1,7 +1,6 @@
 import { EnvironmentConfig } from '@/core/config/environment.interface';
 
 export const envConfig: EnvironmentConfig = {
-  apiUrl: 'http://localhost:3000',
   firebase: {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',

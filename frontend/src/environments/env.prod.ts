@@ -1,7 +1,6 @@
 import { EnvironmentConfig } from '@/core/config/environment.interface';
 
 export const envConfig: EnvironmentConfig = {
-  apiUrl: 'https://lbc.com',
   firebase: {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',

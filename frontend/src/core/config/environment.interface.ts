@@ -1,6 +1,5 @@
 // Environment configuration type
 export interface EnvironmentConfig {
-  apiUrl: string;
   firebase: {
     apiKey: string;
     authDomain: string;
