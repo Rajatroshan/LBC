@@ -72,16 +72,21 @@ export class FestivalService {
 
   async getUpcoming(limit: number = 5): Promise<Festival[]> {
     const now = new Date();
-    const constraints: QueryConstraint[] = [
-      where('isActive', '==', true),
+    
+    // Query only by date (no composite index needed)
+    const q = query(
+      this.collectionRef,
       where('date', '>=', Timestamp.fromDate(now)),
       orderBy('date', 'asc')
-    ];
-
-    const q = query(this.collectionRef, ...constraints);
+    );
+    
     const snapshot = await getDocs(q);
-
-    return snapshot.docs.slice(0, limit).map((doc) => this.toEntity(doc));
+    
+    // Filter for active festivals client-side
+    return snapshot.docs
+      .map((doc) => this.toEntity(doc))
+      .filter((festival) => festival.isActive)
+      .slice(0, limit);
   }
 
   async update(id: string, data: Partial<Festival>): Promise<void> {

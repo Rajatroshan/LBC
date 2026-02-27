@@ -19,9 +19,11 @@ export const DashboardView: React.FC = () => {
       try {
         const data = await dashboardController.getStats();
         setStats(data);
+        setError('');
       } catch (err) {
         console.error('Failed to load dashboard stats:', err);
-        setError('Failed to load dashboard data');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard data';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -38,10 +40,32 @@ export const DashboardView: React.FC = () => {
     );
   }
 
-  if (error || !stats) {
+  if (error) {
     return (
       <Card>
-        <p className="text-red-600">{error || 'Failed to load dashboard'}</p>
+        <div className="p-4">
+          <p className="text-red-600 font-semibold mb-2">Error Loading Dashboard</p>
+          <p className="text-sm text-gray-600">{error}</p>
+          <p className="text-sm text-gray-500 mt-4">
+            This might be because:
+          </p>
+          <ul className="list-disc list-inside text-sm text-gray-600 mt-2 space-y-1">
+            <li>Firestore security rules haven't been deployed</li>
+            <li>Your database collections are not set up</li>
+            <li>You don't have the required permissions</li>
+          </ul>
+          <p className="text-sm text-gray-500 mt-4">
+            Check the browser console (F12) for detailed error messages.
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <Card>
+        <p className="text-gray-600">No dashboard data available</p>
       </Card>
     );
   }
