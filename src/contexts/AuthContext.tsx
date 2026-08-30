@@ -12,6 +12,8 @@ interface AuthContextType {
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  loginWithGithub: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -50,6 +52,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await authController.register(email, password, name);
   };
 
+  const loginWithGoogle = async () => {
+    await authController.loginWithGoogle();
+  };
+
+  const loginWithGithub = async () => {
+    await authController.loginWithGithub();
+  };
+
   const logout = async () => {
     await authController.logout();
     setUser(null);
@@ -59,7 +69,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAdmin = user?.role === 'ADMIN';
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, isAdmin, login, register, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      firebaseUser, 
+      loading, 
+      isAdmin, 
+      login, 
+      register, 
+      loginWithGoogle,
+      loginWithGithub,
+      logout 
+    }}>
       {children}
     </AuthContext.Provider>
   );

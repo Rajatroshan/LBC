@@ -31,6 +31,20 @@ export class AuthController {
   }
 
   /**
+   * Login with Google OAuth
+   */
+  async loginWithGoogle(): Promise<void> {
+    await authService.loginWithGoogle();
+  }
+
+  /**
+   * Login with GitHub OAuth
+   */
+  async loginWithGithub(): Promise<void> {
+    await authService.loginWithGithub();
+  }
+
+  /**
    * Logout user
    */
   async logout(): Promise<void> {

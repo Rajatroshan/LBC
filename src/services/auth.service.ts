@@ -4,9 +4,12 @@ import {
   signOut,
   onAuthStateChanged,
   User as FirebaseUser,
-  updateProfile
+  updateProfile,
+  signInWithPopup,
+  GoogleAuthProvider,
+  GithubAuthProvider
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { User } from '../models';
 import { COLLECTIONS } from '@/constants';
@@ -34,6 +37,66 @@ export class AuthService {
     await this.createUserDocument(user.uid, email, name);
 
     return user;
+  }
+
+  /**
+   * Sign in with Google OAuth
+   */
+  async loginWithGoogle(): Promise<FirebaseUser> {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    const userCredential = await signInWithPopup(auth, provider);
+    const user = userCredential.user;
+
+    await this.syncOAuthUserDocument(user);
+    return user;
+  }
+
+  /**
+   * Sign in with GitHub OAuth
+   */
+  async loginWithGithub(): Promise<FirebaseUser> {
+    const provider = new GithubAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    const user = userCredential.user;
+
+    await this.syncOAuthUserDocument(user);
+    return user;
+  }
+
+  /**
+   * Synchronize OAuth user with Firestore user document
+   */
+  private async syncOAuthUserDocument(user: FirebaseUser): Promise<void> {
+    const docRef = doc(db, COLLECTIONS.USERS, user.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      // First time login - create user document
+      const now = Timestamp.now();
+      await setDoc(docRef, {
+        email: user.email || '',
+        name: user.displayName || user.email?.split('@')[0] || 'User',
+        role: 'USER',
+        photoURL: user.photoURL || '',
+        phone: user.phoneNumber || '',
+        createdAt: now,
+        updatedAt: now,
+      });
+    } else {
+      // Existing user - update updatedAt and photoURL / name if missing
+      const data = docSnap.data();
+      const updates: Record<string, unknown> = {
+        updatedAt: Timestamp.now(),
+      };
+      if (!data.photoURL && user.photoURL) {
+        updates.photoURL = user.photoURL;
+      }
+      if (!data.name && user.displayName) {
+        updates.name = user.displayName;
+      }
+      await updateDoc(docRef, updates);
+    }
   }
 
   /**
