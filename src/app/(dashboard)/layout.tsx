@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader } from '@/components/ui/Loader';
 import { APP_ROUTES } from '@/core/routes';
@@ -15,6 +15,17 @@ export default function DashboardLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Mobile slide-over drawer state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Desktop collapsible sidebar state
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Automatically close mobile menu when navigating to another page
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -35,11 +46,27 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
+      {/* Responsive Sidebar for Mobile & Desktop */}
+      <Sidebar
+        mobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={() => setIsCollapsed(prev => !prev)}
+      />
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <Header
+          onToggleMobileMenu={() => setMobileMenuOpen(prev => !prev)}
+          isCollapsed={isCollapsed}
+          onToggleCollapse={() => setIsCollapsed(prev => !prev)}
+        />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto w-full">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );
