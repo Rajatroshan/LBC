@@ -32,7 +32,8 @@ export const OAuthButtons: React.FC<OAuthButtonsProps> = ({
       } else if (err.message.includes('auth/account-exists-with-different-credential')) {
         message = 'An account already exists with the same email using a different sign-in method.';
       } else if (err.message.includes('auth/unauthorized-domain')) {
-        message = 'This domain (localhost) is not authorized in Firebase Console > Authentication > Settings > Authorized domains.';
+        const domain = typeof window !== 'undefined' ? window.location.hostname : 'this domain';
+        message = `Domain "${domain}" is not authorized in Firebase Console > Authentication > Settings > Authorized domains. Please add it to allow sign-in.`;
       } else if (err.message.includes('auth/operation-not-allowed')) {
         message = 'This sign-in provider is not enabled in Firebase Console. Please enable it in Authentication > Sign-in method.';
       } else {
