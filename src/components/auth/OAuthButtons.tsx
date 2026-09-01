@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { APP_ROUTES } from '@/core/routes';
+import { useToast } from '@/contexts/ToastContext';
 
 interface OAuthButtonsProps {
   mode?: 'signin' | 'signup';
@@ -18,6 +19,7 @@ export const OAuthButtons: React.FC<OAuthButtonsProps> = ({
 }) => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { loginWithGoogle } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
 
   const handleOAuthError = (err: unknown) => {
@@ -43,6 +45,7 @@ export const OAuthButtons: React.FC<OAuthButtonsProps> = ({
     if (onError) {
       onError(message);
     }
+    toast.error(message, 'Authentication Error');
   };
 
   const handleGoogleSignIn = async () => {
@@ -51,6 +54,7 @@ export const OAuthButtons: React.FC<OAuthButtonsProps> = ({
 
     try {
       await loginWithGoogle();
+      toast.success('Signed in with Google successfully!', 'Welcome');
       router.push(APP_ROUTES.DASHBOARD);
     } catch (err) {
       handleOAuthError(err);

@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Loader } from '@/components/ui/Loader';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import { APP_ROUTES } from '@/core/routes';
 
 export const PaymentForm: React.FC = () => {
@@ -28,6 +29,7 @@ export const PaymentForm: React.FC = () => {
   const [generatingReceipt, setGeneratingReceipt] = useState(false);
   const router = useRouter();
   const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadData = async () => {
@@ -41,13 +43,14 @@ export const PaymentForm: React.FC = () => {
       } catch (err) {
         console.error('Failed to load data:', err);
         setError('Failed to load families and festivals');
+        toast.error('Failed to load families and festivals', 'Data Loading Error');
       } finally {
         setLoadingData(false);
       }
     };
 
     loadData();
-  }, []);
+  }, [toast]);
 
   const handleFestivalChange = (id: string) => {
     setFestivalId(id);
@@ -98,8 +101,8 @@ export const PaymentForm: React.FC = () => {
           document.body.removeChild(link);
           URL.revokeObjectURL(url);
           
-          // Show success message and redirect
-          alert(`Payment recorded successfully!\nReceipt ${receipt.receiptNumber} has been downloaded.`);
+          // Show success toast and redirect
+          toast.success(`Payment recorded successfully!\nReceipt ${receipt.receiptNumber} downloaded.`, 'Payment Recorded');
           router.push(APP_ROUTES.PAYMENTS);
         } catch (receiptError) {
           console.error('Failed to generate receipt:', receiptError);
@@ -108,20 +111,21 @@ export const PaymentForm: React.FC = () => {
           const errorMessage = receiptError instanceof Error 
             ? receiptError.message 
             : 'Unknown error occurred';
-          alert(`Payment recorded but receipt generation failed: ${errorMessage}\n\nYou can generate it later from the payments list.`);
+          toast.warning(`Payment recorded, but receipt generation failed: ${errorMessage}`, 'Receipt Warning');
           router.push(APP_ROUTES.PAYMENTS);
         } finally {
           setGeneratingReceipt(false);
         }
       } else {
         // No user, just redirect
-        alert('Payment recorded successfully! (No user logged in for receipt generation)');
+        toast.success('Payment recorded successfully!', 'Payment Recorded');
         router.push(APP_ROUTES.PAYMENTS);
       }
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to record payment');
       console.error('Payment error:', error);
       setError(error.message);
+      toast.error(error.message, 'Payment Failed');
       setLoading(false);
       setGeneratingReceipt(false);
     }

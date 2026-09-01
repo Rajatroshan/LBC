@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Loader } from '@/components/ui/Loader';
 import { APP_ROUTES } from '@/core/routes';
 import { FestivalType } from '@/constants';
+import { useToast } from '@/contexts/ToastContext';
 
 interface FestivalFormProps {
   festivalId?: string;
@@ -24,6 +25,7 @@ export const FestivalForm: React.FC<FestivalFormProps> = ({ festivalId }) => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(!!festivalId);
   const [error, setError] = useState('');
+  const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -38,13 +40,14 @@ export const FestivalForm: React.FC<FestivalFormProps> = ({ festivalId }) => {
           setDescription(festival.description || '');
         } catch {
           setError('Failed to load festival');
+          toast.error('Failed to load festival details', 'Loading Error');
         } finally {
           setLoadingData(false);
         }
       };
       loadFestival();
     }
-  }, [festivalId]);
+  }, [festivalId, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,13 +65,16 @@ export const FestivalForm: React.FC<FestivalFormProps> = ({ festivalId }) => {
 
       if (festivalId) {
         await festivalController.updateFestival(festivalId, festivalData);
+        toast.success(`Festival "${name}" updated successfully!`, 'Festival Updated');
       } else {
         await festivalController.createFestival(festivalData);
+        toast.success(`Festival "${name}" created successfully!`, 'Festival Created');
       }
       router.push(APP_ROUTES.FESTIVALS);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Operation failed';
       setError(errorMessage);
+      toast.error(errorMessage, 'Failed to Save');
     } finally {
       setLoading(false);
     }

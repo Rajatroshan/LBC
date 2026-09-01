@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import Link from 'next/link';
 import { APP_ROUTES } from '@/core/routes';
 import { OAuthButtons } from './OAuthButtons';
+import { useToast } from '@/contexts/ToastContext';
 
 export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ export const LoginForm: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,10 +26,13 @@ export const LoginForm: React.FC = () => {
 
     try {
       await login(email, password);
+      toast.success('Signed in successfully! Redirecting to dashboard...', 'Welcome Back');
       router.push(APP_ROUTES.DASHBOARD);
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Login failed');
-      setError(error.message || 'Failed to login. Please check your credentials.');
+      const message = error.message || 'Failed to login. Please check your credentials.';
+      setError(message);
+      toast.error(message, 'Sign-In Failed');
     } finally {
       setLoading(false);
     }

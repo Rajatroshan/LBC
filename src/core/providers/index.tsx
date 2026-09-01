@@ -3,6 +3,7 @@
 import React from 'react';
 import { FirebaseProvider } from '@/core/providers/FirebaseProvider';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ToastProvider } from '@/contexts/ToastContext';
 
 /**
  * Root Providers
@@ -12,7 +13,9 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <FirebaseProvider>
       <AuthProvider>
-        {children}
+        <ToastProvider>
+          {children}
+        </ToastProvider>
       </AuthProvider>
     </FirebaseProvider>
   );

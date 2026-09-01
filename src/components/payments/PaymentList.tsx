@@ -10,6 +10,7 @@ import { ReceiptViewer } from './ReceiptViewer';
 import { formatCurrency, formatDate } from '@/utils';
 import { Download, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { useToast } from '@/contexts/ToastContext';
 
 interface PaymentListProps {
   festivalId?: string;
@@ -21,6 +22,7 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
   const [error, setError] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [loadingReceipt, setLoadingReceipt] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadPayments = async () => {
@@ -35,13 +37,14 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
       } catch (err) {
         console.error('Failed to load payments:', err);
         setError('Failed to load payments');
+        toast.error('Failed to load payments', 'Payments Error');
       } finally {
         setLoading(false);
       }
     };
 
     loadPayments();
-  }, [festivalId]);
+  }, [festivalId, toast]);
 
   const handleViewReceipt = async (paymentId: string) => {
     setLoadingReceipt(paymentId);
@@ -50,11 +53,11 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
       if (receipt) {
         setSelectedReceipt(receipt);
       } else {
-        alert('No receipt found for this payment.');
+        toast.warning('No receipt found for this payment.', 'Receipt Not Found');
       }
     } catch (err) {
       console.error('Error loading receipt:', err);
-      alert('Failed to load receipt.');
+      toast.error('Failed to load receipt.', 'Error');
     } finally {
       setLoadingReceipt(null);
     }
@@ -74,12 +77,13 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+        toast.success(`Receipt ${result.receiptNumber} downloaded.`, 'Receipt Downloaded');
       } else {
-        alert('No receipt found for this payment.');
+        toast.warning('No receipt found for this payment.', 'Receipt Not Found');
       }
     } catch (err) {
       console.error('Error downloading receipt:', err);
-      alert('Failed to download receipt.');
+      toast.error('Failed to download receipt.', 'Download Error');
     } finally {
       setLoadingReceipt(null);
     }

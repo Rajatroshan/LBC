@@ -3,19 +3,22 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import { APP_CONSTANTS } from '@/constants';
 
 export default function SettingsPage() {
   const { user, isAdmin, logout } = useAuth();
+  const { toast } = useToast();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = async () => {
     try {
       await logout();
+      toast.success('Logged out successfully.', 'Session Ended');
     } catch (error) {
       console.error('Logout failed:', error);
+      toast.error('Logout failed. Please try again.', 'Error');
     }
   };
 
