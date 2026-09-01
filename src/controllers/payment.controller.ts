@@ -8,18 +8,21 @@ import { generateReceiptNumber } from '@/utils/pdf';
 
 export class PaymentController {
   /**
-   * Create a payment and optionally generate a receipt
+   * Create a payment (Admin -> PAID immediately; Regular Member -> UNPAID/PENDING verification)
    */
   async createPayment(data: {
     familyId: string;
     festivalId: string;
     amount: number;
     paidDate: Date;
-    status: 'PAID' | 'UNPAID' | 'PENDING';
+    status?: 'PAID' | 'UNPAID' | 'PENDING';
     receiptNumber?: string;
     notes?: string;
     generateReceipt?: boolean;
     generatedBy?: string;
+    isAdmin?: boolean;
+    submittedByUserId?: string;
+    submittedByUserName?: string;
   }): Promise<Payment> {
     // Validation
     if (!data.familyId || !data.festivalId || !data.amount) {
@@ -30,17 +33,33 @@ export class PaymentController {
       throw new Error('Amount must be positive');
     }
 
-    // Generate receipt number if payment is PAID and no receipt number provided
-    if (data.status === 'PAID' && !data.receiptNumber) {
-      data.receiptNumber = generateReceiptNumber();
-    }
+    // Determine status based on Admin role if not explicitly provided
+    const isActuallyAdmin = data.isAdmin === true;
+    const finalStatus: 'PAID' | 'UNPAID' | 'PENDING' = isActuallyAdmin 
+      ? 'PAID' 
+      : (data.status || 'UNPAID');
 
-    const payment = await paymentService.create(data);
+    // Generate slip/receipt number
+    const finalReceiptNumber = data.receiptNumber || generateReceiptNumber();
 
-    // Add income to account if payment is PAID
-    if (data.status === 'PAID') {
+    const payment = await paymentService.create({
+      familyId: data.familyId,
+      festivalId: data.festivalId,
+      amount: data.amount,
+      paidDate: data.paidDate,
+      status: finalStatus,
+      receiptNumber: finalReceiptNumber,
+      notes: data.notes,
+      submittedByUserId: data.submittedByUserId,
+      submittedByUserName: data.submittedByUserName,
+      verifiedByUserId: isActuallyAdmin ? data.generatedBy : undefined,
+      verifiedByUserName: isActuallyAdmin ? data.submittedByUserName : undefined,
+      verifiedAt: isActuallyAdmin ? new Date() : undefined,
+    });
+
+    // Add income to master account ONLY if payment is PAID (Admin verified)
+    if (finalStatus === 'PAID') {
       try {
-        // Get family and festival names for description
         const family = await familyService.getById(data.familyId);
         const festival = await festivalService.getById(data.festivalId);
         
@@ -53,22 +72,75 @@ export class PaymentController {
           date: data.paidDate,
         });
       } catch (error) {
-        console.error('Error adding income to account:', error);
-        // Payment still created even if account update fails
-      }
-    }
-
-    // Auto-generate receipt for PAID payments if requested
-    if (data.generateReceipt && data.status === 'PAID' && data.generatedBy) {
-      try {
-        await this.generateReceiptForPayment(payment.id, data.generatedBy);
-      } catch (error) {
-        console.error('Error generating receipt:', error);
-        // Payment is still created, just receipt generation failed
+        console.error('Error adding income to master account:', error);
       }
     }
 
     return payment;
+  }
+
+  /**
+   * Admin verifies a pending/unpaid member payment
+   * Transitions status to PAID, credits Master Account, and generates official receipt
+   */
+  async verifyPayment(
+    paymentId: string, 
+    adminUser: { id: string; name: string }
+  ): Promise<{ payment: Payment; receipt: Receipt; pdfBlob: Blob }> {
+    const payment = await this.getPaymentById(paymentId);
+
+    if (payment.status === 'PAID') {
+      throw new Error('This payment has already been verified and marked as PAID.');
+    }
+
+    const verifiedAt = new Date();
+    const receiptNumber = payment.receiptNumber || generateReceiptNumber();
+
+    // 1. Update Payment status in Firestore
+    await paymentService.update(paymentId, {
+      status: 'PAID',
+      receiptNumber,
+      verifiedByUserId: adminUser.id,
+      verifiedByUserName: adminUser.name,
+      verifiedAt,
+    });
+
+    // 2. Add income to Master Account
+    try {
+      const family = await familyService.getById(payment.familyId);
+      const festival = await festivalService.getById(payment.festivalId);
+      
+      const description = `Verified payment from ${family?.headName || 'Unknown'} for ${festival?.name || 'Unknown'}`;
+      
+      await accountService.addIncome({
+        amount: payment.amount,
+        description,
+        referenceId: payment.id,
+        date: payment.paidDate,
+      });
+    } catch (error) {
+      console.error('Error adding income to account during verification:', error);
+    }
+
+    // 3. Generate official verified receipt
+    const family = await familyService.getById(payment.familyId);
+    const festival = await festivalService.getById(payment.festivalId);
+
+    const { receipt, pdfBlob } = await receiptService.generateReceiptWithoutStorage({
+      paymentId: payment.id,
+      familyName: family?.headName || 'Unknown Family',
+      festivalName: festival?.name || 'Unknown Festival',
+      amount: payment.amount,
+      paidDate: payment.paidDate,
+      generatedBy: adminUser.id,
+      notes: payment.notes,
+      isProvisional: false,
+      submittedByName: payment.submittedByUserName,
+      verifiedByName: adminUser.name,
+    });
+
+    const updatedPayment = await this.getPaymentById(paymentId);
+    return { payment: updatedPayment, receipt, pdfBlob };
   }
 
   async getPaymentById(id: string): Promise<Payment> {
@@ -102,27 +174,19 @@ export class PaymentController {
   }
 
   /**
-   * Generate receipt for a payment without Firebase Storage
+   * Generate receipt or provisional slip without storage
    * Returns receipt metadata and PDF blob for immediate download
    */
   async generateReceiptWithoutStorage(
     paymentId: string, 
-    userId: string
+    userId: string,
+    userName?: string
   ): Promise<{ receipt: Receipt; pdfBlob: Blob }> {
     // Get payment details
     const payment = await this.getPaymentById(paymentId);
+    const isProvisional = payment.status !== 'PAID';
 
-    if (payment.status !== 'PAID') {
-      throw new Error('Cannot generate receipt for unpaid payment');
-    }
-
-    // Check if receipt already exists
-    const existingReceipt = await receiptService.getByPaymentId(paymentId);
-    if (existingReceipt) {
-      throw new Error('Receipt already exists for this payment');
-    }
-
-    // Get family and festival details for the receipt
+    // Get family and festival details
     const family = await familyService.getById(payment.familyId);
     const festival = await festivalService.getById(payment.festivalId);
 
@@ -139,9 +203,12 @@ export class PaymentController {
       paidDate: payment.paidDate,
       generatedBy: userId,
       notes: payment.notes,
+      isProvisional,
+      submittedByName: payment.submittedByUserName || userName,
+      verifiedByName: payment.verifiedByUserName,
     });
 
-    // Update payment with receipt number
+    // Update payment with receipt number if missing
     if (receipt.receiptNumber && !payment.receiptNumber) {
       await paymentService.update(paymentId, {
         receiptNumber: receipt.receiptNumber,
@@ -152,76 +219,50 @@ export class PaymentController {
   }
 
   /**
-   * Generate a receipt for an existing payment
+   * Download receipt PDF for a payment
    */
-  async generateReceiptForPayment(paymentId: string, userId: string): Promise<Receipt> {
-    // Get payment details
+  async downloadReceiptForPayment(paymentId: string): Promise<{ receiptNumber: string; pdfBlob: Blob } | null> {
     const payment = await this.getPaymentById(paymentId);
-
-    if (payment.status !== 'PAID') {
-      throw new Error('Cannot generate receipt for unpaid payment');
+    const receipt = await receiptService.getByPaymentId(paymentId);
+    
+    if (receipt) {
+      const pdfBlob = await receiptService.generatePDFFromReceipt(receipt);
+      return {
+        receiptNumber: receipt.receiptNumber,
+        pdfBlob,
+      };
     }
 
-    // Check if receipt already exists
-    const existingReceipt = await receiptService.getByPaymentId(paymentId);
-    if (existingReceipt) {
-      throw new Error('Receipt already exists for this payment');
-    }
-
-    // Get family and festival details for the receipt
+    // If receipt not in db, generate dynamically
     const family = await familyService.getById(payment.familyId);
     const festival = await festivalService.getById(payment.festivalId);
 
-    if (!family || !festival) {
-      throw new Error('Family or Festival not found');
-    }
+    if (!family || !festival) return null;
 
-    // Generate receipt
-    const receipt = await receiptService.generateReceipt({
+    const { receipt: newReceipt, pdfBlob } = await receiptService.generateReceiptWithoutStorage({
       paymentId: payment.id,
       familyName: family.headName,
       festivalName: festival.name,
       amount: payment.amount,
       paidDate: payment.paidDate,
-      generatedBy: userId,
+      generatedBy: payment.submittedByUserId || 'System',
       notes: payment.notes,
+      isProvisional: payment.status !== 'PAID',
+      submittedByName: payment.submittedByUserName,
+      verifiedByName: payment.verifiedByUserName,
     });
 
-    // Update payment with receipt number
-    if (receipt.receiptNumber && !payment.receiptNumber) {
-      await paymentService.update(paymentId, {
-        receiptNumber: receipt.receiptNumber,
-      });
-    }
-
-    return receipt;
+    return {
+      receiptNumber: newReceipt.receiptNumber,
+      pdfBlob,
+    };
   }
 
   /**
-   * Get receipt for a payment
+   * Get receipt document for a payment
    */
   async getReceiptForPayment(paymentId: string): Promise<Receipt | null> {
     return await receiptService.getByPaymentId(paymentId);
-  }
-
-  /**
-   * Download receipt PDF for a payment
-   * Regenerates PDF from metadata if not stored
-   */
-  async downloadReceiptForPayment(paymentId: string): Promise<{ receiptNumber: string; pdfBlob: Blob } | null> {
-    const receipt = await receiptService.getByPaymentId(paymentId);
-    
-    if (!receipt) {
-      return null;
-    }
-
-    // Generate PDF from receipt metadata
-    const pdfBlob = await receiptService.generatePDFFromReceipt(receipt);
-    
-    return {
-      receiptNumber: receipt.receiptNumber,
-      pdfBlob,
-    };
   }
 }
 

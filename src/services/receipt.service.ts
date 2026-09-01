@@ -43,11 +43,14 @@ export class ReceiptService {
     generatedBy: string;
     paymentMethod?: string;
     notes?: string;
+    isProvisional?: boolean;
+    submittedByName?: string;
+    verifiedByName?: string;
   }): Promise<{ receipt: Receipt; pdfBlob: Blob }> {
     try {
       console.log('Generating receipt for payment:', data.paymentId);
       
-      // Generate unique receipt number
+      // Generate unique receipt/slip number
       const receiptNumber = generateReceiptNumber();
       console.log('Generated receipt number:', receiptNumber);
 
@@ -60,6 +63,9 @@ export class ReceiptService {
         paidDate: data.paidDate,
         paymentMethod: data.paymentMethod,
         notes: data.notes,
+        isProvisional: data.isProvisional,
+        submittedByName: data.submittedByName,
+        verifiedByName: data.verifiedByName,
       };
 
       console.log('Generating PDF blob...');
@@ -78,6 +84,7 @@ export class ReceiptService {
         paidDate: Timestamp.fromDate(data.paidDate),
         generatedBy: data.generatedBy,
         pdfUrl: '', // No storage URL
+        isProvisional: data.isProvisional || false,
         createdAt: now,
         updatedAt: now,
       });
@@ -382,6 +389,7 @@ export class ReceiptService {
       paidDate: data.paidDate?.toDate() || new Date(),
       generatedBy: data.generatedBy,
       pdfUrl: data.pdfUrl,
+      isProvisional: data.isProvisional || false,
       createdAt: data.createdAt?.toDate() || new Date(),
       updatedAt: data.updatedAt?.toDate() || new Date(),
     };

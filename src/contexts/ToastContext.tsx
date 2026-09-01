@@ -73,7 +73,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return id;
   }, [removeToast]);
 
-  const toast: ToastShortcuts = {
+  const toast: ToastShortcuts = React.useMemo(() => ({
     success: (message: string, title?: string, duration?: number) =>
       showToast({ type: 'success', title: title || 'Success', message, duration }),
     error: (message: string, title?: string, duration?: number) =>
@@ -82,10 +82,17 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       showToast({ type: 'warning', title: title || 'Warning', message, duration }),
     info: (message: string, title?: string, duration?: number) =>
       showToast({ type: 'info', title: title || 'Notice', message, duration }),
-  };
+  }), [showToast]);
+
+  const contextValue = React.useMemo(() => ({
+    toasts,
+    showToast,
+    removeToast,
+    toast,
+  }), [toasts, showToast, removeToast, toast]);
 
   return (
-    <ToastContext.Provider value={{ toasts, showToast, removeToast, toast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </ToastContext.Provider>

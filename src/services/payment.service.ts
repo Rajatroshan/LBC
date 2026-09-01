@@ -22,12 +22,27 @@ export class PaymentService {
 
   async create(data: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Payment> {
     const now = Timestamp.now();
-    const docRef = await addDoc(this.collectionRef, {
-      ...data,
+    
+    // Sanitize object so no undefined fields are passed to Firestore
+    const docData: Record<string, unknown> = {
+      familyId: data.familyId,
+      festivalId: data.festivalId,
+      amount: data.amount,
       paidDate: Timestamp.fromDate(data.paidDate),
+      status: data.status,
+      receiptNumber: data.receiptNumber || '',
+      notes: data.notes || '',
       createdAt: now,
       updatedAt: now,
-    });
+    };
+
+    if (data.submittedByUserId) docData.submittedByUserId = data.submittedByUserId;
+    if (data.submittedByUserName) docData.submittedByUserName = data.submittedByUserName;
+    if (data.verifiedByUserId) docData.verifiedByUserId = data.verifiedByUserId;
+    if (data.verifiedByUserName) docData.verifiedByUserName = data.verifiedByUserName;
+    if (data.verifiedAt) docData.verifiedAt = Timestamp.fromDate(data.verifiedAt);
+
+    const docRef = await addDoc(this.collectionRef, docData);
 
     const docSnap = await getDoc(docRef);
     return this.toEntity(docSnap);
@@ -74,16 +89,18 @@ export class PaymentService {
   }
 
   async getByFestival(festivalId: string): Promise<Payment[]> {
-    const q = query(this.collectionRef, where('festivalId', '==', festivalId));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => this.toEntity(doc));
+    return this.getAll({ festivalId });
   }
 
-  async getRecent(limit: number = 10): Promise<Payment[]> {
+  async getByFamily(familyId: string): Promise<Payment[]> {
+    return this.getAll({ familyId });
+  }
+
+  async getRecent(limitCount: number = 10): Promise<Payment[]> {
     const q = query(
       this.collectionRef,
-      orderBy('paidDate', 'desc'),
-      firestoreLimit(limit)
+      orderBy('createdAt', 'desc'),
+      firestoreLimit(limitCount)
     );
     const snapshot = await getDocs(q);
     return snapshot.docs.map((doc) => this.toEntity(doc));
@@ -92,13 +109,20 @@ export class PaymentService {
   async update(id: string, data: Partial<Payment>): Promise<void> {
     const docRef = doc(db, COLLECTIONS.PAYMENTS, id);
     const updateData: Record<string, unknown> = {
-      ...data,
       updatedAt: Timestamp.now(),
     };
 
-    if (data.paidDate) {
-      updateData.paidDate = Timestamp.fromDate(data.paidDate);
-    }
+    Object.entries(data).forEach(([key, val]) => {
+      if (val !== undefined) {
+        if (key === 'paidDate' && val instanceof Date) {
+          updateData[key] = Timestamp.fromDate(val);
+        } else if (key === 'verifiedAt' && val instanceof Date) {
+          updateData[key] = Timestamp.fromDate(val);
+        } else {
+          updateData[key] = val;
+        }
+      }
+    });
 
     await updateDoc(docRef, updateData);
   }
@@ -120,6 +144,11 @@ export class PaymentService {
       status: data.status,
       receiptNumber: data.receiptNumber,
       notes: data.notes,
+      submittedByUserId: data.submittedByUserId,
+      submittedByUserName: data.submittedByUserName,
+      verifiedByUserId: data.verifiedByUserId,
+      verifiedByUserName: data.verifiedByUserName,
+      verifiedAt: data.verifiedAt?.toDate(),
       createdAt: data.createdAt?.toDate() || new Date(),
       updatedAt: data.updatedAt?.toDate() || new Date(),
     };

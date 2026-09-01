@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { expenseController } from '@/controllers/expense.controller';
 import { invoiceController } from '@/controllers/invoice.controller';
 import { festivalController } from '@/controllers/festival.controller';
-import { Festival } from '@/models';
+import { Festival, PaymentSourceType } from '@/models';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -14,10 +14,15 @@ import { Loader } from '@/components/ui/Loader';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { APP_ROUTES } from '@/core/routes';
-import { ExpenseCategory, EXPENSE_CATEGORY_LABELS } from '@/constants';
+import { ExpenseCategory, EXPENSE_CATEGORY_LABELS, PAYMENT_SOURCES } from '@/constants';
 import { sanitizePhone } from '@/utils/validation';
+import { Landmark, UserCheck, Wallet, ShieldCheck, Clock } from 'lucide-react';
 
 export const ExpenseForm: React.FC = () => {
+  const { user, isAdmin } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+
   const [purpose, setPurpose] = useState('');
   const [category, setCategory] = useState<string>(ExpenseCategory.OTHER);
   const [amount, setAmount] = useState(0);
@@ -26,14 +31,17 @@ export const ExpenseForm: React.FC = () => {
   const [contactNumber, setContactNumber] = useState('');
   const [festivalId, setFestivalId] = useState('');
   const [notes, setNotes] = useState('');
+  
+  // Set default payment source based on admin role
+  const [paymentSource, setPaymentSource] = useState<PaymentSourceType>(
+    isAdmin ? PAYMENT_SOURCES.MASTER_ACCOUNT : PAYMENT_SOURCES.PERSONAL_OUT_OF_POCKET
+  );
+
   const [festivals, setFestivals] = useState<Festival[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState('');
   const [generatingInvoice, setGeneratingInvoice] = useState(false);
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const router = useRouter();
 
   useEffect(() => {
     const loadFestivals = async () => {
@@ -66,6 +74,11 @@ export const ExpenseForm: React.FC = () => {
         contactNumber: contactNumber || undefined,
         festivalId: festivalId || undefined,
         notes: notes || undefined,
+        paymentSource,
+        paidByUserId: user?.id,
+        paidByUserName: user?.name,
+        paidByUserEmail: user?.email,
+        isAdmin: isAdmin === true,
       });
 
       setLoading(false);
@@ -74,12 +87,10 @@ export const ExpenseForm: React.FC = () => {
       if (user?.id) {
         setGeneratingInvoice(true);
         try {
-          console.log('Starting invoice generation for expense:', expense.id);
           const { invoice, pdfBlob } = await invoiceController.generateInvoiceForExpense(
             expense.id,
             user.id
           );
-          console.log('Invoice generated successfully:', invoice);
           
           // Download PDF immediately
           const url = URL.createObjectURL(pdfBlob);
@@ -91,9 +102,25 @@ export const ExpenseForm: React.FC = () => {
           document.body.removeChild(link);
           URL.revokeObjectURL(url);
           
-          // Show success toast and redirect
-          toast.success(`Expense recorded successfully!\nInvoice ${invoice.invoiceNumber} downloaded.`, 'Expense Recorded');
-          router.push(APP_ROUTES.PAYMENTS);
+          if (paymentSource === PAYMENT_SOURCES.PERSONAL_OUT_OF_POCKET) {
+            toast.success(
+              `Expense recorded as Out-of-Pocket!\nLogged to your personal ledger (Claimable under Reimbursements).`, 
+              'Out-of-Pocket Logged'
+            );
+            router.push(APP_ROUTES.REIMBURSEMENTS);
+          } else if (!isAdmin) {
+            toast.success(
+              `Master Account expense submitted for Admin Approval!\nInvoice ${invoice.invoiceNumber} downloaded. Funds will be deducted once verified.`,
+              'Awaiting Admin Approval'
+            );
+            router.push(APP_ROUTES.REIMBURSEMENTS);
+          } else {
+            toast.success(
+              `Expense disbursed directly from Club Master Account!\nInvoice ${invoice.invoiceNumber} downloaded.`, 
+              'Master Account Disbursed'
+            );
+            router.push(APP_ROUTES.PAYMENTS);
+          }
         } catch (invoiceError) {
           console.error('Failed to generate invoice:', invoiceError);
           setGeneratingInvoice(false);
@@ -101,13 +128,13 @@ export const ExpenseForm: React.FC = () => {
             ? invoiceError.message 
             : 'Unknown error occurred';
           toast.warning(`Expense recorded, but invoice generation failed: ${errorMessage}`, 'Invoice Warning');
-          router.push(APP_ROUTES.PAYMENTS);
+          router.push(APP_ROUTES.REIMBURSEMENTS);
         } finally {
           setGeneratingInvoice(false);
         }
       } else {
         toast.success('Expense recorded successfully!', 'Expense Recorded');
-        router.push(APP_ROUTES.PAYMENTS);
+        router.push(APP_ROUTES.REIMBURSEMENTS);
       }
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to record expense');
@@ -128,17 +155,127 @@ export const ExpenseForm: React.FC = () => {
 
   return (
     <Card>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Record Expense</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">Record Vendor Expense</h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+            Record supplier, decoration, food, or operational costs
+          </p>
+        </div>
+
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+          {isAdmin ? (
+            <span className="flex items-center gap-1 text-emerald-700">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              Admin (Direct Payout Authorized)
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 text-amber-700">
+              <Clock className="w-4 h-4 text-amber-600" />
+              Member (Approval Workflow)
+            </span>
+          )}
+        </div>
+      </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Payment Source Selection */}
+        <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3">
+          <label className="block text-sm font-semibold text-gray-800">
+            Payment Source / Paid By <span className="text-red-500">*</span>
+          </label>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Option 1: Club Master Account */}
+            <label
+              className={`flex items-start gap-3 p-3.5 rounded-lg border cursor-pointer transition-all ${
+                paymentSource === PAYMENT_SOURCES.MASTER_ACCOUNT
+                  ? 'border-primary-500 bg-primary-50/70 text-primary-900 shadow-xs'
+                  : 'border-gray-200 bg-white hover:bg-gray-100 text-gray-700'
+              }`}
+            >
+              <input
+                type="radio"
+                name="paymentSource"
+                value={PAYMENT_SOURCES.MASTER_ACCOUNT}
+                checked={paymentSource === PAYMENT_SOURCES.MASTER_ACCOUNT}
+                onChange={() => setPaymentSource(PAYMENT_SOURCES.MASTER_ACCOUNT)}
+                className="w-4 h-4 mt-0.5 text-primary-600 focus:ring-primary-500"
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold flex items-center gap-1.5">
+                  <Landmark className="w-4 h-4 text-primary-600" />
+                  Club Master Account
+                </span>
+                <span className="text-xs text-gray-500 mt-0.5">
+                  {isAdmin 
+                    ? 'Direct deduction from treasury (No approval needed)' 
+                    : 'Request club payment (Requires Admin approval before deduction)'}
+                </span>
+              </div>
+            </label>
+
+            {/* Option 2: Paid Out-of-Pocket */}
+            <label
+              className={`flex items-start gap-3 p-3.5 rounded-lg border cursor-pointer transition-all ${
+                paymentSource === PAYMENT_SOURCES.PERSONAL_OUT_OF_POCKET
+                  ? 'border-amber-500 bg-amber-50/70 text-amber-900 shadow-xs'
+                  : 'border-gray-200 bg-white hover:bg-gray-100 text-gray-700'
+              }`}
+            >
+              <input
+                type="radio"
+                name="paymentSource"
+                value={PAYMENT_SOURCES.PERSONAL_OUT_OF_POCKET}
+                checked={paymentSource === PAYMENT_SOURCES.PERSONAL_OUT_OF_POCKET}
+                onChange={() => setPaymentSource(PAYMENT_SOURCES.PERSONAL_OUT_OF_POCKET)}
+                className="w-4 h-4 mt-0.5 text-amber-600 focus:ring-amber-500"
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold flex items-center gap-1.5">
+                  <Wallet className="w-4 h-4 text-amber-600" />
+                  Paid Out-of-Pocket (My Money)
+                </span>
+                <span className="text-xs text-gray-500 mt-0.5">
+                  Paid from personal pocket. Logged to your ledger & claimable for reimbursement
+                </span>
+              </div>
+            </label>
+          </div>
+
+          {/* Context Guidance */}
+          {paymentSource === PAYMENT_SOURCES.PERSONAL_OUT_OF_POCKET ? (
+            <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>
+                <strong>Out-of-Pocket Workflow:</strong> Logged into your personal ledger ({user?.name || 'Member'}). You can raise a money request from the <strong>Reimbursements</strong> page anytime to receive approval and payout from the central treasury.
+              </span>
+            </div>
+          ) : !isAdmin ? (
+            <div className="p-2.5 bg-sky-50 border border-sky-200 rounded-lg text-xs text-sky-800 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-sky-600 shrink-0" />
+              <span>
+                <strong>Master Account Request:</strong> This will be submitted to the Admin Approvals Queue. Treasury funds will be deducted once verified and approved by an Admin.
+              </span>
+            </div>
+          ) : (
+            <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>
+                <strong>Direct Treasury Disbursement:</strong> As an Admin, the amount will be immediately deducted from the Club Master Account.
+              </span>
+            </div>
+          )}
+        </div>
+
         <Input
-          label="Title"
+          label="Expense Title / Item"
           value={purpose}
           onChange={(e) => setPurpose(e.target.value)}
           placeholder="e.g., DJ Service, Lights, Catering, Decoration"
@@ -150,7 +287,7 @@ export const ExpenseForm: React.FC = () => {
           type="number"
           value={amount.toString()}
           onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-          min="0"
+          min="1"
           required
         />
 
@@ -163,7 +300,7 @@ export const ExpenseForm: React.FC = () => {
         />
 
         <Input
-          label="Paid To (Vendor Name)"
+          label="Paid To (Vendor / Contractor Name)"
           value={paidTo}
           onChange={(e) => setPaidTo(e.target.value)}
           placeholder="Enter vendor/recipient name"
@@ -178,35 +315,40 @@ export const ExpenseForm: React.FC = () => {
           placeholder="Enter contact number (optional)"
           maxLength={15}
           pattern="[0-9]*"
-          inputMode="numeric"
         />
 
-        <div className="w-full">
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Category <span className="text-red-500 ml-1">*</span>
+            Category <span className="text-red-500">*</span>
           </label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-medium"
             required
           >
-            {Object.values(ExpenseCategory).map((cat) => (
-              <option key={cat} value={cat}>{EXPENSE_CATEGORY_LABELS[cat]}</option>
+            {Object.entries(ExpenseCategory).map(([key, value]) => (
+              <option key={key} value={value}>
+                {EXPENSE_CATEGORY_LABELS[value] || value}
+              </option>
             ))}
           </select>
         </div>
 
-        <div className="w-full">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Festival (Optional)</label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Associated Festival (Optional)
+          </label>
           <select
             value={festivalId}
             onChange={(e) => setFestivalId(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
           >
-            <option value="">No Festival</option>
-            {festivals.map((f) => (
-              <option key={f.id} value={f.id}>{f.name}</option>
+            <option value="">General Expense (Not tied to a festival)</option>
+            {festivals.map((festival) => (
+              <option key={festival.id} value={festival.id}>
+                {festival.name}
+              </option>
             ))}
           </select>
         </div>
@@ -215,22 +357,18 @@ export const ExpenseForm: React.FC = () => {
           label="Notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Any additional notes (optional)"
+          placeholder="Enter additional details, items list, or bill notes (optional)"
           rows={3}
         />
 
         <div className="flex gap-4">
-          <Button 
-            type="submit" 
-            isLoading={loading || generatingInvoice} 
-            disabled={loading || generatingInvoice}
-          >
+          <Button type="submit" isLoading={loading || generatingInvoice} disabled={loading || generatingInvoice}>
             {generatingInvoice ? 'Generating Invoice...' : 'Record Expense'}
           </Button>
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push(APP_ROUTES.PAYMENTS)}
+            onClick={() => router.push(APP_ROUTES.REIMBURSEMENTS)}
             disabled={loading || generatingInvoice}
           >
             Cancel

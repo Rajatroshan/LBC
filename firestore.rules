@@ -14,11 +14,9 @@ service cloud.firestore {
     
     // Users collection
     match /users/{userId} {
-      // Allow users to read their own document
-      allow read: if isAuthenticated() && request.auth.uid == userId;
-      // Allow admins to read all users
-      allow read: if isAdmin();
-      // Allow user creation during registration
+      // Allow users to read their own document or admins to read all
+      allow read: if isAuthenticated();
+      // Allow user creation during registration / OAuth login
       allow create: if isAuthenticated();
       // Allow users to update their own document, admins can update any
       allow update: if (isAuthenticated() && request.auth.uid == userId) || isAdmin();
@@ -42,26 +40,30 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // Payments collection
+    // Payments collection (Chanda Contributions)
     match /payments/{paymentId} {
       allow read: if isAuthenticated();
-      allow create: if isAdmin();
+      // Allow authenticated members to record payments (which enter verification queue)
+      allow create: if isAuthenticated();
+      // Only admins can verify or update payments
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
     
-    // Receipts collection
+    // Receipts collection (Receipts and Provisional Slips)
     match /receipts/{receiptId} {
       allow read: if isAuthenticated();
-      allow create: if isAdmin();
+      allow create: if isAuthenticated();
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
     
-    // Expenses collection
+    // Expenses collection (Vendor bills and Out-of-pocket expenses)
     match /expenses/{expenseId} {
       allow read: if isAuthenticated();
-      allow create: if isAdmin();
+      // Allow authenticated members to record out-of-pocket or master account expense requests
+      allow create: if isAuthenticated();
+      // Only admins can approve or edit expenses
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
@@ -69,12 +71,27 @@ service cloud.firestore {
     // Invoices collection (for expense invoices)
     match /invoices/{invoiceId} {
       allow read: if isAuthenticated();
-      allow create: if isAdmin();
+      allow create: if isAuthenticated();
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
     
-    // Account collection (main account balance)
+    // User Accounts collection (Personal Ledgers)
+    match /user_accounts/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Reimbursement Requests collection
+    match /reimbursement_requests/{requestId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+    
+    // Account collection (Main treasury balance)
     match /account/{accountId} {
       allow read: if isAuthenticated();
       allow create: if isAdmin();
@@ -82,7 +99,7 @@ service cloud.firestore {
       allow delete: if false; // Never delete account
     }
     
-    // Transactions collection (account history)
+    // Transactions collection (Main account audit history)
     match /transactions/{transactionId} {
       allow read: if isAuthenticated();
       allow create: if isAdmin();

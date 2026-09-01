@@ -44,6 +44,11 @@ export interface Payment extends BaseEntity {
   status: 'PAID' | 'UNPAID' | 'PENDING';
   receiptNumber?: string;
   notes?: string;
+  submittedByUserId?: string;
+  submittedByUserName?: string;
+  verifiedByUserId?: string;
+  verifiedByUserName?: string;
+  verifiedAt?: Date;
 }
 
 // Receipt Types
@@ -56,7 +61,11 @@ export interface Receipt extends BaseEntity {
   paidDate: Date;
   generatedBy: string;
   pdfUrl?: string;
+  isProvisional?: boolean;
 }
+
+// Payment Source Types
+export type PaymentSourceType = 'MASTER_ACCOUNT' | 'PERSONAL_OUT_OF_POCKET';
 
 // Expense Types (for tracking outgoing payments)
 export interface Expense extends BaseEntity {
@@ -69,6 +78,50 @@ export interface Expense extends BaseEntity {
   festivalId?: string;
   notes?: string;
   receiptUrl?: string;
+  paymentSource?: PaymentSourceType;
+  paidByUserId?: string;
+  paidByUserName?: string;
+  paidByUserEmail?: string;
+  reimbursementStatus?: 'PENDING' | 'REIMBURSED' | 'NONE';
+  approvalStatus?: 'APPROVED' | 'PENDING_APPROVAL' | 'REJECTED';
+  approvedByUserId?: string;
+  approvedByUserName?: string;
+  approvedAt?: Date;
+  rejectionReason?: string;
+}
+
+// User Personal Account & Ledger
+export interface UserAccount extends BaseEntity {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  totalPaidOutOfPocket: number;
+  totalReimbursed: number;
+  pendingReimbursement: number;
+}
+
+// Reimbursement / Money Request
+export interface ReimbursementRequest extends BaseEntity {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  amount: number;
+  festivalId?: string;
+  festivalName?: string;
+  notes: string;
+  payoutDetails?: string; // e.g. UPI ID or bank account note
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  approvedBy?: string;
+  approvedByName?: string;
+  approvedAt?: Date;
+  receiptNumber?: string;
+  rejectionReason?: string;
+}
+
+export interface ReimbursementFilter {
+  userId?: string;
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  festivalId?: string;
 }
 
 // Invoice Types (for expense invoices)
@@ -93,7 +146,7 @@ export interface Account extends BaseEntity {
   lastTransactionDate?: Date;
 }
 
-// Transaction Types (for tracking account history)
+// Transaction Types (for tracking money in/out)
 export interface Transaction extends BaseEntity {
   type: 'INCOME' | 'EXPENSE';
   amount: number;
@@ -129,6 +182,8 @@ export interface PaymentFilter {
 export interface ExpenseFilter {
   festivalId?: string;
   category?: string;
+  paymentSource?: PaymentSourceType;
+  paidByUserId?: string;
   startDate?: Date;
   endDate?: Date;
 }

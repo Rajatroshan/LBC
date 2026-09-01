@@ -1,12 +1,3 @@
-// Festival Types
-export enum FestivalType {
-  DURGA_PUJA = 'DURGA_PUJA',
-  DIWALI = 'DIWALI',
-  HOLI = 'HOLI',
-  VILLAGE_PUJA = 'VILLAGE_PUJA',
-  OTHER = 'OTHER',
-}
-
 // Predefined Public Festivals list for dropdown
 export const PREDEFINED_FESTIVALS = [
   'Durga Puja',
@@ -59,6 +50,12 @@ export const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
   OTHER: 'Other',
 };
 
+// Payment Source Options
+export const PAYMENT_SOURCES = {
+  MASTER_ACCOUNT: 'MASTER_ACCOUNT',
+  PERSONAL_OUT_OF_POCKET: 'PERSONAL_OUT_OF_POCKET',
+} as const;
+
 // Collection Names for Firestore
 export const COLLECTIONS = {
   USERS: 'users',
@@ -70,6 +67,8 @@ export const COLLECTIONS = {
   INVOICES: 'invoices',
   ACCOUNT: 'account',
   TRANSACTIONS: 'transactions',
+  USER_ACCOUNTS: 'user_accounts',
+  REIMBURSEMENT_REQUESTS: 'reimbursement_requests',
 } as const;
 
 // App Constants

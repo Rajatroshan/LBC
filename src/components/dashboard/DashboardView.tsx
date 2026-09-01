@@ -330,10 +330,16 @@ export const DashboardView: React.FC = () => {
                 🎉 Festivals
               </Link>
               <Link href={APP_ROUTES.PAYMENTS} className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg text-gray-700 font-medium text-center border border-gray-200/60 transition-colors">
-                💰 Payments
+                💰 Record Payment
+              </Link>
+              <Link href={APP_ROUTES.EXPENSES} className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg text-gray-700 font-medium text-center border border-gray-200/60 transition-colors">
+                🧾 Record Expense
               </Link>
               <Link href={APP_ROUTES.CALENDAR} className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg text-gray-700 font-medium text-center border border-gray-200/60 transition-colors">
                 📅 Calendar
+              </Link>
+              <Link href={APP_ROUTES.REIMBURSEMENTS} className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg text-gray-700 font-medium text-center border border-gray-200/60 transition-colors">
+                👛 Reimbursements
               </Link>
               <Link href={APP_ROUTES.REPORTS} className="col-span-2 p-2.5 bg-primary-50 hover:bg-primary-100 text-primary-800 font-semibold rounded-lg text-center border border-primary-200 transition-colors">
                 📊 Financial Reports & Statements

@@ -20,12 +20,32 @@ export class ExpenseService {
 
   async create(data: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>): Promise<Expense> {
     const now = Timestamp.now();
-    const docRef = await addDoc(this.collectionRef, {
-      ...data,
+    const docData: Record<string, unknown> = {
+      purpose: data.purpose,
+      category: data.category,
+      amount: data.amount,
       expenseDate: Timestamp.fromDate(data.expenseDate),
+      paidTo: data.paidTo,
+      paymentSource: data.paymentSource || 'MASTER_ACCOUNT',
+      reimbursementStatus: data.reimbursementStatus || 'NONE',
+      approvalStatus: data.approvalStatus || 'APPROVED',
       createdAt: now,
       updatedAt: now,
-    });
+    };
+
+    if (data.contactNumber) docData.contactNumber = data.contactNumber;
+    if (data.festivalId) docData.festivalId = data.festivalId;
+    if (data.notes) docData.notes = data.notes;
+    if (data.receiptUrl) docData.receiptUrl = data.receiptUrl;
+    if (data.paidByUserId) docData.paidByUserId = data.paidByUserId;
+    if (data.paidByUserName) docData.paidByUserName = data.paidByUserName;
+    if (data.paidByUserEmail) docData.paidByUserEmail = data.paidByUserEmail;
+    if (data.approvedByUserId) docData.approvedByUserId = data.approvedByUserId;
+    if (data.approvedByUserName) docData.approvedByUserName = data.approvedByUserName;
+    if (data.approvedAt) docData.approvedAt = Timestamp.fromDate(data.approvedAt);
+    if (data.rejectionReason) docData.rejectionReason = data.rejectionReason;
+
+    const docRef = await addDoc(this.collectionRef, docData);
 
     const docSnap = await getDoc(docRef);
     return this.toEntity(docSnap);
@@ -51,6 +71,14 @@ export class ExpenseService {
         constraints.push(where('category', '==', filter.category));
       }
 
+      if (filter?.paymentSource) {
+        constraints.push(where('paymentSource', '==', filter.paymentSource));
+      }
+
+      if (filter?.paidByUserId) {
+        constraints.push(where('paidByUserId', '==', filter.paidByUserId));
+      }
+
       const q = query(this.collectionRef, ...constraints);
       const snapshot = await getDocs(q);
       
@@ -69,7 +97,6 @@ export class ExpenseService {
       return expenses;
     } catch (error) {
       console.error('Error fetching expenses:', error);
-      // Return empty array instead of throwing, since no expenses is a valid state
       return [];
     }
   }
@@ -77,13 +104,20 @@ export class ExpenseService {
   async update(id: string, data: Partial<Expense>): Promise<void> {
     const docRef = doc(db, COLLECTIONS.EXPENSES, id);
     const updateData: Record<string, unknown> = {
-      ...data,
       updatedAt: Timestamp.now(),
     };
 
-    if (data.expenseDate) {
-      updateData.expenseDate = Timestamp.fromDate(data.expenseDate);
-    }
+    Object.entries(data).forEach(([key, val]) => {
+      if (val !== undefined) {
+        if (key === 'expenseDate' && val instanceof Date) {
+          updateData[key] = Timestamp.fromDate(val);
+        } else if (key === 'approvedAt' && val instanceof Date) {
+          updateData[key] = Timestamp.fromDate(val);
+        } else {
+          updateData[key] = val;
+        }
+      }
+    });
 
     await updateDoc(docRef, updateData);
   }
@@ -107,6 +141,16 @@ export class ExpenseService {
       festivalId: data.festivalId,
       notes: data.notes,
       receiptUrl: data.receiptUrl,
+      paymentSource: data.paymentSource || 'MASTER_ACCOUNT',
+      paidByUserId: data.paidByUserId,
+      paidByUserName: data.paidByUserName,
+      paidByUserEmail: data.paidByUserEmail,
+      reimbursementStatus: data.reimbursementStatus || 'NONE',
+      approvalStatus: data.approvalStatus || 'APPROVED',
+      approvedByUserId: data.approvedByUserId,
+      approvedByUserName: data.approvedByUserName,
+      approvedAt: data.approvedAt?.toDate(),
+      rejectionReason: data.rejectionReason,
       createdAt: data.createdAt?.toDate() || new Date(),
       updatedAt: data.updatedAt?.toDate() || new Date(),
     };
