@@ -21,9 +21,10 @@ export const APP_ROUTES = {
   PAYMENTS: '/payments',
   PAYMENT_RECORD: '/payments/record',
   
-  // Expense routes
+  // Expense & Reimbursement routes
   EXPENSES: '/expenses',
   EXPENSE_RECORD: '/expenses/record',
+  REIMBURSEMENTS: '/reimbursements',
   
   // Receipt routes
   RECEIPTS: '/receipts',
