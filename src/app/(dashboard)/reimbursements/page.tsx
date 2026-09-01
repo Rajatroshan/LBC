@@ -361,59 +361,183 @@ export default function ReimbursementsPage() {
         </div>
       </div>
 
-      {/* Member Personal Account Balance Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-amber-500 hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">My Pending Reimbursement</p>
-              <p className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">
-                {formatCurrency(userAccount?.pendingReimbursement || 0)}
-              </p>
-              <p className="text-[11px] text-gray-400 mt-1">
-                Amount currently claimable from club
-              </p>
+      {/* Metrics Section: Club-Wide for Admin, Personal for Member */}
+      {isAdmin ? (
+        <div className="space-y-4">
+          {/* Section 1: Club-Wide Community Reimbursement Totals */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                <Users className="w-4 h-4 text-primary-600" />
+                Club-Wide Community Reimbursement Flow (All Members)
+              </h2>
+              <span className="text-[11px] font-semibold text-primary-700 bg-primary-50 border border-primary-200 px-2 py-0.5 rounded-full">
+                {allUserAccounts.length} Member Ledgers
+              </span>
             </div>
-            <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
-              <Clock className="w-5 h-5" />
-            </div>
-          </div>
-        </Card>
 
-        <Card className="border-l-4 border-l-primary-500 hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">My Total Out-of-Pocket</p>
-              <p className="text-2xl sm:text-3xl font-black text-primary-700 mt-1">
-                {formatCurrency(userAccount?.totalPaidOutOfPocket || 0)}
-              </p>
-              <p className="text-[11px] text-gray-400 mt-1">
-                Total vendor bills paid from your pocket
-              </p>
-            </div>
-            <div className="p-2.5 bg-primary-50 text-primary-600 rounded-xl">
-              <TrendingUp className="w-5 h-5" />
-            </div>
-          </div>
-        </Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="border-l-4 border-l-amber-500 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Pending Reimbursement</p>
+                    <p className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">
+                      {formatCurrency(allUserAccounts.reduce((sum, acc) => sum + (acc.pendingReimbursement || 0), 0))}
+                    </p>
+                    <p className="text-[11px] text-gray-400 mt-1">
+                      Total owed by club to members
+                    </p>
+                  </div>
+                  <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                </div>
+              </Card>
 
-        <Card className="border-l-4 border-l-emerald-500 hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Reimbursed</p>
-              <p className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">
-                {formatCurrency(userAccount?.totalReimbursed || 0)}
-              </p>
-              <p className="text-[11px] text-gray-400 mt-1">
-                Settled & paid back to you by club
-              </p>
-            </div>
-            <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
-              <CheckCircle className="w-5 h-5" />
+              <Card className="border-l-4 border-l-primary-500 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Out-of-Pocket Spent</p>
+                    <p className="text-2xl sm:text-3xl font-black text-primary-700 mt-1">
+                      {formatCurrency(allUserAccounts.reduce((sum, acc) => sum + (acc.totalPaidOutOfPocket || 0), 0))}
+                    </p>
+                    <p className="text-[11px] text-gray-400 mt-1">
+                      Total paid by all members from pocket
+                    </p>
+                  </div>
+                  <div className="p-2.5 bg-primary-50 text-primary-600 rounded-xl">
+                    <TrendingUp className="w-5 h-5" />
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="border-l-4 border-l-emerald-500 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Reimbursed</p>
+                    <p className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">
+                      {formatCurrency(allUserAccounts.reduce((sum, acc) => sum + (acc.totalReimbursed || 0), 0))}
+                    </p>
+                    <p className="text-[11px] text-gray-400 mt-1">
+                      Total settled & disbursed from treasury
+                    </p>
+                  </div>
+                  <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <CheckCircle className="w-5 h-5" />
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="border-l-4 border-l-sky-500 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Pending Action Items</p>
+                    <p className="text-2xl sm:text-3xl font-black text-sky-700 mt-1">
+                      {totalPendingActionItems}
+                    </p>
+                    <p className="text-[11px] text-gray-400 mt-1">
+                      {pendingAdminClaims.length} Claims • {pendingExpenses.length} Expense Requests
+                    </p>
+                  </div>
+                  <div className="p-2.5 bg-sky-50 text-sky-600 rounded-xl">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                </div>
+              </Card>
             </div>
           </div>
-        </Card>
-      </div>
+
+          {/* Section 2: Admin's Personal Account Balance */}
+          <div className="p-4 bg-gray-50/80 border border-gray-200/80 rounded-2xl">
+            <div className="flex items-center justify-between mb-2.5">
+              <p className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1.5">
+                <Wallet className="w-3.5 h-3.5 text-gray-500" />
+                My Personal Out-of-Pocket Ledger ({user?.name || 'Admin'})
+              </p>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-700">
+                Personal Account
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-3 bg-white border border-gray-200 rounded-xl flex justify-between items-center">
+                <div>
+                  <p className="text-gray-400 text-[11px] font-medium">My Pending Reimbursement</p>
+                  <p className="text-lg font-black text-amber-600 mt-0.5">{formatCurrency(userAccount?.pendingReimbursement || 0)}</p>
+                </div>
+                <Clock className="w-4 h-4 text-amber-500" />
+              </div>
+              <div className="p-3 bg-white border border-gray-200 rounded-xl flex justify-between items-center">
+                <div>
+                  <p className="text-gray-400 text-[11px] font-medium">My Total Out-of-Pocket</p>
+                  <p className="text-lg font-black text-primary-700 mt-0.5">{formatCurrency(userAccount?.totalPaidOutOfPocket || 0)}</p>
+                </div>
+                <TrendingUp className="w-4 h-4 text-primary-500" />
+              </div>
+              <div className="p-3 bg-white border border-gray-200 rounded-xl flex justify-between items-center">
+                <div>
+                  <p className="text-gray-400 text-[11px] font-medium">Total Reimbursed to Me</p>
+                  <p className="text-lg font-black text-emerald-600 mt-0.5">{formatCurrency(userAccount?.totalReimbursed || 0)}</p>
+                </div>
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Regular Member Personal Account Balance Cards */
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card className="border-l-4 border-l-amber-500 hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">My Pending Reimbursement</p>
+                <p className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">
+                  {formatCurrency(userAccount?.pendingReimbursement || 0)}
+                </p>
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Amount currently claimable from club
+                </p>
+              </div>
+              <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
+                <Clock className="w-5 h-5" />
+              </div>
+            </div>
+          </Card>
+
+          <Card className="border-l-4 border-l-primary-500 hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">My Total Out-of-Pocket</p>
+                <p className="text-2xl sm:text-3xl font-black text-primary-700 mt-1">
+                  {formatCurrency(userAccount?.totalPaidOutOfPocket || 0)}
+                </p>
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Total vendor bills paid from your pocket
+                </p>
+              </div>
+              <div className="p-2.5 bg-primary-50 text-primary-600 rounded-xl">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+            </div>
+          </Card>
+
+          <Card className="border-l-4 border-l-emerald-500 hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Reimbursed</p>
+                <p className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">
+                  {formatCurrency(userAccount?.totalReimbursed || 0)}
+                </p>
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Settled & paid back to you by club
+                </p>
+              </div>
+              <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                <CheckCircle className="w-5 h-5" />
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Admin Quick Action Banner if pending requests exist */}
       {isAdmin && totalPendingActionItems > 0 && (
