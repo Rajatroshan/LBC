@@ -1,12 +1,3 @@
-// Festival Types
-export enum FestivalType {
-  DURGA_PUJA = 'DURGA_PUJA',
-  DIWALI = 'DIWALI',
-  HOLI = 'HOLI',
-  VILLAGE_PUJA = 'VILLAGE_PUJA',
-  OTHER = 'OTHER',
-}
-
 // Predefined Public Festivals list for dropdown
 export const PREDEFINED_FESTIVALS = [
   'Durga Puja',

@@ -42,7 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { label: 'Families', href: APP_ROUTES.FAMILIES, Icon: Users, adminOnly: false },
     { label: 'Festivals', href: APP_ROUTES.FESTIVALS, Icon: Sparkles, adminOnly: false },
     { label: 'Record Payment', href: APP_ROUTES.PAYMENTS, Icon: CreditCard, adminOnly: false },
-    { label: 'Record Expense', href: APP_ROUTES.EXPENSE_RECORD, Icon: Receipt, adminOnly: false },
+    { label: 'Record Expense', href: APP_ROUTES.EXPENSES, Icon: Receipt, adminOnly: false },
     { label: 'Reimbursements', href: APP_ROUTES.REIMBURSEMENTS, Icon: Wallet, adminOnly: false },
     { label: 'Calendar', href: APP_ROUTES.CALENDAR, Icon: CalendarDays, adminOnly: false },
     { label: 'Reports', href: APP_ROUTES.REPORTS, Icon: BarChart3, adminOnly: true },

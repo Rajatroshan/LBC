@@ -166,6 +166,10 @@ export class ExpenseController {
     return await expenseService.getAll(filter);
   }
 
+  async getExpensesByFestival(festivalId: string): Promise<Expense[]> {
+    return await expenseService.getAll({ festivalId });
+  }
+
   async updateExpense(id: string, data: Partial<Expense>): Promise<void> {
     await expenseService.update(id, data);
   }
