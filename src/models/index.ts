@@ -26,8 +26,10 @@ export interface Family extends BaseEntity {
 // Festival Types
 export interface Festival extends BaseEntity {
   name: string;
-  type: string;
+  type?: string;
   date: Date;
+  endDate?: Date;
+  isMultiDay?: boolean;
   amountPerFamily: number;
   description?: string;
   isActive: boolean;
@@ -132,16 +134,24 @@ export interface ExpenseFilter {
 }
 
 // Dashboard Types
+export interface EnrichedPayment extends Payment {
+  familyName?: string;
+  festivalName?: string;
+}
+
 export interface DashboardStats {
   totalFamilies: number;
   activeFamilies: number;
   totalFestivals: number;
+  activeFestivalsCount: number;
   upcomingFestivals: number;
   totalCollectionThisYear: number;
   totalExpenseThisYear: number;
+  allTimeCollection: number;
+  allTimeExpense: number;
   currentBalance: number;
   pendingPayments: number;
-  recentPayments: Payment[];
+  recentPayments: EnrichedPayment[];
   upcomingFestivalsList: Festival[];
   recentTransactions: Transaction[];
 }

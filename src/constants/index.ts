@@ -7,6 +7,32 @@ export enum FestivalType {
   OTHER = 'OTHER',
 }
 
+// Predefined Public Festivals list for dropdown
+export const PREDEFINED_FESTIVALS = [
+  'Durga Puja',
+  'Ganesh Chaturthi',
+  'Diwali',
+  'Laxmi Puja',
+  'Kali Puja',
+  'Holi',
+  'Navratri',
+  'Dussehra / Vijayadashami',
+  'Makar Sankranti / Pongal',
+  'Saraswati Puja / Vasant Panchami',
+  'Janmashtami',
+  'Maha Shivratri',
+  'Ram Navami',
+  'Chhath Puja',
+  'Jagannath Rath Yatra',
+  'Raksha Bandhan',
+  'Eid-ul-Fitr',
+  'Eid-ul-Adha',
+  'Christmas',
+  'New Year Celebration',
+  'Village Annual Puja',
+  'OTHER',
+] as const;
+
 // Expense Categories
 export enum ExpenseCategory {
   TENT = 'TENT',
