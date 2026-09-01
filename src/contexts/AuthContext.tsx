@@ -11,6 +11,7 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginOrRegister: (email: string, password: string, name?: string) => Promise<{ isNewUser: boolean }>;
   register: (email: string, password: string, name: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   loginWithGithub: () => Promise<void>;
@@ -29,11 +30,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setFirebaseUser(fbUser);
       if (fbUser) {
         try {
-          const userDoc = await authController.getUserDocument(fbUser.uid);
+          let userDoc = await authController.getUserDocument(fbUser.uid);
+          if (!userDoc) {
+            // First time login or document pending: sync document now
+            await authController.syncOAuthUserDocument(fbUser);
+            userDoc = await authController.getUserDocument(fbUser.uid);
+          }
+          if (!userDoc) {
+            // Instant fallback so UI is never blocked
+            userDoc = {
+              id: fbUser.uid,
+              email: fbUser.email || '',
+              name: fbUser.displayName || fbUser.email?.split('@')[0] || 'User',
+              role: 'USER',
+              photoURL: fbUser.photoURL || undefined,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+          }
           setUser(userDoc);
         } catch (error) {
           console.error('Failed to load user document:', error);
-          setUser(null);
+          setUser({
+            id: fbUser.uid,
+            email: fbUser.email || '',
+            name: fbUser.displayName || fbUser.email?.split('@')[0] || 'User',
+            role: 'USER',
+            photoURL: fbUser.photoURL || undefined,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
         }
       } else {
         setUser(null);
@@ -48,12 +74,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await authController.login(email, password);
   };
 
+  const loginOrRegister = async (email: string, password: string, name?: string) => {
+    return await authController.loginOrRegister(email, password, name);
+  };
+
   const register = async (email: string, password: string, name: string) => {
     await authController.register(email, password, name);
   };
 
   const loginWithGoogle = async () => {
     await authController.loginWithGoogle();
+    const fbUser = authController.getCurrentUser();
+    if (fbUser) {
+      setFirebaseUser(fbUser);
+      let userDoc = await authController.getUserDocument(fbUser.uid);
+      if (!userDoc) {
+        userDoc = {
+          id: fbUser.uid,
+          email: fbUser.email || '',
+          name: fbUser.displayName || fbUser.email?.split('@')[0] || 'User',
+          role: 'USER',
+          photoURL: fbUser.photoURL || undefined,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      }
+      setUser(userDoc);
+    }
   };
 
   const loginWithGithub = async () => {
@@ -75,6 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loading, 
       isAdmin, 
       login, 
+      loginOrRegister,
       register, 
       loginWithGoogle,
       loginWithGithub,

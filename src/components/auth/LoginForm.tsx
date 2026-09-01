@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import Link from 'next/link';
 import { APP_ROUTES } from '@/core/routes';
 import { OAuthButtons } from './OAuthButtons';
 import { useToast } from '@/contexts/ToastContext';
@@ -15,24 +14,44 @@ export const LoginForm: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { loginOrRegister } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (password.length < 6) {
+      const msg = 'Password must be at least 6 characters.';
+      setError(msg);
+      toast.warning(msg, 'Validation Error');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await login(email, password);
-      toast.success('Signed in successfully! Redirecting to dashboard...', 'Welcome Back');
+      const { isNewUser } = await loginOrRegister(email.trim(), password);
+      
+      if (isNewUser) {
+        toast.success(
+          'Account created and signed in successfully! Welcome to LBC.', 
+          'Welcome to LBC'
+        );
+      } else {
+        toast.success(
+          'Signed in successfully! Redirecting to dashboard...', 
+          'Welcome Back'
+        );
+      }
+      
       router.push(APP_ROUTES.DASHBOARD);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Login failed');
-      const message = error.message || 'Failed to login. Please check your credentials.';
+      const error = err instanceof Error ? err : new Error('Authentication failed');
+      const message = error.message || 'Failed to authenticate. Please check your credentials.';
       setError(message);
-      toast.error(message, 'Sign-In Failed');
+      toast.error(message, 'Authentication Failed');
     } finally {
       setLoading(false);
     }
@@ -40,10 +59,12 @@ export const LoginForm: React.FC = () => {
 
   return (
     <div className="w-full max-w-md">
-      <div className="bg-white rounded-2xl shadow-xl p-8">
+      <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-primary-600">LBC</h1>
-          <p className="text-gray-500 mt-2">Sign in to your account</p>
+          <h1 className="text-3xl font-bold text-primary-600 tracking-tight">LBC</h1>
+          <p className="text-gray-500 mt-2 text-sm">
+            Sign in or get started with your account
+          </p>
         </div>
 
         {error && (
@@ -52,7 +73,7 @@ export const LoginForm: React.FC = () => {
           </div>
         )}
 
-        {/* OAuth Fast Sign-in */}
+        {/* Fast 1-Click OAuth Sign-in / Sign-up */}
         <OAuthButtons mode="signin" onError={setError} disabled={loading} />
 
         <div className="relative my-6">
@@ -66,39 +87,44 @@ export const LoginForm: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Email"
+            label="Email Address"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
+            placeholder="name@example.com"
             required
+            autoComplete="email"
           />
 
-          <Input
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-            required
-          />
+          <div>
+            <Input
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+              minLength={6}
+              autoComplete="current-password"
+              helperText="Min. 6 characters. If you're new, your account will be created automatically."
+            />
+          </div>
 
           <Button
             type="submit"
-            className="w-full"
+            className="w-full mt-2"
             isLoading={loading}
             disabled={loading}
           >
-            Sign In
+            Continue
           </Button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Don&apos;t have an account?{' '}
-          <Link href={APP_ROUTES.REGISTER} className="text-primary-600 hover:underline font-medium">
-            Register
-          </Link>
-        </p>
+        <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+          <p className="text-xs text-gray-400">
+            By continuing, you agree to secure access to the LBC Chanda Management platform.
+          </p>
+        </div>
       </div>
     </div>
   );
