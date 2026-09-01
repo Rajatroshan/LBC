@@ -13,6 +13,7 @@ import { APP_ROUTES } from '@/core/routes';
 import { EXPENSE_CATEGORY_LABELS } from '@/constants';
 import { Eye, Download } from 'lucide-react';
 import Link from 'next/link';
+import { useToast } from '@/contexts/ToastContext';
 
 export const ExpenseList: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -20,6 +21,7 @@ export const ExpenseList: React.FC = () => {
   const [error, setError] = useState('');
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [loadingInvoice, setLoadingInvoice] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadExpenses = async () => {
@@ -31,13 +33,14 @@ export const ExpenseList: React.FC = () => {
         console.error('Failed to load expenses:', err);
         const errorMsg = err instanceof Error ? err.message : 'Failed to load expenses';
         setError(errorMsg);
+        toast.error(errorMsg, 'Expenses Error');
       } finally {
         setLoading(false);
       }
     };
 
     loadExpenses();
-  }, []);
+  }, [toast]);
 
   const handleViewInvoice = async (expenseId: string) => {
     setLoadingInvoice(expenseId);
@@ -46,11 +49,11 @@ export const ExpenseList: React.FC = () => {
       if (invoice) {
         setSelectedInvoice(invoice);
       } else {
-        alert('No invoice found for this expense.');
+        toast.warning('No invoice found for this expense.', 'Invoice Not Found');
       }
     } catch (err) {
       console.error('Error loading invoice:', err);
-      alert('Failed to load invoice.');
+      toast.error('Failed to load invoice.', 'Error');
     } finally {
       setLoadingInvoice(null);
     }
@@ -70,12 +73,13 @@ export const ExpenseList: React.FC = () => {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+        toast.success(`Invoice ${result.invoiceNumber} downloaded.`, 'Invoice Downloaded');
       } else {
-        alert('No invoice found for this expense.');
+        toast.warning('No invoice found for this expense.', 'Invoice Not Found');
       }
     } catch (err) {
       console.error('Error downloading invoice:', err);
-      alert('Failed to download invoice.');
+      toast.error('Failed to download invoice.', 'Download Error');
     } finally {
       setLoadingInvoice(null);
     }

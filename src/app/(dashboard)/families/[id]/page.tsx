@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Loader } from '@/components/ui/Loader';
 import { APP_ROUTES } from '@/core/routes';
+import { useToast } from '@/contexts/ToastContext';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -17,6 +18,7 @@ export default function FamilyDetailPage({ params }: { params: { id: string } })
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -27,17 +29,19 @@ export default function FamilyDetailPage({ params }: { params: { id: string } })
           setFamily(family);
         } else {
           setError('Family not found');
+          toast.error('Family not found', 'Not Found');
         }
       } catch (err) {
         console.error('Failed to load family:', err);
         setError('Failed to load family details');
+        toast.error('Failed to load family details', 'Loading Error');
       } finally {
         setLoading(false);
       }
     };
 
     loadFamily();
-  }, [params.id]);
+  }, [params.id, toast]);
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this family? This action cannot be undone.')) {
@@ -47,10 +51,11 @@ export default function FamilyDetailPage({ params }: { params: { id: string } })
     setDeleting(true);
     try {
       await familyController.deleteFamily(params.id);
+      toast.success('Family deleted successfully.', 'Deleted');
       router.push(APP_ROUTES.FAMILIES);
     } catch (err) {
       console.error('Failed to delete family:', err);
-      alert('Failed to delete family. Please try again.');
+      toast.error('Failed to delete family. Please try again.', 'Delete Failed');
       setDeleting(false);
     }
   };

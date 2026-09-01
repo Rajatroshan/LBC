@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Loader } from '@/components/ui/Loader';
 import { downloadPDF } from '@/utils';
 import { Download, Eye, CheckCircle } from 'lucide-react';
+import { useToast } from '@/contexts/ToastContext';
 
 interface ReceiptPreviewProps {
   receipt: Receipt | null;
@@ -22,6 +23,7 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({
   onViewAll,
 }) => {
   const [downloading, setDownloading] = useState(false);
+  const { toast } = useToast();
 
   const handleDownload = async () => {
     if (!receipt?.pdfUrl) return;
@@ -31,9 +33,10 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({
       const response = await fetch(receipt.pdfUrl);
       const blob = await response.blob();
       downloadPDF(blob, `Receipt_${receipt.receiptNumber}.pdf`);
+      toast.success(`Receipt ${receipt.receiptNumber} downloaded.`, 'Success');
     } catch (error) {
       console.error('Error downloading receipt:', error);
-      alert('Failed to download receipt. Please try again.');
+      toast.error('Failed to download receipt. Please try again.', 'Download Error');
     } finally {
       setDownloading(false);
     }

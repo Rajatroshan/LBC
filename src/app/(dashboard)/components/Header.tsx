@@ -1,11 +1,12 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
-import { useRouter } from 'next/navigation';
 import { Menu, PanelLeftClose, PanelLeftOpen, LogOut } from 'lucide-react';
 import { APP_ROUTES } from '@/core/routes';
+import { useToast } from '@/contexts/ToastContext';
 
 interface HeaderProps {
   onToggleMobileMenu: () => void;
@@ -19,11 +20,18 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleCollapse,
 }) => {
   const { user, logout } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
 
   const handleLogout = async () => {
-    await logout();
-    router.push(APP_ROUTES.LOGIN);
+    try {
+      await logout();
+      toast.success('Logged out successfully.', 'See you soon');
+      router.push(APP_ROUTES.LOGIN);
+    } catch (err) {
+      console.error('Logout error:', err);
+      toast.error('Failed to log out. Please try again.', 'Error');
+    }
   };
 
   const getInitials = (name?: string) => {

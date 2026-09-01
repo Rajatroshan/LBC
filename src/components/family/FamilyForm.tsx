@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Loader } from '@/components/ui/Loader';
 import { APP_ROUTES } from '@/core/routes';
 import { sanitizePhone, isValidPhone } from '@/utils/validation';
+import { useToast } from '@/contexts/ToastContext';
 
 interface FamilyFormProps {
   familyId?: string;
@@ -23,6 +24,7 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({ familyId }) => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(!!familyId);
   const [error, setError] = useState('');
+  const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -36,13 +38,14 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({ familyId }) => {
           setAddress(family.address);
         } catch {
           setError('Failed to load family');
+          toast.error('Failed to load family details', 'Loading Error');
         } finally {
           setLoadingData(false);
         }
       };
       loadFamily();
     }
-  }, [familyId]);
+  }, [familyId, toast]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const numericValue = sanitizePhone(e.target.value);
@@ -54,7 +57,9 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({ familyId }) => {
     setError('');
 
     if (!isValidPhone(phone)) {
-      setError('Phone number must be 10-15 digits (numbers only)');
+      const validationMsg = 'Phone number must be 10-15 digits (numbers only)';
+      setError(validationMsg);
+      toast.warning(validationMsg, 'Validation Error');
       return;
     }
 
@@ -63,13 +68,16 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({ familyId }) => {
     try {
       if (familyId) {
         await familyController.updateFamily(familyId, { headName, members, phone, address });
+        toast.success(`Family "${headName}" updated successfully!`, 'Family Updated');
       } else {
         await familyController.createFamily({ headName, members, phone, address });
+        toast.success(`Family "${headName}" created successfully!`, 'Family Created');
       }
       router.push(APP_ROUTES.FAMILIES);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Operation failed';
       setError(errorMessage);
+      toast.error(errorMessage, 'Failed to Save');
     } finally {
       setLoading(false);
     }

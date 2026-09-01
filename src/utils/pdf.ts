@@ -105,6 +105,7 @@ export const generateReceiptPDF = (data: ReceiptData): Blob => {
   });
 
   // Get Y position after table
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const finalY = (doc as any).lastAutoTable.finalY || tableStartY + 60;
 
   // Amount in words section
@@ -321,6 +322,7 @@ export const generateInvoicePDF = (data: InvoiceData): Blob => {
   });
 
   // Payment Details Table
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const finalY = (doc as any).lastAutoTable.finalY + 10;
   autoTable(doc, {
     startY: finalY,
@@ -355,6 +357,7 @@ export const generateInvoicePDF = (data: InvoiceData): Blob => {
 
   // Amount in Words
   const amountInWords = numberToWords(data.amount);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wordsY = (doc as any).lastAutoTable.finalY + 10;
   
   doc.setFontSize(10);

@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Loader } from '@/components/ui/Loader';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import { APP_ROUTES } from '@/core/routes';
 import { ExpenseCategory, EXPENSE_CATEGORY_LABELS } from '@/constants';
 import { sanitizePhone } from '@/utils/validation';
@@ -31,6 +32,7 @@ export const ExpenseForm: React.FC = () => {
   const [error, setError] = useState('');
   const [generatingInvoice, setGeneratingInvoice] = useState(false);
   const { user } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -40,13 +42,14 @@ export const ExpenseForm: React.FC = () => {
         setFestivals(data);
       } catch (err) {
         console.error('Failed to load festivals:', err);
+        toast.error('Failed to load festivals list', 'Loading Error');
       } finally {
         setLoadingData(false);
       }
     };
 
     loadFestivals();
-  }, []);
+  }, [toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,29 +91,28 @@ export const ExpenseForm: React.FC = () => {
           document.body.removeChild(link);
           URL.revokeObjectURL(url);
           
-          // Show success message and redirect
-          alert(`Expense recorded successfully!\nInvoice ${invoice.invoiceNumber} has been downloaded.`);
+          // Show success toast and redirect
+          toast.success(`Expense recorded successfully!\nInvoice ${invoice.invoiceNumber} downloaded.`, 'Expense Recorded');
           router.push(APP_ROUTES.PAYMENTS);
         } catch (invoiceError) {
           console.error('Failed to generate invoice:', invoiceError);
           setGeneratingInvoice(false);
-          // Expense is still successful, just show warning
           const errorMessage = invoiceError instanceof Error 
             ? invoiceError.message 
             : 'Unknown error occurred';
-          alert(`Expense recorded but invoice generation failed: ${errorMessage}\n\nYou can generate it later from the expenses list.`);
+          toast.warning(`Expense recorded, but invoice generation failed: ${errorMessage}`, 'Invoice Warning');
           router.push(APP_ROUTES.PAYMENTS);
         } finally {
           setGeneratingInvoice(false);
         }
       } else {
-        // No user, just redirect
-        alert('Expense recorded successfully! (No user logged in for invoice generation)');
+        toast.success('Expense recorded successfully!', 'Expense Recorded');
         router.push(APP_ROUTES.PAYMENTS);
       }
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to record expense');
       setError(error.message);
+      toast.error(error.message, 'Expense Failed');
       setLoading(false);
       setGeneratingInvoice(false);
     }

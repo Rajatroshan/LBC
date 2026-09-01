@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import Link from 'next/link';
 import { APP_ROUTES } from '@/core/routes';
 import { OAuthButtons } from './OAuthButtons';
+import { useToast } from '@/contexts/ToastContext';
 
 export const RegisterForm: React.FC = () => {
   const [name, setName] = useState('');
@@ -17,6 +18,7 @@ export const RegisterForm: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,11 +27,13 @@ export const RegisterForm: React.FC = () => {
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
+      toast.warning('Passwords do not match', 'Validation Error');
       return;
     }
 
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
+      toast.warning('Password must be at least 6 characters', 'Validation Error');
       return;
     }
 
@@ -37,10 +41,13 @@ export const RegisterForm: React.FC = () => {
 
     try {
       await register(email, password, name);
+      toast.success('Account created successfully! Welcome to LBC.', 'Registration Successful');
       router.push(APP_ROUTES.DASHBOARD);
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Registration failed');
-      setError(error.message || 'Failed to register. Please try again.');
+      const message = error.message || 'Failed to register. Please try again.';
+      setError(message);
+      toast.error(message, 'Registration Failed');
     } finally {
       setLoading(false);
     }
