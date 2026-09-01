@@ -8,12 +8,12 @@ import { DashboardStats } from '../models';
 export class DashboardController {
   async getStats(): Promise<DashboardStats> {
     try {
-      // Get all data in parallel
+      // Get all core datasets concurrently
       const [
         allFamilies,
         allFestivals,
         upcomingFestivals,
-        recentPayments,
+        recentPaymentsRaw,
         allPayments,
         allExpenses,
         mainAccount,
@@ -29,12 +29,15 @@ export class DashboardController {
         accountService.getRecentTransactions(10),
       ]);
 
-      // Calculate stats
+      // Calculate family statistics
       const activeFamilies = allFamilies.filter((f) => f.isActive).length;
+      
+      // Calculate festival statistics (unexpired & active)
       const activeFestivals = allFestivals.filter((f) => f.isActive);
       
-      // Get current year
+      // Calculate current year collections & expenses
       const currentYear = new Date().getFullYear();
+      
       const paymentsThisYear = allPayments.filter(
         (p) => p.paidDate.getFullYear() === currentYear && p.status === 'PAID'
       );
@@ -43,6 +46,10 @@ export class DashboardController {
         (sum, p) => sum + p.amount,
         0
       );
+
+      const allTimeCollection = allPayments
+        .filter((p) => p.status === 'PAID')
+        .reduce((sum, p) => sum + p.amount, 0);
 
       const expensesThisYear = allExpenses.filter(
         (e) => e.expenseDate.getFullYear() === currentYear
@@ -53,16 +60,36 @@ export class DashboardController {
         0
       );
 
+      const allTimeExpense = allExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+      // Current balance: use synced balance from account or true net balance (allTimeCollection - allTimeExpense)
+      const computedNetBalance = allTimeCollection - allTimeExpense;
+      const currentBalance = mainAccount.balance !== 0 ? mainAccount.balance : computedNetBalance;
+
+      // Pending payments count
       const pendingPayments = allPayments.filter((p) => p.status !== 'PAID').length;
+
+      // Map families & festivals for human-readable recent payments
+      const familyMap = new Map(allFamilies.map((f) => [f.id, f.headName]));
+      const festivalMap = new Map(allFestivals.map((f) => [f.id, f.name]));
+
+      const recentPayments = recentPaymentsRaw.map((payment) => ({
+        ...payment,
+        familyName: familyMap.get(payment.familyId) || 'Family Member',
+        festivalName: festivalMap.get(payment.festivalId) || 'Festival Contribution',
+      }));
 
       return {
         totalFamilies: allFamilies.length,
         activeFamilies,
-        totalFestivals: activeFestivals.length,
+        totalFestivals: allFestivals.length,
+        activeFestivalsCount: activeFestivals.length,
         upcomingFestivals: upcomingFestivals.length,
         totalCollectionThisYear,
         totalExpenseThisYear,
-        currentBalance: mainAccount.balance,
+        allTimeCollection,
+        allTimeExpense,
+        currentBalance,
         pendingPayments,
         recentPayments,
         upcomingFestivalsList: upcomingFestivals,

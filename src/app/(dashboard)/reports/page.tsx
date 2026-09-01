@@ -71,9 +71,6 @@ export default function ReportsPage() {
                   <strong>Date:</strong> {formatDate(festival.date)}
                 </p>
                 <p>
-                  <strong>Type:</strong> {festival.type}
-                </p>
-                <p>
                   <strong>Amount:</strong> {formatCurrency(festival.amountPerFamily)}
                 </p>
               </div>

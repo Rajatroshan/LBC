@@ -94,20 +94,35 @@ export default function CalendarPage() {
   };
 
   const getFestivalsForDate = (year: number, month: number, day: number): Festival[] => {
+    const targetDate = new Date(year, month, day);
+    targetDate.setHours(0, 0, 0, 0);
+
     return festivals.filter((f) => {
-      const festDate = new Date(f.date);
+      const festStart = new Date(f.date);
+      festStart.setHours(0, 0, 0, 0);
+
+      if (f.endDate && f.isMultiDay) {
+        const festEnd = new Date(f.endDate);
+        festEnd.setHours(23, 59, 59, 999);
+        return targetDate >= festStart && targetDate <= festEnd;
+      }
+
       return (
-        festDate.getFullYear() === year &&
-        festDate.getMonth() === month &&
-        festDate.getDate() === day
+        festStart.getFullYear() === year &&
+        festStart.getMonth() === month &&
+        festStart.getDate() === day
       );
     });
   };
 
   const getFestivalsForMonth = (year: number, month: number): Festival[] => {
+    const monthStart = new Date(year, month, 1);
+    const monthEnd = new Date(year, month + 1, 0, 23, 59, 59, 999);
+
     return festivals.filter((f) => {
-      const festDate = new Date(f.date);
-      return festDate.getFullYear() === year && festDate.getMonth() === month;
+      const festStart = new Date(f.date);
+      const festEnd = f.endDate && f.isMultiDay ? new Date(f.endDate) : festStart;
+      return festStart <= monthEnd && festEnd >= monthStart;
     });
   };
 
@@ -275,9 +290,6 @@ export default function CalendarPage() {
                       <Link key={f.id} href={APP_ROUTES.FESTIVAL_DETAIL(f.id)}>
                         <div className="p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
                           <p className="font-medium text-gray-800">{f.name}</p>
-                          <p className="text-sm text-gray-600">
-                            Type: {f.type.replace(/_/g, ' ')}
-                          </p>
                           <p className="text-sm font-semibold text-primary-600 mt-1">
                             {formatCurrency(f.amountPerFamily)} per family
                           </p>
@@ -286,10 +298,14 @@ export default function CalendarPage() {
                           )}
                           <span
                             className={`inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium ${
-                              f.isActive ? 'bg-green-200 text-green-800' : 'bg-red-100 text-red-700'
+                              f.isActive 
+                                ? 'bg-green-200 text-green-800' 
+                                : festivalController.isDatePassed(f.date, f.endDate)
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-red-100 text-red-700'
                             }`}
                           >
-                            {f.isActive ? 'Active' : 'Inactive'}
+                            {f.isActive ? 'Active' : festivalController.isDatePassed(f.date, f.endDate) ? 'Inactive (Passed)' : 'Inactive'}
                           </span>
                         </div>
                       </Link>
