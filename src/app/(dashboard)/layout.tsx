@@ -13,7 +13,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
+  const { user, firebaseUser, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -28,10 +28,10 @@ export default function DashboardLayout({
   }, [pathname]);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push(APP_ROUTES.LOGIN);
+    if (!loading && !user && !firebaseUser) {
+      router.replace(APP_ROUTES.LOGIN);
     }
-  }, [user, loading, router]);
+  }, [user, firebaseUser, loading, router]);
 
   if (loading) {
     return (
@@ -41,7 +41,7 @@ export default function DashboardLayout({
     );
   }
 
-  if (!user) {
+  if (!user && !firebaseUser) {
     return null;
   }
 

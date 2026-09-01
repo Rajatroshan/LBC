@@ -24,6 +24,77 @@ export class AuthService {
   }
 
   /**
+   * Seamless single-platform authentication:
+   * 1. Attempts sign in with email & password.
+   * 2. If the user doesn't exist yet, automatically creates the account,
+   *    sets up the profile, and initializes the Firestore user record.
+   */
+  async loginOrRegister(
+    email: string, 
+    password: string, 
+    name?: string
+  ): Promise<{ user: FirebaseUser; isNewUser: boolean }> {
+    try {
+      // 1. Try to sign in directly
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Ensure Firestore document exists
+      const docRef = doc(db, COLLECTIONS.USERS, user.uid);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        await this.createUserDocument(
+          user.uid, 
+          email, 
+          user.displayName || name || email.split('@')[0]
+        );
+      }
+
+      return { user, isNewUser: false };
+    } catch (err: unknown) {
+      const authError = err as { code?: string; message?: string };
+      const code = authError.code || '';
+
+      // If user does not exist or credentials not recognized, attempt automatic registration
+      if (
+        code === 'auth/user-not-found' ||
+        code === 'auth/invalid-credential'
+      ) {
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          const displayName = name || email.split('@')[0];
+
+          await updateProfile(user, { displayName });
+          await this.createUserDocument(user.uid, email, displayName);
+
+          return { user, isNewUser: true };
+        } catch (createErr: unknown) {
+          const createError = createErr as { code?: string; message?: string };
+          if (createError.code === 'auth/email-already-in-use') {
+            throw new Error('Incorrect password for this account. Please try again.');
+          } else if (createError.code === 'auth/weak-password') {
+            throw new Error('Password must be at least 6 characters.');
+          } else if (createError.code === 'auth/invalid-email') {
+            throw new Error('Please enter a valid email address.');
+          }
+          throw createErr;
+        }
+      }
+
+      if (code === 'auth/wrong-password') {
+        throw new Error('Incorrect password. Please try again.');
+      } else if (code === 'auth/invalid-email') {
+        throw new Error('Please enter a valid email address.');
+      } else if (code === 'auth/too-many-requests') {
+        throw new Error('Access to this account has been temporarily disabled due to many failed attempts. Please try again later.');
+      }
+
+      throw err;
+    }
+  }
+
+  /**
    * Register new user
    */
   async register(email: string, password: string, name: string): Promise<FirebaseUser> {
@@ -65,9 +136,9 @@ export class AuthService {
   }
 
   /**
-   * Synchronize OAuth user with Firestore user document
+   * Synchronize OAuth / authenticated user with Firestore user document
    */
-  private async syncOAuthUserDocument(user: FirebaseUser): Promise<void> {
+  async syncOAuthUserDocument(user: FirebaseUser): Promise<void> {
     const docRef = doc(db, COLLECTIONS.USERS, user.uid);
     const docSnap = await getDoc(docRef);
 

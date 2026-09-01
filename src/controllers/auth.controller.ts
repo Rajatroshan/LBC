@@ -15,6 +15,26 @@ export class AuthController {
   }
 
   /**
+   * Unified single-platform login or auto-register
+   */
+  async loginOrRegister(
+    email: string, 
+    password: string, 
+    name?: string
+  ): Promise<{ isNewUser: boolean }> {
+    if (!email || !password) {
+      throw new Error('Email and password are required');
+    }
+
+    if (password.length < 6) {
+      throw new Error('Password must be at least 6 characters');
+    }
+
+    const result = await authService.loginOrRegister(email, password, name);
+    return { isNewUser: result.isNewUser };
+  }
+
+  /**
    * Register new user
    */
   async register(email: string, password: string, name: string): Promise<void> {
@@ -42,6 +62,13 @@ export class AuthController {
    */
   async loginWithGithub(): Promise<void> {
     await authService.loginWithGithub();
+  }
+
+  /**
+   * Sync OAuth user with Firestore document
+   */
+  async syncOAuthUserDocument(user: import('firebase/auth').User): Promise<void> {
+    await authService.syncOAuthUserDocument(user);
   }
 
   /**

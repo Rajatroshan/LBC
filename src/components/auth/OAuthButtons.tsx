@@ -55,10 +55,9 @@ export const OAuthButtons: React.FC<OAuthButtonsProps> = ({
     try {
       await loginWithGoogle();
       toast.success('Signed in with Google successfully!', 'Welcome');
-      router.push(APP_ROUTES.DASHBOARD);
+      router.replace(APP_ROUTES.DASHBOARD);
     } catch (err) {
       handleOAuthError(err);
-    } finally {
       setIsGoogleLoading(false);
     }
   };
