@@ -1,3 +1,10 @@
+'use client';
+
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { APP_ROUTES } from '@/core/routes';
+import { Loader } from '@/components/ui/Loader';
 import Navigation from './(landing)/components/Navigation';
 import HeroSection from './(landing)/components/HeroSection';
 import GlimpsesSection from './(landing)/components/GlimpsesSection';
@@ -10,6 +17,27 @@ import CTASection from './(landing)/components/CTASection';
 import Footer from './(landing)/components/Footer';
 
 export default function HomePage() {
+  const { user, firebaseUser, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    // If authenticated, automatically redirect from base URL to Dashboard
+    if (!loading && (user || firebaseUser)) {
+      router.replace(APP_ROUTES.DASHBOARD);
+    }
+  }, [user, firebaseUser, loading, router]);
+
+  // If still checking auth or already logged in (redirecting), show clean centered loader
+  if (loading || user || firebaseUser) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <Loader size="lg" />
+        <p className="text-xs text-gray-400 mt-4">Loading LBC...</p>
+      </div>
+    );
+  }
+
+  // If not logged in, render the public landing page
   return (
     <div className="min-h-screen bg-white">
       {/* Sticky Navigation */}

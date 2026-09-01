@@ -4,7 +4,6 @@ import {
   getDoc, 
   getDocs, 
   setDoc, 
-  updateDoc, 
   Timestamp,
   increment 
 } from 'firebase/firestore';
@@ -64,29 +63,33 @@ export class UserAccountService {
     userEmail: string, 
     amount: number
   ): Promise<void> {
-    const docRef = doc(db, COLLECTIONS.USER_ACCOUNTS, userId);
-    const docSnap = await getDoc(docRef);
-    const now = Timestamp.now();
+    try {
+      const docRef = doc(db, COLLECTIONS.USER_ACCOUNTS, userId);
+      const docSnap = await getDoc(docRef);
+      const now = Timestamp.now();
 
-    if (!docSnap.exists()) {
-      await setDoc(docRef, {
-        userId,
-        userName: userName || 'Member',
-        userEmail: userEmail || '',
-        totalPaidOutOfPocket: amount,
-        totalReimbursed: 0,
-        pendingReimbursement: amount,
-        createdAt: now,
-        updatedAt: now,
-      });
-    } else {
-      await updateDoc(docRef, {
-        userName: userName || docSnap.data().userName,
-        userEmail: userEmail || docSnap.data().userEmail,
-        totalPaidOutOfPocket: increment(amount),
-        pendingReimbursement: increment(amount),
-        updatedAt: now,
-      });
+      if (!docSnap.exists()) {
+        await setDoc(docRef, {
+          userId,
+          userName: userName || 'Member',
+          userEmail: userEmail || '',
+          totalPaidOutOfPocket: amount,
+          totalReimbursed: 0,
+          pendingReimbursement: amount,
+          createdAt: now,
+          updatedAt: now,
+        });
+      } else {
+        await setDoc(docRef, {
+          userName: userName || docSnap.data().userName || 'Member',
+          userEmail: userEmail || docSnap.data().userEmail || '',
+          totalPaidOutOfPocket: increment(amount),
+          pendingReimbursement: increment(amount),
+          updatedAt: now,
+        }, { merge: true });
+      }
+    } catch (error) {
+      console.error('Error recording out-of-pocket:', error);
     }
   }
 
@@ -94,14 +97,44 @@ export class UserAccountService {
    * Record a reimbursement payout made back to the member
    */
   async recordReimbursementPayout(userId: string, amount: number): Promise<void> {
-    const docRef = doc(db, COLLECTIONS.USER_ACCOUNTS, userId);
-    const now = Timestamp.now();
+    try {
+      const docRef = doc(db, COLLECTIONS.USER_ACCOUNTS, userId);
+      const docSnap = await getDoc(docRef);
+      const now = Timestamp.now();
 
-    await updateDoc(docRef, {
-      totalReimbursed: increment(amount),
-      pendingReimbursement: increment(-amount),
-      updatedAt: now,
-    });
+      if (!docSnap.exists()) {
+        await setDoc(docRef, {
+          userId,
+          userName: 'Member',
+          userEmail: '',
+          totalPaidOutOfPocket: amount,
+          totalReimbursed: amount,
+          pendingReimbursement: 0,
+          createdAt: now,
+          updatedAt: now,
+        });
+      } else {
+        await setDoc(docRef, {
+          totalReimbursed: increment(amount),
+          pendingReimbursement: increment(-amount),
+          updatedAt: now,
+        }, { merge: true });
+      }
+    } catch (error) {
+      console.error('Error in recordReimbursementPayout:', error);
+      // Fail-safe merge
+      try {
+        const docRef = doc(db, COLLECTIONS.USER_ACCOUNTS, userId);
+        await setDoc(docRef, {
+          userId,
+          totalReimbursed: increment(amount),
+          pendingReimbursement: increment(-amount),
+          updatedAt: Timestamp.now(),
+        }, { merge: true });
+      } catch (fallbackErr) {
+        console.error('Fallback setDoc error:', fallbackErr);
+      }
+    }
   }
 
   /**
@@ -135,4 +168,3 @@ export class UserAccountService {
 }
 
 export const userAccountService = new UserAccountService();
-

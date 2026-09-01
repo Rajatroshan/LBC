@@ -488,18 +488,20 @@ export const generateReimbursementVoucherPDF = (data: ReimbursementVoucherData):
   doc.setTextColor(15, 23, 42);
   doc.text('MEMBER REIMBURSEMENT PAYOUT VOUCHER', pageWidth / 2, 52, { align: 'center' });
 
+  const safeDate = data.approvedDate instanceof Date ? data.approvedDate : new Date(data.approvedDate || Date.now());
+
   // Voucher details table
   autoTable(doc, {
     startY: 60,
     head: [['VOUCHER & BENEFICIARY INFORMATION', '']],
     body: [
-      ['Voucher / Receipt No:', data.voucherNumber],
-      ['Settlement Date:', format(data.approvedDate, 'dd/MM/yyyy hh:mm a')],
-      ['Beneficiary Name:', data.beneficiaryName],
-      ['Beneficiary Email:', data.beneficiaryEmail],
+      ['Voucher / Receipt No:', data.voucherNumber || 'VOUCHER'],
+      ['Settlement Date:', format(safeDate, 'dd/MM/yyyy hh:mm a')],
+      ['Beneficiary Name:', data.beneficiaryName || 'Member'],
+      ['Beneficiary Email:', data.beneficiaryEmail || 'N/A'],
       ['Linked Festival / Event:', data.festivalName || 'General Club Operations'],
       ['Payout Destination / UPI:', data.payoutDetails || 'Direct Settlement / Cash'],
-      ['Approved & Authorized By:', data.approvedByName],
+      ['Approved & Authorized By:', data.approvedByName || 'Club Administrator'],
     ],
     theme: 'plain',
     headStyles: {
