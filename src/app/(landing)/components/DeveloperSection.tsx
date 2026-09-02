@@ -123,10 +123,6 @@ export default function DeveloperSection() {
                   <span className="px-2.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-widest bg-amber-400/20 text-amber-300 border border-amber-400/30">
                     Lead Architect & Engineer
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-widest bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
-                    <Building2 className="w-2.5 h-2.5" />
-                    Tech Mahindra
-                  </span>
                 </div>
                 <h3 className="text-xl sm:text-3xl font-black text-white tracking-tight">
                   Rajat Kumar Sahu

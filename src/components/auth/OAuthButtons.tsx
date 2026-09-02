@@ -57,6 +57,10 @@ export const OAuthButtons: React.FC<OAuthButtonsProps> = ({
       toast.success('Signed in with Google successfully!', 'Welcome');
       router.replace(APP_ROUTES.DASHBOARD);
     } catch (err) {
+      if (err instanceof Error && err.message === 'PENDING_APPROVAL') {
+        setIsGoogleLoading(false);
+        return;
+      }
       handleOAuthError(err);
       setIsGoogleLoading(false);
     }

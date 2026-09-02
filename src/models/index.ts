@@ -18,6 +18,14 @@ export interface User extends BaseEntity {
   role: 'ADMIN' | 'USER';
   phone?: string;
   photoURL?: string;
+
+  // Member Approval Lifecycle
+  approvalStatus?: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';
+  approvedByUserId?: string;
+  approvedByUserName?: string;
+  approvedByUserEmail?: string;
+  approvedAt?: Date;
+  rejectionReason?: string;
 }
 
 // Family Types

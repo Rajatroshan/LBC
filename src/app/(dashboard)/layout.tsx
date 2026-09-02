@@ -28,8 +28,12 @@ export default function DashboardLayout({
   }, [pathname]);
 
   useEffect(() => {
-    if (!loading && !user && !firebaseUser) {
-      router.replace(APP_ROUTES.LOGIN);
+    if (!loading) {
+      if (!user && !firebaseUser) {
+        router.replace(APP_ROUTES.LOGIN);
+      } else if (user && user.role !== 'ADMIN' && user.approvalStatus === 'PENDING_APPROVAL') {
+        router.replace(APP_ROUTES.LOGIN);
+      }
     }
   }, [user, firebaseUser, loading, router]);
 
@@ -42,6 +46,10 @@ export default function DashboardLayout({
   }
 
   if (!user && !firebaseUser) {
+    return null;
+  }
+
+  if (user && user.role !== 'ADMIN' && user.approvalStatus === 'PENDING_APPROVAL') {
     return null;
   }
 

@@ -16,6 +16,7 @@ import {
   Settings, 
   Wallet,
   Receipt,
+  UserCheck,
   X
 } from 'lucide-react';
 
@@ -43,6 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { label: 'Reimbursements', emoji: '👛', href: APP_ROUTES.REIMBURSEMENTS, Icon: Wallet, adminOnly: false },
     { label: 'Utsav Calendar', emoji: '📅', href: APP_ROUTES.CALENDAR, Icon: CalendarDays, adminOnly: false },
     { label: 'Sabha Reports', emoji: '📊', href: APP_ROUTES.REPORTS, Icon: BarChart3, adminOnly: true },
+    { label: 'Member Approvals', emoji: '👥', href: APP_ROUTES.MEMBERS, Icon: UserCheck, adminOnly: true },
     { label: 'Settings', emoji: '⚙️', href: APP_ROUTES.SETTINGS, Icon: Settings, adminOnly: false },
   ];
 

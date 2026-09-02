@@ -242,11 +242,18 @@ export const DashboardView: React.FC = () => {
               </div>
             </div>
             
-            <Link href={APP_ROUTES.REIMBURSEMENTS}>
-              <span className="text-xs text-amber-300 hover:text-amber-200 font-bold underline">
-                Open Reimbursements Hub →
-              </span>
-            </Link>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <Link href={APP_ROUTES.MEMBERS}>
+                <span className="px-3 py-1 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-black text-xs shadow-xs transition-all flex items-center gap-1">
+                  👥 Sadasya Approvals →
+                </span>
+              </Link>
+              <Link href={APP_ROUTES.REIMBURSEMENTS}>
+                <span className="text-xs text-amber-300 hover:text-amber-200 font-bold underline">
+                  Reimbursements Hub →
+                </span>
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
