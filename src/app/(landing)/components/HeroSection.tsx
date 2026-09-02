@@ -255,7 +255,7 @@ export default function HeroSection() {
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs font-black text-stone-900">1-Click Sarpanch Audit</p>
+                <p className="text-xs font-black text-stone-900">1-Click Admin Audit</p>
                 <p className="text-[9px] text-stone-500 font-semibold">Instant Signed PDF Vouchers</p>
               </div>
             </div>

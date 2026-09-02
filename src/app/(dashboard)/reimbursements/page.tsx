@@ -314,13 +314,13 @@ export default function ReimbursementsPage() {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-2xl border border-gray-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-3xl border-2 border-amber-200 shadow-sm">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-2.5">
-            <Wallet className="w-7 h-7 text-primary-600" />
-            Reimbursements & Claims Hub
+          <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight flex items-center gap-2">
+            <span>👛</span>
+            <span>Apna Kisan Reimbursements &amp; Claims Hub</span>
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+          <p className="text-xs sm:text-sm text-stone-500 font-medium mt-0.5">
             Manage out-of-pocket vendor payments, money requests, and treasury settlements
           </p>
         </div>
@@ -332,9 +332,9 @@ export default function ReimbursementsPage() {
             onClick={() => loadData(true)}
             isLoading={refreshing}
             disabled={refreshing}
-            className="flex items-center gap-1.5 text-xs text-gray-700 hover:bg-gray-50 border-gray-300"
+            className="flex items-center gap-1.5 text-xs font-bold rounded-2xl border-2 border-amber-300 bg-white hover:bg-amber-50 text-stone-700"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-orange-600 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
 
@@ -343,20 +343,20 @@ export default function ReimbursementsPage() {
             <Button
               size="sm"
               variant="outline"
-              className="flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 hover:bg-amber-100 border-amber-300 shadow-xs font-semibold"
+              className="flex items-center gap-1.5 text-xs text-orange-800 bg-amber-50 hover:bg-amber-100 border-2 border-amber-300 font-bold rounded-2xl"
             >
-              <Receipt className="w-3.5 h-3.5 text-amber-600" />
-              Record Vendor Expense
+              <Receipt className="w-3.5 h-3.5 text-orange-600" />
+              + Record Vendor Bill
             </Button>
           </Link>
 
           <Button
             size="sm"
             onClick={handleOpenClaimModal}
-            className="flex items-center gap-1.5 text-xs bg-primary-600 hover:bg-primary-700 shadow-xs"
+            className="flex items-center gap-1.5 text-xs font-black rounded-2xl bg-orange-600 hover:bg-orange-700 text-white shadow-sm border border-amber-200"
           >
             <PlusCircle className="w-3.5 h-3.5" />
-            Raise Money Request
+            + Raise Money Request
           </Button>
         </div>
       </div>

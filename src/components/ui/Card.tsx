@@ -16,9 +16,9 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const paddingStyles = {
     none: 'p-0',
-    sm: 'p-3',
-    md: 'p-4',
-    lg: 'p-6',
+    sm: 'p-3 sm:p-4',
+    md: 'p-4 sm:p-6',
+    lg: 'p-6 sm:p-8',
   };
 
   const shadowStyles = {
@@ -31,7 +31,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       className={clsx(
-        'bg-white rounded-xl border border-gray-200',
+        'bg-white rounded-3xl border-2 border-amber-200/70 transition-all',
         paddingStyles[padding],
         shadowStyles[shadow],
         className

@@ -215,12 +215,13 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({ festivalId }) => {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-5 rounded-3xl border-2 border-amber-200 shadow-sm">
         <div>
-          <h2 className="text-xl font-bold text-gray-800">
-            {festivalId ? 'Festival Expenses' : 'Vendor Expenses & Disbursements'}
+          <h2 className="text-xl font-black text-stone-900 flex items-center gap-2">
+            <span>🏺</span>
+            <span>{festivalId ? 'Festival Expenses & Vendor Bills' : 'Gram Kharcha & Vendor Disbursements'}</span>
           </h2>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-stone-500 font-medium mt-0.5">
             {isAdmin
               ? 'Track supplier bills, approve pending master account requests, and issue invoices'
               : 'View recorded vendor expenses, out-of-pocket claims, and club payments'}
@@ -234,15 +235,15 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({ festivalId }) => {
             onClick={() => loadExpenses(true)}
             isLoading={refreshing}
             disabled={refreshing}
-            className="flex items-center gap-1.5 text-xs text-gray-700"
+            className="flex items-center gap-1.5 text-xs text-stone-700 font-bold rounded-2xl border-2 border-amber-300 bg-white hover:bg-amber-50"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-orange-600 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
           <Link href={APP_ROUTES.EXPENSE_RECORD}>
-            <Button size="sm" className="flex items-center gap-1.5 text-xs bg-amber-600 hover:bg-amber-700 text-white">
+            <Button size="sm" className="flex items-center gap-1.5 text-xs font-black rounded-2xl bg-orange-600 hover:bg-orange-700 text-white shadow-sm border border-amber-200">
               <PlusCircle className="w-3.5 h-3.5" />
-              Record Expense
+              + Record Expense
             </Button>
           </Link>
         </div>

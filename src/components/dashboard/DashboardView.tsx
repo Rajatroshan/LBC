@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { dashboardController } from '@/controllers/dashboard.controller';
 import { reimbursementController } from '@/controllers/reimbursement.controller';
-import { DashboardStats, UserAccount, ReimbursementRequest } from '@/models';
+import { DashboardStats, UserAccount } from '@/models';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Loader } from '@/components/ui/Loader';
@@ -12,22 +12,13 @@ import Link from 'next/link';
 import { APP_ROUTES } from '@/core/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
-  Users, 
-  Sparkles, 
-  TrendingUp, 
-  TrendingDown, 
-  Wallet, 
-  PlusCircle, 
   ArrowUpRight, 
   ArrowDownRight, 
   Calendar, 
   RefreshCw,
-  Clock,
-  Receipt,
-  FileText,
-  ShieldCheck,
-  CheckCircle2
+  AlertCircle
 } from 'lucide-react';
+import { CartoonDiya } from '@/app/(landing)/components/VillageIllustrations';
 
 export const DashboardView: React.FC = () => {
   const { user, isAdmin } = useAuth();
@@ -35,7 +26,6 @@ export const DashboardView: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [userAccount, setUserAccount] = useState<UserAccount | null>(null);
   const [allUserAccounts, setAllUserAccounts] = useState<UserAccount[]>([]);
-  const [pendingClaims, setPendingClaims] = useState<ReimbursementRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
@@ -51,13 +41,10 @@ export const DashboardView: React.FC = () => {
         : Promise.resolve(null);
       
       const adminPromises = isAdmin
-        ? Promise.all([
-            reimbursementController.getAllUserAccounts(),
-            reimbursementController.getAllClaims(),
-          ])
-        : Promise.resolve([[], []]);
+        ? reimbursementController.getAllUserAccounts()
+        : Promise.resolve([]);
 
-      const [data, uAcc, [aAccs, aClaims]] = await Promise.all([
+      const [data, uAcc, aAccs] = await Promise.all([
         dataPromise,
         userAccPromise,
         adminPromises,
@@ -67,7 +54,6 @@ export const DashboardView: React.FC = () => {
       setUserAccount(uAcc);
       if (isAdmin) {
         setAllUserAccounts(aAccs || []);
-        setPendingClaims((aClaims || []).filter(c => c.status === 'PENDING'));
       }
       setError('');
     } catch (err) {
@@ -95,9 +81,10 @@ export const DashboardView: React.FC = () => {
   if (error) {
     return (
       <Card>
-        <div className="p-4 text-center">
-          <p className="text-red-600 font-semibold mb-2 text-lg">Error Loading Dashboard</p>
-          <p className="text-sm text-gray-600 mb-6">{error}</p>
+        <div className="p-6 text-center space-y-3">
+          <AlertCircle className="w-10 h-10 text-red-500 mx-auto" />
+          <p className="text-red-700 font-bold text-base">Error Loading Village Dashboard</p>
+          <p className="text-xs text-stone-600">{error}</p>
           <Button onClick={() => loadData(true)} className="mx-auto">
             Retry Loading
           </Button>
@@ -109,7 +96,7 @@ export const DashboardView: React.FC = () => {
   if (!stats) {
     return (
       <Card>
-        <p className="text-gray-600 text-center py-8">No dashboard data available</p>
+        <p className="text-stone-600 text-center py-8 font-medium">No village dashboard data available.</p>
       </Card>
     );
   }
@@ -117,324 +104,195 @@ export const DashboardView: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const netThisYear = stats.totalCollectionThisYear - stats.totalExpenseThisYear;
 
-  // Community Reimbursement totals
   const communityTotalPending = allUserAccounts.reduce((sum, acc) => sum + (acc.pendingReimbursement || 0), 0);
   const communityTotalSpent = allUserAccounts.reduce((sum, acc) => sum + (acc.totalPaidOutOfPocket || 0), 0);
   const communityTotalReimbursed = allUserAccounts.reduce((sum, acc) => sum + (acc.totalReimbursed || 0), 0);
 
   return (
-    <div className="space-y-6">
-      {/* Top Header & Quick Actions */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Financial & Community Dashboard</h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Real-time overview for {currentYear} festivals, collections, expenses & reimbursements</p>
+    <div className="space-y-6 pb-8">
+      
+      {/* 🪔 Daily Village Blessing & Quote Banner */}
+      <div className="bg-gradient-to-r from-amber-100 via-orange-50 to-emerald-50 p-4 sm:p-5 rounded-3xl border-2 border-amber-300 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <CartoonDiya size={42} />
+          <div>
+            <p className="text-xs font-black text-amber-900 flex items-center gap-1.5">
+              <span>🌾 Luhuren Gram Sandesh • {currentYear}</span>
+              <span className="text-[10px] px-2 py-0.2 rounded-full bg-amber-200/80 text-amber-950 font-bold">Auspicious</span>
+            </p>
+            <p className="text-xs sm:text-sm text-stone-700 font-semibold italic mt-0.5">
+              &ldquo;Mili-juli chanda se khilta gaon, parivaar ka prem hi mandap ki shaan.&rdquo;
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+        <div className="flex items-center gap-2 shrink-0">
           <Button
             size="sm"
             variant="outline"
             onClick={() => loadData(true)}
             isLoading={refreshing}
             disabled={refreshing}
-            className="flex items-center gap-1.5 text-xs text-gray-700 hover:bg-gray-50 border-gray-300"
+            className="flex items-center gap-1.5 text-xs font-bold rounded-2xl border-2 border-amber-300 bg-white"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            <RefreshCw className={`w-3.5 h-3.5 text-orange-600 ${refreshing ? 'animate-spin' : ''}`} />
+            <span>Refresh Hisab</span>
           </Button>
-
-          <Link href={APP_ROUTES.PAYMENTS}>
-            <Button size="sm" className="flex items-center gap-1.5 text-xs bg-primary-600 hover:bg-primary-700 shadow-xs">
-              <PlusCircle className="w-3.5 h-3.5" />
-              Record Payment
-            </Button>
-          </Link>
-
-          <Link href={APP_ROUTES.EXPENSES}>
-            <Button size="sm" variant="secondary" className="flex items-center gap-1.5 text-xs shadow-xs">
-              <ArrowDownRight className="w-3.5 h-3.5" />
-              Record Expense
-            </Button>
-          </Link>
         </div>
       </div>
 
-      {/* KPI Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Main Balance Card */}
-        <Card className="border-l-4 border-l-primary-500 hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Available Master Balance</p>
-              <p className={`text-2xl sm:text-3xl font-extrabold mt-1 tracking-tight ${
-                stats.currentBalance >= 0 ? 'text-primary-700' : 'text-red-600'
-              }`}>
-                {formatCurrency(stats.currentBalance)}
-              </p>
-              <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
-                <Wallet className="w-3 h-3 text-gray-400" />
-                Live Treasury Account
-              </p>
-            </div>
-            <div className="p-2.5 bg-primary-50 text-primary-600 rounded-xl">
-              <Wallet className="w-5 h-5" />
+      {/* Primary Village Treasury Stat Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        {/* 1. Master Account Gullak Balance */}
+        <div className="bg-white rounded-3xl p-5 border-2 border-amber-300 shadow-sm hover:shadow-md transition-all space-y-2 relative overflow-hidden group">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-800">
+              🏺 TREASURY GULLAK
+            </span>
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-lg shadow-xs group-hover:scale-110 transition-transform">
+              🏺
             </div>
           </div>
-        </Card>
+          <p className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+            {formatCurrency(stats.currentBalance)}
+          </p>
+          <div className="flex items-center justify-between text-[11px] font-bold text-stone-500 pt-1 border-t border-amber-100">
+            <span>Central Mandap Cash</span>
+            <span className={netThisYear >= 0 ? 'text-emerald-700' : 'text-orange-700'}>
+              Net {netThisYear >= 0 ? '+' : ''}{formatCurrency(netThisYear)}
+            </span>
+          </div>
+        </div>
 
-        {/* Collections This Year Card */}
-        <Card className="border-l-4 border-l-emerald-500 hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Collections ({currentYear})</p>
-              <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1 tracking-tight">
-                {formatCurrency(stats.totalCollectionThisYear)}
-              </p>
-              <p className="text-[11px] text-gray-400 mt-1">
-                All-time: <span className="font-semibold text-gray-600">{formatCurrency(stats.allTimeCollection)}</span>
-              </p>
-            </div>
-            <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
-              <TrendingUp className="w-5 h-5" />
+        {/* 2. Total Chanda Collections */}
+        <div className="bg-white rounded-3xl p-5 border-2 border-emerald-300 shadow-sm hover:shadow-md transition-all space-y-2 relative overflow-hidden group">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800">
+              📜 CHANDA SANGRAH
+            </span>
+            <div className="w-10 h-10 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-lg shadow-xs group-hover:scale-110 transition-transform">
+              🪔
             </div>
           </div>
-        </Card>
+          <p className="text-2xl sm:text-3xl font-black text-emerald-800 tracking-tight">
+            {formatCurrency(stats.totalCollectionThisYear)}
+          </p>
+          <div className="flex items-center justify-between text-[11px] font-bold text-stone-500 pt-1 border-t border-emerald-100">
+            <span>{currentYear} Puja Subscriptions</span>
+            <span className="text-emerald-700 flex items-center gap-0.5">
+              <ArrowUpRight className="w-3.5 h-3.5" /> 100% Verified
+            </span>
+          </div>
+        </div>
 
-        {/* Expenses This Year Card */}
-        <Card className="border-l-4 border-l-rose-500 hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Expenses ({currentYear})</p>
-              <p className="text-2xl sm:text-3xl font-extrabold text-rose-600 mt-1 tracking-tight">
-                {formatCurrency(stats.totalExpenseThisYear)}
-              </p>
-              <p className="text-[11px] text-gray-400 mt-1">
-                All-time: <span className="font-semibold text-gray-600">{formatCurrency(stats.allTimeExpense)}</span>
-              </p>
-            </div>
-            <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl">
-              <TrendingDown className="w-5 h-5" />
+        {/* 3. Total Festival Expenses */}
+        <div className="bg-white rounded-3xl p-5 border-2 border-orange-300 shadow-sm hover:shadow-md transition-all space-y-2 relative overflow-hidden group">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-wider text-orange-800">
+              🧾 KHARCHA BAHI-KHATA
+            </span>
+            <div className="w-10 h-10 rounded-2xl bg-orange-100 border border-orange-300 flex items-center justify-center text-lg shadow-xs group-hover:scale-110 transition-transform">
+              📜
             </div>
           </div>
-        </Card>
+          <p className="text-2xl sm:text-3xl font-black text-orange-900 tracking-tight">
+            {formatCurrency(stats.totalExpenseThisYear)}
+          </p>
+          <div className="flex items-center justify-between text-[11px] font-bold text-stone-500 pt-1 border-t border-orange-100">
+            <span>Tent, Sound &amp; Prasad</span>
+            <span className="text-orange-700 flex items-center gap-0.5">
+              <ArrowDownRight className="w-3.5 h-3.5" /> Disbursed
+            </span>
+          </div>
+        </div>
 
-        {/* Registered Families Card */}
-        <Card className="border-l-4 border-l-sky-500 hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Registered Families</p>
-              <p className="text-2xl sm:text-3xl font-extrabold text-sky-700 mt-1 tracking-tight">
-                {stats.totalFamilies}
-              </p>
-              <p className="text-[11px] text-gray-400 mt-1">
-                <span className="font-semibold text-emerald-600">{stats.activeFamilies} active</span> contributing
-              </p>
-            </div>
-            <div className="p-2.5 bg-sky-50 text-sky-600 rounded-xl">
-              <Users className="w-5 h-5" />
+        {/* 4. Village Families Registered */}
+        <div className="bg-white rounded-3xl p-5 border-2 border-yellow-300 shadow-sm hover:shadow-md transition-all space-y-2 relative overflow-hidden group">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-800">
+              🏡 GRAM PARIVAR
+            </span>
+            <div className="w-10 h-10 rounded-2xl bg-yellow-100 border border-yellow-300 flex items-center justify-center text-lg shadow-xs group-hover:scale-110 transition-transform">
+              🌾
             </div>
           </div>
-        </Card>
+          <p className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+            {stats.totalFamilies} Parivar
+          </p>
+          <div className="flex items-center justify-between text-[11px] font-bold text-stone-500 pt-1 border-t border-yellow-100">
+            <span>Active Households</span>
+            <span className="text-amber-800 font-bold">{stats.activeFestivalsCount} Pujas Active</span>
+          </div>
+        </div>
+
       </div>
 
-      {/* Reimbursement & Out-of-Pocket Flow Panel */}
-      <Card className="border border-amber-200/90 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-gray-100">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-amber-100 text-amber-800 rounded-xl">
-              <Wallet className="w-5 h-5" />
+      {/* Admin Quick Audit Strip (for Committee Admins) */}
+      {isAdmin && (
+        <div className="bg-gradient-to-r from-stone-900 to-stone-950 text-white p-5 rounded-3xl border-2 border-amber-400/40 shadow-xl space-y-3">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-400 text-stone-950 flex items-center justify-center font-black text-sm">
+                🛡️
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-black text-white">Admin &amp; Committee Master Overview</h3>
+                <p className="text-[11px] text-amber-300">Live community out-of-pocket claims &amp; pending disbursements</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-base font-bold text-gray-900">
-                {isAdmin ? 'Community Reimbursements & Out-of-Pocket Flow' : 'My Personal Reimbursement Ledger'}
-              </h2>
-              <p className="text-xs text-gray-500">
-                {isAdmin 
-                  ? 'Track total out-of-pocket vendor spending by members and settlement liability'
-                  : 'Track your personal out-of-pocket expenses and claim status'}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
+            
             <Link href={APP_ROUTES.REIMBURSEMENTS}>
-              <Button size="sm" variant="outline" className="text-xs border-amber-300 text-amber-900 hover:bg-amber-50">
+              <span className="text-xs text-amber-300 hover:text-amber-200 font-bold underline">
                 Open Reimbursements Hub →
-              </Button>
+              </span>
             </Link>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+            <div className="p-3 bg-stone-800/80 rounded-2xl border border-stone-700">
+              <p className="text-[10px] text-stone-400 font-bold uppercase">TOTAL OUT-OF-POCKET SPENT</p>
+              <p className="text-lg font-black text-white mt-0.5">{formatCurrency(communityTotalSpent)}</p>
+            </div>
+            <div className="p-3 bg-stone-800/80 rounded-2xl border border-stone-700">
+              <p className="text-[10px] text-stone-400 font-bold uppercase">TOTAL REIMBURSED BACK</p>
+              <p className="text-lg font-black text-emerald-400 mt-0.5">{formatCurrency(communityTotalReimbursed)}</p>
+            </div>
+            <div className="p-3 bg-stone-800/80 rounded-2xl border border-stone-700">
+              <p className="text-[10px] text-amber-300 font-bold uppercase">PENDING MEMBER CLAIMS</p>
+              <p className="text-lg font-black text-amber-400 mt-0.5">{formatCurrency(communityTotalPending)}</p>
+            </div>
+          </div>
         </div>
+      )}
 
-        {isAdmin ? (
-          <div className="pt-4 space-y-4">
-            {/* Admin: Community Totals Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="p-3.5 bg-white border border-amber-200/80 rounded-xl shadow-2xs">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Pending Owed to Members</p>
-                <p className="text-xl sm:text-2xl font-black text-amber-600 mt-1">
-                  {formatCurrency(communityTotalPending)}
-                </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">
-                  Current club reimbursement liability
-                </p>
-              </div>
-
-              <div className="p-3.5 bg-white border border-primary-200/80 rounded-xl shadow-2xs">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Member Out-of-Pocket</p>
-                <p className="text-xl sm:text-2xl font-black text-primary-700 mt-1">
-                  {formatCurrency(communityTotalSpent)}
-                </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">
-                  Spent across all member ledgers
-                </p>
-              </div>
-
-              <div className="p-3.5 bg-white border border-emerald-200/80 rounded-xl shadow-2xs">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Settled & Reimbursed</p>
-                <p className="text-xl sm:text-2xl font-black text-emerald-600 mt-1">
-                  {formatCurrency(communityTotalReimbursed)}
-                </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">
-                  Disbursed back from treasury
-                </p>
-              </div>
-
-              <div className="p-3.5 bg-white border border-sky-200/80 rounded-xl shadow-2xs">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Pending Claims in Queue</p>
-                <p className="text-xl sm:text-2xl font-black text-sky-700 mt-1">
-                  {pendingClaims.length}
-                </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">
-                  Claims awaiting Admin approval
-                </p>
-              </div>
-            </div>
-
-            {/* Admin: Personal Summary Strip */}
-            <div className="p-3 bg-gray-50/90 border border-gray-200/70 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
-              <span className="font-semibold text-gray-700 flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                Admin Personal Ledger ({user?.name || 'Admin'}):
-              </span>
-              <div className="flex items-center gap-4 text-[11px] text-gray-600 flex-wrap">
-                <span>My Out-of-Pocket: <strong className="text-primary-700">{formatCurrency(userAccount?.totalPaidOutOfPocket || 0)}</strong></span>
-                <span>My Pending Claim: <strong className="text-amber-600">{formatCurrency(userAccount?.pendingReimbursement || 0)}</strong></span>
-                <span>Total Reimbursed to Me: <strong className="text-emerald-600">{formatCurrency(userAccount?.totalReimbursed || 0)}</strong></span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Member: Personal Cards */
-          <div className="pt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-3.5 bg-white border border-amber-200 rounded-xl shadow-2xs">
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">My Pending Reimbursement</p>
-              <p className="text-xl sm:text-2xl font-black text-amber-600 mt-1">
-                {formatCurrency(userAccount?.pendingReimbursement || 0)}
-              </p>
-              <p className="text-[10px] text-gray-400 mt-0.5">Claimable upon admin approval</p>
-            </div>
-
-            <div className="p-3.5 bg-white border border-primary-200 rounded-xl shadow-2xs">
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">My Total Out-of-Pocket</p>
-              <p className="text-xl sm:text-2xl font-black text-primary-700 mt-1">
-                {formatCurrency(userAccount?.totalPaidOutOfPocket || 0)}
-              </p>
-              <p className="text-[10px] text-gray-400 mt-0.5">Bills paid from personal money</p>
-            </div>
-
-            <div className="p-3.5 bg-white border border-emerald-200 rounded-xl shadow-2xs">
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Reimbursed</p>
-              <p className="text-xl sm:text-2xl font-black text-emerald-600 mt-1">
-                {formatCurrency(userAccount?.totalReimbursed || 0)}
-              </p>
-              <p className="text-[10px] text-gray-400 mt-0.5">Settled & paid back by club</p>
-            </div>
-          </div>
-        )}
-      </Card>
-
-      {/* Net Year Surplus & Festival Overview Strip */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Net Surplus Card */}
-        <Card className="bg-gradient-to-br from-gray-900 to-gray-800 text-white shadow-md">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs uppercase font-medium text-gray-300 tracking-wider">Annual Net Surplus ({currentYear})</p>
-              <p className={`text-3xl font-black mt-2 tracking-tight ${
-                netThisYear >= 0 ? 'text-emerald-400' : 'text-rose-400'
-              }`}>
-                {formatCurrency(netThisYear)}
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                Total Collections minus Expenses in {currentYear}
-              </p>
-            </div>
-            <div className={`p-2.5 rounded-xl ${netThisYear >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
-              {netThisYear >= 0 ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
-            </div>
-          </div>
-        </Card>
-
-        {/* Active Festivals Summary */}
-        <Card className="hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Active Festivals</p>
-              <p className="text-3xl font-extrabold text-gray-800 mt-1 tracking-tight">
-                {stats.activeFestivalsCount}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                <span className="font-semibold text-primary-600">{stats.upcomingFestivals} upcoming</span> / {stats.totalFestivals} total recorded
-              </p>
-            </div>
-            <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
-              <Sparkles className="w-5 h-5" />
-            </div>
-          </div>
-        </Card>
-
-        {/* Pending Collections / Unpaid */}
-        <Card className="hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Pending / Unpaid Logs</p>
-              <p className="text-3xl font-extrabold text-gray-800 mt-1 tracking-tight">
-                {stats.pendingPayments}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                {stats.pendingPayments === 0 ? 'All recorded payments verified' : 'Requires follow-up collection'}
-              </p>
-            </div>
-            <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl">
-              <Receipt className="w-5 h-5" />
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Main Content: Upcoming Festivals & Recent Payments */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Upcoming Festivals (1 Col) */}
-        <div className="space-y-4">
-          <Card>
-            <div className="flex justify-between items-center mb-4">
+      {/* Main Content 2-Column Grid */}
+      <div className="grid lg:grid-cols-12 gap-6">
+        
+        {/* Left Column: Upcoming Utsav & Pujas (7 Cols) */}
+        <div className="lg:col-span-7 space-y-4">
+          <div className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-amber-200 shadow-sm space-y-4">
+            
+            <div className="flex items-center justify-between pb-3 border-b-2 border-amber-100">
               <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary-600" />
-                <h2 className="text-lg font-bold text-gray-900">Upcoming Festivals</h2>
+                <span className="text-xl">🪔</span>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-stone-900">Upcoming Utsav &amp; Pujas</h3>
+                  <p className="text-xs text-stone-500 font-medium">Scheduled festivals and community collection targets</p>
+                </div>
               </div>
-              <Link href={APP_ROUTES.FESTIVALS} className="text-primary-600 hover:text-primary-700 text-xs font-semibold hover:underline">
-                View All →
+              <Link href={APP_ROUTES.FESTIVALS} className="text-xs font-bold text-orange-700 hover:text-orange-800 underline">
+                View All Pujas →
               </Link>
             </div>
 
             {stats.upcomingFestivalsList.length === 0 ? (
-              <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                <Calendar className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                <p className="text-xs text-gray-500">No upcoming festivals scheduled.</p>
+              <div className="text-center py-10 bg-amber-50/50 rounded-2xl border-2 border-dashed border-amber-200 space-y-2">
+                <Calendar className="w-8 h-8 text-amber-400 mx-auto" />
+                <p className="text-xs text-stone-600 font-bold">No upcoming festivals scheduled.</p>
                 {isAdmin && (
-                  <Link href={APP_ROUTES.FESTIVAL_CREATE} className="text-xs text-primary-600 font-semibold mt-2 inline-block hover:underline">
-                    + Schedule a festival
+                  <Link href={APP_ROUTES.FESTIVAL_CREATE} className="text-xs font-black text-orange-700 hover:underline inline-block">
+                    + Schedule a new puja
                   </Link>
                 )}
               </div>
@@ -448,21 +306,27 @@ export const DashboardView: React.FC = () => {
 
                   return (
                     <Link key={festival.id} href={APP_ROUTES.FESTIVAL_DETAIL(festival.id)}>
-                      <div className="p-3.5 bg-gray-50/80 hover:bg-primary-50/60 border border-gray-200/80 hover:border-primary-300 rounded-xl transition-all duration-150">
+                      <div className="p-4 bg-amber-50/40 hover:bg-amber-100/60 border-2 border-amber-200 rounded-2xl transition-all duration-150 group">
                         <div className="flex justify-between items-start gap-2">
-                          <p className="font-semibold text-gray-900 text-sm">{festival.name}</p>
-                          <span className="font-bold text-primary-700 text-xs bg-white px-2 py-0.5 rounded-md border border-gray-200 shadow-2xs shrink-0">
-                            {formatCurrency(festival.amountPerFamily)}/family
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                          <Clock className="w-3.5 h-3.5 text-gray-400" />
-                          <span>{formatDate(festival.date)}</span>
-                          {isMultiDay && festival.endDate && (
-                            <span className="px-1.5 py-0.5 bg-primary-100 text-primary-700 rounded text-[10px] font-medium">
-                              {diffDays} days
-                            </span>
-                          )}
+                          <div>
+                            <h4 className="text-sm font-black text-stone-900 group-hover:text-orange-700 transition-colors flex items-center gap-1.5">
+                              <span>🪔</span>
+                              <span>{festival.name}</span>
+                            </h4>
+                            <div className="flex items-center gap-2 text-xs text-stone-600 mt-1 font-medium">
+                              <Calendar className="w-3.5 h-3.5 text-amber-700" />
+                              <span>{formatDate(festival.date)}</span>
+                              {isMultiDay && (
+                                <span className="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.2 rounded-full font-bold border border-amber-300">
+                                  {diffDays} Days Utsav
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs font-bold text-stone-500">Per Family</span>
+                            <p className="text-sm font-black text-emerald-800">{formatCurrency(festival.amountPerFamily)}</p>
+                          </div>
                         </div>
                       </div>
                     </Link>
@@ -470,110 +334,83 @@ export const DashboardView: React.FC = () => {
                 })}
               </div>
             )}
-          </Card>
-
-          {/* Quick Navigation Box */}
-          <Card>
-            <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-1.5">
-              <FileText className="w-4 h-4 text-primary-600" />
-              Quick Navigation
-            </h3>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <Link href={APP_ROUTES.FAMILIES} className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg text-gray-700 font-medium text-center border border-gray-200/60 transition-colors">
-                👨‍👩‍👧‍👦 Families
-              </Link>
-              <Link href={APP_ROUTES.FESTIVALS} className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg text-gray-700 font-medium text-center border border-gray-200/60 transition-colors">
-                🎉 Festivals
-              </Link>
-              <Link href={APP_ROUTES.PAYMENTS} className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg text-gray-700 font-medium text-center border border-gray-200/60 transition-colors">
-                💰 Record Payment
-              </Link>
-              <Link href={APP_ROUTES.EXPENSES} className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg text-gray-700 font-medium text-center border border-gray-200/60 transition-colors">
-                🧾 Record Expense
-              </Link>
-              <Link href={APP_ROUTES.CALENDAR} className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg text-gray-700 font-medium text-center border border-gray-200/60 transition-colors">
-                📅 Calendar
-              </Link>
-              <Link href={APP_ROUTES.REIMBURSEMENTS} className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg text-gray-700 font-medium text-center border border-gray-200/60 transition-colors">
-                👛 Reimbursements
-              </Link>
-              <Link href={APP_ROUTES.REPORTS} className="col-span-2 p-2.5 bg-primary-50 hover:bg-primary-100 text-primary-800 font-semibold rounded-lg text-center border border-primary-200 transition-colors">
-                📊 Financial Reports & Statements
-              </Link>
-            </div>
-          </Card>
+          </div>
         </div>
 
-        {/* Right Column: Recent Payments (2 Cols) */}
-        <div className="lg:col-span-2">
-          <Card>
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-2">
-                <Receipt className="w-5 h-5 text-emerald-600" />
-                <h2 className="text-lg font-bold text-gray-900">Recent Collections & Contributions</h2>
-              </div>
-              <Link href={APP_ROUTES.PAYMENTS} className="text-primary-600 hover:text-primary-700 text-xs font-semibold hover:underline">
-                View All Payments →
-              </Link>
+        {/* Right Column: Quick Village Actions & Out-of-Pocket Ledger (5 Cols) */}
+        <div className="lg:col-span-5 space-y-4">
+          
+          {/* Out-of-Pocket Personal Pocket Card */}
+          <div className="bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100/70 rounded-3xl p-5 sm:p-6 border-2 border-amber-300 shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-900">
+                👛 APNA KISAN LEDGER
+              </span>
+              <span className="text-xs font-bold text-amber-800 bg-white/80 px-2.5 py-0.5 rounded-full border border-amber-300">
+                Claimable
+              </span>
+            </div>
+            
+            <div>
+              <p className="text-xs text-stone-600 font-medium">Out-of-Pocket Balance Pending Reimbursement:</p>
+              <p className="text-2xl sm:text-3xl font-black text-orange-950 mt-0.5">
+                {formatCurrency(userAccount?.pendingReimbursement || 0)}
+              </p>
             </div>
 
-            {stats.recentPayments.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                <Receipt className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-600">No payment records yet.</p>
-                <p className="text-xs text-gray-400 mt-1">Start by recording family contribution payments.</p>
-                <Link href={APP_ROUTES.PAYMENT_RECORD} className="mt-3 inline-block">
-                  <Button size="sm" className="text-xs">
-                    + Record First Payment
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left">
-                  <thead>
-                    <tr className="border-b border-gray-200 text-gray-500 font-semibold bg-gray-50/50">
-                      <th className="py-2.5 px-3">Date</th>
-                      <th className="py-2.5 px-3">Family Head</th>
-                      <th className="py-2.5 px-3">Festival</th>
-                      <th className="py-2.5 px-3">Amount</th>
-                      <th className="py-2.5 px-3">Status</th>
-                      <th className="py-2.5 px-3">Receipt #</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {stats.recentPayments.map((payment) => (
-                      <tr key={payment.id} className="hover:bg-gray-50/80 transition-colors">
-                        <td className="py-3 px-3 text-gray-500">{formatDate(payment.paidDate)}</td>
-                        <td className="py-3 px-3 font-semibold text-gray-900">{payment.familyName}</td>
-                        <td className="py-3 px-3 text-gray-600">{payment.festivalName}</td>
-                        <td className="py-3 px-3 font-bold text-emerald-600 text-sm">
-                          {formatCurrency(payment.amount)}
-                        </td>
-                        <td className="py-3 px-3">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                            payment.status === 'PAID'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : payment.status === 'PENDING'
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-rose-100 text-rose-800'
-                          }`}>
-                            {payment.status === 'PAID' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
-                            {payment.status}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3 font-mono text-[11px] text-gray-500">
-                          {payment.receiptNumber || '-'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Card>
+            <div className="pt-2 border-t border-amber-200/80 flex items-center justify-between">
+              <Link href={APP_ROUTES.EXPENSE_RECORD} className="flex-1">
+                <Button size="sm" className="w-full text-xs font-bold rounded-xl bg-orange-600 hover:bg-orange-700 text-white">
+                  + Log Out-of-Pocket
+                </Button>
+              </Link>
+              <Link href={APP_ROUTES.REIMBURSEMENTS} className="flex-1 ml-2">
+                <Button size="sm" variant="outline" className="w-full text-xs font-bold rounded-xl border-2 border-amber-300 bg-white">
+                  Claim Payout →
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Quick Village Action Shortcuts */}
+          <div className="bg-white rounded-3xl p-5 border-2 border-amber-200 shadow-sm space-y-3">
+            <h4 className="text-xs font-black uppercase tracking-wider text-stone-700">Quick Village Actions</h4>
+            
+            <div className="grid grid-cols-2 gap-2 text-xs font-bold">
+              <Link href={APP_ROUTES.PAYMENT_RECORD}>
+                <div className="p-3 rounded-2xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-950 flex items-center gap-2 transition-all">
+                  <span className="text-base">📜</span>
+                  <span>Record Chanda</span>
+                </div>
+              </Link>
+              
+              <Link href={APP_ROUTES.EXPENSE_RECORD}>
+                <div className="p-3 rounded-2xl bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-950 flex items-center gap-2 transition-all">
+                  <span className="text-base">🏺</span>
+                  <span>Record Expense</span>
+                </div>
+              </Link>
+
+              <Link href={APP_ROUTES.FAMILIES}>
+                <div className="p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-950 flex items-center gap-2 transition-all">
+                  <span className="text-base">🏡</span>
+                  <span>Parivar List</span>
+                </div>
+              </Link>
+
+              <Link href={APP_ROUTES.CALENDAR}>
+                <div className="p-3 rounded-2xl bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 text-yellow-950 flex items-center gap-2 transition-all">
+                  <span className="text-base">📅</span>
+                  <span>Utsav Dates</span>
+                </div>
+              </Link>
+            </div>
+          </div>
+
         </div>
+
       </div>
+
     </div>
   );
 };

@@ -16,10 +16,9 @@ import {
   Settings, 
   Wallet,
   Receipt,
-  X, 
-  ChevronLeft, 
-  ChevronRight 
+  X
 } from 'lucide-react';
+import { VerticalToranWireDivider, HorizontalToranWireDivider } from '@/app/(landing)/components/VillageIllustrations';
 
 interface SidebarProps {
   mobileOpen: boolean;
@@ -32,21 +31,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   mobileOpen,
   onMobileClose,
   isCollapsed,
-  onToggleCollapse,
 }) => {
   const pathname = usePathname();
   const { isAdmin } = useAuth();
 
   const menuItems = [
-    { label: 'Dashboard', href: APP_ROUTES.DASHBOARD, Icon: LayoutDashboard, adminOnly: false },
-    { label: 'Families', href: APP_ROUTES.FAMILIES, Icon: Users, adminOnly: false },
-    { label: 'Festivals', href: APP_ROUTES.FESTIVALS, Icon: Sparkles, adminOnly: false },
-    { label: 'Record Payment', href: APP_ROUTES.PAYMENTS, Icon: CreditCard, adminOnly: false },
-    { label: 'Record Expense', href: APP_ROUTES.EXPENSES, Icon: Receipt, adminOnly: false },
-    { label: 'Reimbursements', href: APP_ROUTES.REIMBURSEMENTS, Icon: Wallet, adminOnly: false },
-    { label: 'Calendar', href: APP_ROUTES.CALENDAR, Icon: CalendarDays, adminOnly: false },
-    { label: 'Reports', href: APP_ROUTES.REPORTS, Icon: BarChart3, adminOnly: true },
-    { label: 'Settings', href: APP_ROUTES.SETTINGS, Icon: Settings, adminOnly: false },
+    { label: 'Mandap Dashboard', emoji: '🌾', href: APP_ROUTES.DASHBOARD, Icon: LayoutDashboard, adminOnly: false },
+    { label: 'Gram Parivar', emoji: '🏡', href: APP_ROUTES.FAMILIES, Icon: Users, adminOnly: false },
+    { label: 'Utsav & Pujas', emoji: '🪔', href: APP_ROUTES.FESTIVALS, Icon: Sparkles, adminOnly: false },
+    { label: 'Record Chanda', emoji: '📜', href: APP_ROUTES.PAYMENTS, Icon: CreditCard, adminOnly: false },
+    { label: 'Record Expense', emoji: '🏺', href: APP_ROUTES.EXPENSES, Icon: Receipt, adminOnly: false },
+    { label: 'Reimbursements', emoji: '👛', href: APP_ROUTES.REIMBURSEMENTS, Icon: Wallet, adminOnly: false },
+    { label: 'Utsav Calendar', emoji: '📅', href: APP_ROUTES.CALENDAR, Icon: CalendarDays, adminOnly: false },
+    { label: 'Sabha Reports', emoji: '📊', href: APP_ROUTES.REPORTS, Icon: BarChart3, adminOnly: true },
+    { label: 'Settings', emoji: '⚙️', href: APP_ROUTES.SETTINGS, Icon: Settings, adminOnly: false },
   ];
 
   const filteredItems = menuItems.filter(item => !item.adminOnly || isAdmin);
@@ -56,16 +54,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Backdrop Overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
           onClick={onMobileClose}
           aria-hidden="true"
         />
       )}
 
-      {/* Sidebar Container */}
+      {/* Sidebar Container with Dashboard-matching Orange-to-Green Gradient & Hidden Scrollbar */}
       <aside
         className={clsx(
-          'fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out lg:static',
+          'fixed inset-y-0 left-0 z-50 bg-gradient-to-b from-amber-100/95 via-orange-50/90 to-emerald-100/95 flex flex-col transition-all duration-300 ease-in-out lg:static shadow-sm relative',
           // Mobile responsive slide-in
           mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0',
           // Desktop width handling
@@ -74,41 +72,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {/* Sidebar Header / Brand */}
         <div className={clsx(
-          'h-16 flex items-center border-b border-gray-200 px-4',
+          'h-16 flex items-center px-4 bg-amber-200/40 backdrop-blur-xs relative',
           isCollapsed ? 'lg:justify-center justify-between' : 'justify-between'
         )}>
-          <div className={clsx('flex items-center gap-3 overflow-hidden', isCollapsed && 'lg:hidden')}>
-            <div className="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-              L
+          <div className={clsx('flex items-center gap-2.5 overflow-hidden', isCollapsed && 'lg:hidden')}>
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-black text-base shadow-sm border border-amber-200">
+              🪔
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900 leading-tight">LBC</h1>
-              <p className="text-xs text-gray-500 font-medium leading-none">Chanda Management</p>
+              <h1 className="text-base font-black text-stone-900 leading-tight">LBC Mandap</h1>
+              <p className="text-[10px] text-amber-900 font-bold leading-none">Village Chanda System</p>
             </div>
           </div>
 
           {/* Icon only on desktop collapsed */}
           {isCollapsed && (
-            <div className="hidden lg:flex w-9 h-9 rounded-xl bg-primary-600 items-center justify-center text-white font-bold text-lg shadow-sm">
-              L
+            <div className="hidden lg:flex w-9 h-9 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 items-center justify-center text-white font-black text-base shadow-sm border border-amber-200">
+              🪔
             </div>
           )}
 
           {/* Close button on mobile */}
           <button
             onClick={onMobileClose}
-            className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 lg:hidden focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="p-1.5 rounded-xl text-stone-700 hover:bg-amber-200/60 lg:hidden focus:outline-none"
             aria-label="Close sidebar"
           >
             <X className="w-5 h-5" />
           </button>
+
+          {/* Toran Wire Divider under Sidebar Header */}
+          <div className="absolute bottom-0 left-0 right-0 translate-y-1/2 pointer-events-none z-20">
+            <HorizontalToranWireDivider />
+          </div>
         </div>
 
-        {/* Navigation Items */}
-        <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto">
+        {/* Navigation Items (Scrollbar completely hidden while scrolling smoothly) */}
+        <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto pt-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {filteredItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-            const Icon = item.Icon;
 
             return (
               <Link
@@ -117,19 +119,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => onMobileClose()}
                 title={isCollapsed ? item.label : undefined}
                 className={clsx(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group font-medium text-sm',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-all duration-150 group font-bold text-xs sm:text-sm',
                   isActive
-                    ? 'bg-primary-50 text-primary-700 shadow-xs'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                    ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white shadow-md border-2 border-amber-200 font-black'
+                    : 'text-stone-800 hover:bg-white/80 hover:text-stone-950 border border-transparent hover:border-amber-300/60 shadow-xs hover:shadow-xs',
                   isCollapsed && 'lg:justify-center lg:px-2'
                 )}
               >
-                <Icon
-                  className={clsx(
-                    'w-5 h-5 shrink-0 transition-colors',
-                    isActive ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-600'
-                  )}
-                />
+                <span className="text-base shrink-0 group-hover:scale-110 transition-transform">{item.emoji}</span>
                 <span className={clsx('truncate', isCollapsed && 'lg:hidden')}>
                   {item.label}
                 </span>
@@ -138,30 +135,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </nav>
 
-        {/* Desktop Collapse Toggle & Version Footer */}
-        <div className="p-3 border-t border-gray-100 space-y-2">
-          {/* Desktop Toggle Button */}
-          <button
-            onClick={onToggleCollapse}
-            className={clsx(
-              'hidden lg:flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors',
-              isCollapsed && 'justify-center'
-            )}
-            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {isCollapsed ? (
-              <ChevronRight className="w-4 h-4" />
-            ) : (
-              <>
-                <ChevronLeft className="w-4 h-4" />
-                <span>Collapse Sidebar</span>
-              </>
-            )}
-          </button>
+        {/* Bottom Daily Village Quote Card */}
+        {!isCollapsed && (
+          <div className="p-3 border-2 border-amber-300/80 bg-white/85 m-2.5 rounded-2xl text-center space-y-1 shadow-xs z-10">
+            <div className="flex items-center justify-center gap-1 text-[10px] font-black text-amber-900">
+              <span>🌾 Gaon Ekta Sandesh</span>
+            </div>
+            <p className="text-[10px] text-stone-700 italic font-bold leading-snug">
+              &ldquo;Mili-juli chanda se khilta gaon, 100% Khula Hisab.&rdquo;
+            </p>
+          </div>
+        )}
 
-          <p className={clsx('text-[11px] text-gray-400 text-center tracking-tight', isCollapsed && 'lg:hidden')}>
-            © 2026 LBC • v1.0.0
-          </p>
+        {/* 🌺 Vertical Wavy / Snake Toran Garland Wire Divider on the Right Border */}
+        <div className="hidden lg:block absolute top-0 bottom-0 right-0 translate-x-1/2 pointer-events-none z-30">
+          <VerticalToranWireDivider />
         </div>
       </aside>
     </>

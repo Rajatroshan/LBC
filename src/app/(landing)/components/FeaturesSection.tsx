@@ -48,7 +48,7 @@ const villageFeatures = [
     tag: 'Settlement Vouchers',
   },
   {
-    iconEmoji: '👨👩👧👦',
+    iconEmoji: '🏡',
     badge: 'PARIVAR DIRECTORY',
     title: 'Village Families & Household Register',
     description: 'Maintain family head names, member count, addresses, and phone contacts. Access a lifetime history of festival contributions across every past year.',

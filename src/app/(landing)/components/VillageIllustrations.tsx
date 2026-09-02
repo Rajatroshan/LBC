@@ -372,3 +372,66 @@ export const CartoonMatkaGullak: React.FC<{ className?: string; size?: number }>
   </svg>
 );
 
+/**
+ * 🌺 Horizontal Toran Garland Wire Divider (Wavy/Snake Wire with Marigold & Mango Leaves)
+ */
+export const HorizontalToranWireDivider: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <div className={`w-full overflow-hidden leading-none pointer-events-none select-none h-3.5 sm:h-4.5 ${className}`}>
+    <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 1200 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Snake / Wave Wire */}
+      <path 
+        d="M0 6 Q 50 18 100 6 Q 150 18 200 6 Q 250 18 300 6 Q 350 18 400 6 Q 450 18 500 6 Q 550 18 600 6 Q 650 18 700 6 Q 750 18 800 6 Q 850 18 900 6 Q 950 18 1000 6 Q 1050 18 1100 6 Q 1150 18 1200 6" 
+        stroke="#92400E" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+      />
+      
+      {/* Hanging Mango Leaves at each trough */}
+      {[50, 150, 250, 350, 450, 550, 650, 750, 850, 950, 1050, 1150].map((cx) => (
+        <path key={`leaf-${cx}`} d={`M${cx - 7} 13 C${cx - 2} 23, ${cx + 2} 23, ${cx + 7} 13 Z`} fill="#16A34A" stroke="#14532D" strokeWidth="0.8" />
+      ))}
+
+      {/* Marigold Orbs at each node */}
+      {[0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200].map((cx) => (
+        <g key={`bead-${cx}`}>
+          <circle cx={cx} cy="6" r="4.5" fill="#EA580C" />
+          <circle cx={cx} cy="6" r="3" fill="#F59E0B" />
+          <circle cx={cx} cy="6" r="1.5" fill="#FEF08A" />
+        </g>
+      ))}
+    </svg>
+  </div>
+);
+
+/**
+ * 🌺 Vertical Toran Garland Wire Divider (Wavy/Snake Wire for Sidebar edge)
+ */
+export const VerticalToranWireDivider: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <div className={`h-full w-3.5 sm:w-4 overflow-hidden leading-none pointer-events-none select-none ${className}`}>
+    <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 24 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Vertical Snake / Wave Wire */}
+      <path 
+        d="M6 0 Q 18 50 6 100 Q 18 150 6 200 Q 18 250 6 300 Q 18 350 6 400 Q 18 450 6 500 Q 18 550 6 600 Q 18 650 6 700 Q 18 750 6 800 Q 18 850 6 900 Q 18 950 6 1000" 
+        stroke="#92400E" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+      />
+      
+      {/* Mango Leaves on wave crests */}
+      {[50, 150, 250, 350, 450, 550, 650, 750, 850, 950].map((cy) => (
+        <path key={`vleaf-${cy}`} d={`M13 ${cy - 7} C23 ${cy - 2}, 23 ${cy + 2}, 13 ${cy + 7} Z`} fill="#16A34A" stroke="#14532D" strokeWidth="0.8" />
+      ))}
+
+      {/* Marigold Orbs */}
+      {[0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000].map((cy) => (
+        <g key={`vbead-${cy}`}>
+          <circle cx="6" cy={cy} r="4.5" fill="#EA580C" />
+          <circle cx="6" cy={cy} r="3" fill="#F59E0B" />
+          <circle cx="6" cy={cy} r="1.5" fill="#FEF08A" />
+        </g>
+      ))}
+    </svg>
+  </div>
+);
+
+
