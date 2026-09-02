@@ -81,6 +81,12 @@ export default function Navigation() {
               About Us
             </button>
             <button
+              onClick={() => scrollToSection('developer')}
+              className={`font-medium transition-colors text-amber-400 hover:text-amber-300 font-semibold`}
+            >
+              Developer
+            </button>
+            <button
               onClick={() => scrollToSection('contact')}
               className={`font-medium transition-colors hover:text-primary-600 ${
                 isScrolled ? 'text-gray-700' : 'text-white'

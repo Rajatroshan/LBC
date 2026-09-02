@@ -13,6 +13,7 @@ import WhoIsThisForSection from './(landing)/components/WhoIsThisForSection';
 import AboutSection from './(landing)/components/AboutSection';
 import HowItWorksSection from './(landing)/components/HowItWorksSection';
 import CommunityGlimpsesSection from './(landing)/components/CommunityGlimpsesSection';
+import DeveloperSection from './(landing)/components/DeveloperSection';
 import CTASection from './(landing)/components/CTASection';
 import Footer from './(landing)/components/Footer';
 
@@ -63,6 +64,9 @@ export default function HomePage() {
 
       {/* Community Glimpses (Photos Carousel) */}
       <CommunityGlimpsesSection />
+
+      {/* Meet the Developer Section */}
+      <DeveloperSection />
 
       {/* Call to Action */}
       <CTASection />
