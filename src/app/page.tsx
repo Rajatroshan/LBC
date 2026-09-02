@@ -14,7 +14,6 @@ import AboutSection from './(landing)/components/AboutSection';
 import HowItWorksSection from './(landing)/components/HowItWorksSection';
 import CommunityGlimpsesSection from './(landing)/components/CommunityGlimpsesSection';
 import DeveloperSection from './(landing)/components/DeveloperSection';
-import CTASection from './(landing)/components/CTASection';
 import Footer from './(landing)/components/Footer';
 
 export default function HomePage() {
@@ -67,9 +66,6 @@ export default function HomePage() {
 
       {/* Meet the Developer Section */}
       <DeveloperSection />
-
-      {/* Call to Action */}
-      <CTASection />
 
       {/* Footer */}
       <Footer />

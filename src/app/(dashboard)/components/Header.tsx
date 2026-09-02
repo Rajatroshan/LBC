@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/Button';
 import { Menu, PanelLeftClose, PanelLeftOpen, LogOut } from 'lucide-react';
 import { APP_ROUTES } from '@/core/routes';
 import { useToast } from '@/contexts/ToastContext';
-import { HorizontalToranWireDivider } from '@/app/(landing)/components/VillageIllustrations';
 
 interface HeaderProps {
   onToggleMobileMenu: () => void;
@@ -51,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
   const displayEmail = user?.email || firebaseUser?.email;
 
   return (
-    <header className="h-16 bg-[#FFFDF7] flex items-center justify-between px-4 sm:px-6 shrink-0 z-30 shadow-xs relative">
+    <header className="h-16 bg-[#FFFDF7] border-b border-amber-200/80 flex items-center justify-between px-4 sm:px-6 shrink-0 z-30 shadow-xs">
       {/* Left side: Sidebar Toggles & Title/Greeting */}
       <div className="flex items-center gap-3 sm:gap-4 min-w-0">
         {/* Mobile Hamburger Button */}
@@ -122,11 +121,6 @@ export const Header: React.FC<HeaderProps> = ({
           <LogOut className="w-4 h-4 text-orange-600" />
           <span className="hidden sm:inline">Logout</span>
         </Button>
-      </div>
-
-      {/* 🌺 Auspicious Wavy / Snake Marigold Toran Garland Wire Divider under Header */}
-      <div className="absolute bottom-0 left-0 right-0 translate-y-1/2 pointer-events-none z-30">
-        <HorizontalToranWireDivider />
       </div>
     </header>
   );

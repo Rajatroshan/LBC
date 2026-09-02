@@ -18,7 +18,6 @@ import {
   Receipt,
   X
 } from 'lucide-react';
-import { VerticalToranWireDivider, HorizontalToranWireDivider } from '@/app/(landing)/components/VillageIllustrations';
 
 interface SidebarProps {
   mobileOpen: boolean;
@@ -63,16 +62,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Sidebar Container with Dashboard-matching Orange-to-Green Gradient & Hidden Scrollbar */}
       <aside
         className={clsx(
-          'fixed inset-y-0 left-0 z-50 bg-gradient-to-b from-amber-100/95 via-orange-50/90 to-emerald-100/95 flex flex-col transition-all duration-300 ease-in-out lg:static shadow-sm relative',
+          'fixed inset-y-0 left-0 z-50 bg-gradient-to-b from-amber-100/95 via-orange-50/90 to-emerald-100/95 border-r border-amber-300/80 flex flex-col transition-all duration-300 ease-in-out lg:relative lg:translate-x-0 shadow-sm',
           // Mobile responsive slide-in
-          mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0',
+          mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full',
           // Desktop width handling
           isCollapsed ? 'lg:w-20' : 'w-64'
         )}
       >
         {/* Sidebar Header / Brand */}
         <div className={clsx(
-          'h-16 flex items-center px-4 bg-amber-200/40 backdrop-blur-xs relative',
+          'h-16 flex items-center border-b border-amber-300/70 px-4 bg-amber-200/40 backdrop-blur-xs',
           isCollapsed ? 'lg:justify-center justify-between' : 'justify-between'
         )}>
           <div className={clsx('flex items-center gap-2.5 overflow-hidden', isCollapsed && 'lg:hidden')}>
@@ -100,15 +99,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             <X className="w-5 h-5" />
           </button>
-
-          {/* Toran Wire Divider under Sidebar Header */}
-          <div className="absolute bottom-0 left-0 right-0 translate-y-1/2 pointer-events-none z-20">
-            <HorizontalToranWireDivider />
-          </div>
         </div>
 
         {/* Navigation Items (Scrollbar completely hidden while scrolling smoothly) */}
-        <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto pt-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {filteredItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
 
@@ -137,7 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Bottom Daily Village Quote Card */}
         {!isCollapsed && (
-          <div className="p-3 border-2 border-amber-300/80 bg-white/85 m-2.5 rounded-2xl text-center space-y-1 shadow-xs z-10">
+          <div className="p-3 border-2 border-amber-300/80 bg-white/85 m-2.5 rounded-2xl text-center space-y-1 shadow-xs">
             <div className="flex items-center justify-center gap-1 text-[10px] font-black text-amber-900">
               <span>🌾 Gaon Ekta Sandesh</span>
             </div>
@@ -146,12 +140,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </p>
           </div>
         )}
-
-        {/* 🌺 Vertical Wavy / Snake Toran Garland Wire Divider on the Right Border */}
-        <div className="hidden lg:block absolute top-0 bottom-0 right-0 translate-x-1/2 pointer-events-none z-30">
-          <VerticalToranWireDivider />
-        </div>
       </aside>
     </>
   );
 };
+
