@@ -11,6 +11,7 @@ import { Loader } from '@/components/ui/Loader';
 import { APP_ROUTES } from '@/core/routes';
 import { sanitizePhone, isValidPhone } from '@/utils/validation';
 import { useToast } from '@/contexts/ToastContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface FamilyFormProps {
   familyId?: string;
@@ -24,6 +25,7 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({ familyId }) => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(!!familyId);
   const [error, setError] = useState('');
+  const { user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -67,10 +69,25 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({ familyId }) => {
 
     try {
       if (familyId) {
-        await familyController.updateFamily(familyId, { headName, members, phone, address });
+        await familyController.updateFamily(familyId, { 
+          headName, 
+          members, 
+          phone, 
+          address,
+          updatedByUserId: user?.id,
+          updatedByUserName: user?.name || user?.email,
+        });
         toast.success(`Family "${headName}" updated successfully!`, 'Family Updated');
       } else {
-        await familyController.createFamily({ headName, members, phone, address });
+        await familyController.createFamily({ 
+          headName, 
+          members, 
+          phone, 
+          address,
+          createdByUserId: user?.id,
+          createdByUserName: user?.name || user?.email,
+          createdByUserEmail: user?.email,
+        });
         toast.success(`Family "${headName}" created successfully!`, 'Family Created');
       }
       router.push(APP_ROUTES.FAMILIES);

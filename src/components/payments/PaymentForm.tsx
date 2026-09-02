@@ -67,7 +67,7 @@ export const PaymentForm: React.FC = () => {
     setLoading(true);
 
     try {
-      // Create payment
+      // Create payment with complete audit trail
       const payment = await paymentController.createPayment({
         familyId,
         festivalId,
@@ -77,8 +77,14 @@ export const PaymentForm: React.FC = () => {
         generateReceipt: false,
         generatedBy: user?.id,
         isAdmin: isAdmin === true,
+        recordedByUserId: user?.id,
+        recordedByUserName: user?.name || user?.email,
+        recordedByUserEmail: user?.email,
+        recordedByUserRole: isAdmin ? 'ADMIN' : 'USER',
         submittedByUserId: user?.id,
-        submittedByUserName: user?.name,
+        submittedByUserName: user?.name || user?.email,
+        submittedByUserEmail: user?.email,
+        submittedByUserRole: isAdmin ? 'ADMIN' : 'USER',
       });
 
       setLoading(false);

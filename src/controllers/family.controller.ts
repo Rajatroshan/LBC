@@ -11,6 +11,9 @@ export class FamilyController {
     members: number;
     phone: string;
     address: string;
+    createdByUserId?: string;
+    createdByUserName?: string;
+    createdByUserEmail?: string;
   }): Promise<Family> {
     // Validation
     if (!data.headName || !data.phone) {
@@ -28,6 +31,9 @@ export class FamilyController {
     return await familyService.create({
       ...data,
       isActive: true,
+      createdByUserId: data.createdByUserId,
+      createdByUserName: data.createdByUserName,
+      createdByUserEmail: data.createdByUserEmail,
     });
   }
 

@@ -432,9 +432,11 @@ export const DashboardView: React.FC = () => {
               <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                 <Calendar className="w-8 h-8 text-gray-300 mx-auto mb-2" />
                 <p className="text-xs text-gray-500">No upcoming festivals scheduled.</p>
-                <Link href={APP_ROUTES.FESTIVAL_CREATE} className="text-xs text-primary-600 font-semibold mt-2 inline-block hover:underline">
-                  + Schedule a festival
-                </Link>
+                {isAdmin && (
+                  <Link href={APP_ROUTES.FESTIVAL_CREATE} className="text-xs text-primary-600 font-semibold mt-2 inline-block hover:underline">
+                    + Schedule a festival
+                  </Link>
+                )}
               </div>
             ) : (
               <div className="space-y-3">

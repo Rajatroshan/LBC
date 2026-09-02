@@ -176,12 +176,14 @@ export default function FestivalDetailPage({ params }: { params: { id: string } 
               </Button>
             )}
 
-            <Link href={APP_ROUTES.FESTIVAL_EDIT(festival.id)}>
-              <Button size="sm" variant="outline" className="flex items-center gap-1.5">
-                <Edit className="w-3.5 h-3.5" />
-                Edit Festival
-              </Button>
-            </Link>
+            {isAdmin && (
+              <Link href={APP_ROUTES.FESTIVAL_EDIT(festival.id)}>
+                <Button size="sm" variant="outline" className="flex items-center gap-1.5">
+                  <Edit className="w-3.5 h-3.5" />
+                  Edit Festival
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </Card>

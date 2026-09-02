@@ -36,10 +36,33 @@ export class PaymentService {
       updatedAt: now,
     };
 
+    // Recording Audit Trail
+    if (data.recordedByUserId) docData.recordedByUserId = data.recordedByUserId;
+    if (data.recordedByUserName) docData.recordedByUserName = data.recordedByUserName;
+    if (data.recordedByUserEmail) docData.recordedByUserEmail = data.recordedByUserEmail;
+    if (data.recordedByUserRole) docData.recordedByUserRole = data.recordedByUserRole;
+    if (data.recordedAt) {
+      docData.recordedAt = Timestamp.fromDate(data.recordedAt);
+    } else if (data.recordedByUserId) {
+      docData.recordedAt = now;
+    }
+
+    // Submitted Info (backward compatibility & sync)
     if (data.submittedByUserId) docData.submittedByUserId = data.submittedByUserId;
     if (data.submittedByUserName) docData.submittedByUserName = data.submittedByUserName;
+    if (data.submittedByUserEmail) docData.submittedByUserEmail = data.submittedByUserEmail;
+    if (data.submittedByUserRole) docData.submittedByUserRole = data.submittedByUserRole;
+    if (data.submittedAt) {
+      docData.submittedAt = Timestamp.fromDate(data.submittedAt);
+    } else if (data.submittedByUserId) {
+      docData.submittedAt = now;
+    }
+
+    // Verification Info
     if (data.verifiedByUserId) docData.verifiedByUserId = data.verifiedByUserId;
     if (data.verifiedByUserName) docData.verifiedByUserName = data.verifiedByUserName;
+    if (data.verifiedByUserEmail) docData.verifiedByUserEmail = data.verifiedByUserEmail;
+    if (data.verifiedByUserRole) docData.verifiedByUserRole = data.verifiedByUserRole;
     if (data.verifiedAt) docData.verifiedAt = Timestamp.fromDate(data.verifiedAt);
 
     const docRef = await addDoc(this.collectionRef, docData);
@@ -118,6 +141,10 @@ export class PaymentService {
           updateData[key] = Timestamp.fromDate(val);
         } else if (key === 'verifiedAt' && val instanceof Date) {
           updateData[key] = Timestamp.fromDate(val);
+        } else if (key === 'recordedAt' && val instanceof Date) {
+          updateData[key] = Timestamp.fromDate(val);
+        } else if (key === 'submittedAt' && val instanceof Date) {
+          updateData[key] = Timestamp.fromDate(val);
         } else {
           updateData[key] = val;
         }
@@ -144,11 +171,32 @@ export class PaymentService {
       status: data.status,
       receiptNumber: data.receiptNumber,
       notes: data.notes,
-      submittedByUserId: data.submittedByUserId,
-      submittedByUserName: data.submittedByUserName,
+
+      // Recording Audit Trail
+      recordedByUserId: data.recordedByUserId || data.submittedByUserId,
+      recordedByUserName: data.recordedByUserName || data.submittedByUserName,
+      recordedByUserEmail: data.recordedByUserEmail,
+      recordedByUserRole: data.recordedByUserRole,
+      recordedAt: data.recordedAt?.toDate() || data.createdAt?.toDate(),
+
+      // Submitted Info
+      submittedByUserId: data.submittedByUserId || data.recordedByUserId,
+      submittedByUserName: data.submittedByUserName || data.recordedByUserName,
+      submittedByUserEmail: data.submittedByUserEmail || data.recordedByUserEmail,
+      submittedByUserRole: data.submittedByUserRole || data.recordedByUserRole,
+      submittedAt: data.submittedAt?.toDate() || data.createdAt?.toDate(),
+
+      // Verification Info
       verifiedByUserId: data.verifiedByUserId,
       verifiedByUserName: data.verifiedByUserName,
+      verifiedByUserEmail: data.verifiedByUserEmail,
+      verifiedByUserRole: data.verifiedByUserRole,
       verifiedAt: data.verifiedAt?.toDate(),
+
+      // Updated Info
+      updatedByUserId: data.updatedByUserId,
+      updatedByUserName: data.updatedByUserName,
+
       createdAt: data.createdAt?.toDate() || new Date(),
       updatedAt: data.updatedAt?.toDate() || new Date(),
     };

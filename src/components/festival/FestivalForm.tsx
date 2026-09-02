@@ -11,6 +11,7 @@ import { Loader } from '@/components/ui/Loader';
 import { APP_ROUTES } from '@/core/routes';
 import { PREDEFINED_FESTIVALS } from '@/constants';
 import { useToast } from '@/contexts/ToastContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Calendar, Clock, Sparkles } from 'lucide-react';
 
 interface FestivalFormProps {
@@ -34,6 +35,7 @@ export const FestivalForm: React.FC<FestivalFormProps> = ({ festivalId }) => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(!!festivalId);
   const [error, setError] = useState('');
+  const { user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -137,10 +139,19 @@ export const FestivalForm: React.FC<FestivalFormProps> = ({ festivalId }) => {
       };
 
       if (festivalId) {
-        await festivalController.updateFestival(festivalId, festivalData);
+        await festivalController.updateFestival(festivalId, {
+          ...festivalData,
+          updatedByUserId: user?.id,
+          updatedByUserName: user?.name || user?.email,
+        });
         toast.success(`Festival "${finalName}" updated successfully!`, 'Festival Updated');
       } else {
-        await festivalController.createFestival(festivalData);
+        await festivalController.createFestival({
+          ...festivalData,
+          createdByUserId: user?.id,
+          createdByUserName: user?.name || user?.email,
+          createdByUserEmail: user?.email,
+        });
         toast.success(`Festival "${finalName}" created successfully!`, 'Festival Created');
       }
       router.push(APP_ROUTES.FESTIVALS);

@@ -23,6 +23,12 @@ export class PaymentController {
     isAdmin?: boolean;
     submittedByUserId?: string;
     submittedByUserName?: string;
+    submittedByUserEmail?: string;
+    submittedByUserRole?: 'ADMIN' | 'USER';
+    recordedByUserId?: string;
+    recordedByUserName?: string;
+    recordedByUserEmail?: string;
+    recordedByUserRole?: 'ADMIN' | 'USER';
   }): Promise<Payment> {
     // Validation
     if (!data.familyId || !data.festivalId || !data.amount) {
@@ -42,6 +48,12 @@ export class PaymentController {
     // Generate slip/receipt number
     const finalReceiptNumber = data.receiptNumber || generateReceiptNumber();
 
+    const recordingUserId = data.recordedByUserId || data.submittedByUserId || data.generatedBy;
+    const recordingUserName = data.recordedByUserName || data.submittedByUserName;
+    const recordingUserEmail = data.recordedByUserEmail || data.submittedByUserEmail;
+    const recordingUserRole = data.recordedByUserRole || (isActuallyAdmin ? 'ADMIN' : 'USER');
+    const now = new Date();
+
     const payment = await paymentService.create({
       familyId: data.familyId,
       festivalId: data.festivalId,
@@ -50,11 +62,25 @@ export class PaymentController {
       status: finalStatus,
       receiptNumber: finalReceiptNumber,
       notes: data.notes,
-      submittedByUserId: data.submittedByUserId,
-      submittedByUserName: data.submittedByUserName,
-      verifiedByUserId: isActuallyAdmin ? data.generatedBy : undefined,
-      verifiedByUserName: isActuallyAdmin ? data.submittedByUserName : undefined,
-      verifiedAt: isActuallyAdmin ? new Date() : undefined,
+
+      // Safety Audit Trail
+      recordedByUserId: recordingUserId,
+      recordedByUserName: recordingUserName,
+      recordedByUserEmail: recordingUserEmail,
+      recordedByUserRole: recordingUserRole,
+      recordedAt: now,
+
+      submittedByUserId: recordingUserId,
+      submittedByUserName: recordingUserName,
+      submittedByUserEmail: recordingUserEmail,
+      submittedByUserRole: recordingUserRole,
+      submittedAt: now,
+
+      verifiedByUserId: isActuallyAdmin ? recordingUserId : undefined,
+      verifiedByUserName: isActuallyAdmin ? recordingUserName : undefined,
+      verifiedByUserEmail: isActuallyAdmin ? recordingUserEmail : undefined,
+      verifiedByUserRole: isActuallyAdmin ? 'ADMIN' : undefined,
+      verifiedAt: isActuallyAdmin ? now : undefined,
     });
 
     // Add income to master account ONLY if payment is PAID (Admin verified)
@@ -63,7 +89,7 @@ export class PaymentController {
         const family = await familyService.getById(data.familyId);
         const festival = await festivalService.getById(data.festivalId);
         
-        const description = `Payment received from ${family?.headName || 'Unknown'} for ${festival?.name || 'Unknown'}`;
+        const description = `Payment received from ${family?.headName || 'Unknown'} for ${festival?.name || 'Unknown'} (Recorded by ${recordingUserName || 'Admin'})`;
         
         await accountService.addIncome({
           amount: data.amount,
@@ -85,7 +111,7 @@ export class PaymentController {
    */
   async verifyPayment(
     paymentId: string, 
-    adminUser: { id: string; name: string }
+    adminUser: { id: string; name: string; email?: string }
   ): Promise<{ payment: Payment; receipt: Receipt; pdfBlob: Blob }> {
     const payment = await this.getPaymentById(paymentId);
 
@@ -96,13 +122,17 @@ export class PaymentController {
     const verifiedAt = new Date();
     const receiptNumber = payment.receiptNumber || generateReceiptNumber();
 
-    // 1. Update Payment status in Firestore
+    // 1. Update Payment status in Firestore with complete verification audit trail
     await paymentService.update(paymentId, {
       status: 'PAID',
       receiptNumber,
       verifiedByUserId: adminUser.id,
       verifiedByUserName: adminUser.name,
+      verifiedByUserEmail: adminUser.email,
+      verifiedByUserRole: 'ADMIN',
       verifiedAt,
+      updatedByUserId: adminUser.id,
+      updatedByUserName: adminUser.name,
     });
 
     // 2. Add income to Master Account

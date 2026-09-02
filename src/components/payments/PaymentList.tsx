@@ -89,7 +89,8 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
     try {
       const { receipt, pdfBlob } = await paymentController.verifyPayment(payment.id, {
         id: user.id,
-        name: user.name || 'Admin',
+        name: user.name || user.email || 'Admin',
+        email: user.email,
       });
 
       // Download official receipt
@@ -325,7 +326,12 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
 
                 return (
                   <tr key={payment.id} className="hover:bg-gray-50/60 transition-colors">
-                    <td className="px-3.5 py-3 text-gray-500">{formatDate(payment.paidDate)}</td>
+                    <td className="px-3.5 py-3 text-gray-500">
+                      <div>{formatDate(payment.paidDate)}</div>
+                      <div className="text-[10px] text-gray-400 mt-0.5 font-medium">
+                        By: <span className="text-gray-600 font-semibold">{payment.recordedByUserName || payment.submittedByUserName || 'Member'}</span>
+                      </div>
+                    </td>
                     <td className="px-3.5 py-3 font-semibold text-gray-900">
                       {family ? `${family.headName} (${family.phone})` : 'Unknown Family'}
                     </td>
@@ -336,14 +342,21 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
                       {formatCurrency(payment.amount)}
                     </td>
                     <td className="px-3.5 py-3">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
-                        isPaid 
-                          ? 'bg-emerald-100 text-emerald-800' 
-                          : 'bg-amber-100 text-amber-800'
-                      }`}>
-                        {isPaid ? <CheckCircle2 className="w-3 h-3 text-emerald-600" /> : <Clock className="w-3 h-3 text-amber-600" />}
-                        {isPaid ? 'PAID (Verified)' : 'UNPAID (Pending Verification)'}
-                      </span>
+                      <div>
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+                          isPaid 
+                            ? 'bg-emerald-100 text-emerald-800' 
+                            : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {isPaid ? <CheckCircle2 className="w-3 h-3 text-emerald-600" /> : <Clock className="w-3 h-3 text-amber-600" />}
+                          {isPaid ? 'PAID (Verified)' : 'UNPAID (Pending)'}
+                        </span>
+                      </div>
+                      {isPaid && payment.verifiedByUserName && (
+                        <div className="text-[10px] text-emerald-700 mt-0.5 font-medium">
+                          Verified by {payment.verifiedByUserName}
+                        </div>
+                      )}
                     </td>
                     <td className="px-3.5 py-3 text-gray-500 font-mono text-[11px]">
                       {payment.receiptNumber || '-'}

@@ -79,12 +79,14 @@ export const FestivalList: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-800">Festivals</h1>
           <p className="text-sm text-gray-500 mt-1">Manage community pujas, festivals, and subscriptions</p>
         </div>
-        <Link href={APP_ROUTES.FESTIVAL_CREATE}>
-          <Button className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Add Festival
-          </Button>
-        </Link>
+        {isAdmin && (
+          <Link href={APP_ROUTES.FESTIVAL_CREATE}>
+            <Button className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Add Festival
+            </Button>
+          </Link>
+        )}
       </div>
 
       {loading ? (
