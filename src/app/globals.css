@@ -3,20 +3,16 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 232, 245, 233;
+  --foreground-rgb: 41, 37, 36;
+  --background-start-rgb: 254, 243, 199;
   --background-end-rgb: 255, 255, 255;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background-color: #FFFDF7;
   min-height: 100vh;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 /* Smooth scrolling */
@@ -24,95 +20,224 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom Animations for Landing Page */
-@keyframes slide-in-left {
+/* 🌤️ Cloud Horizontal Slow Movement */
+@keyframes cloud-move-left {
   0% {
-    opacity: 0;
-    transform: translateX(-50px);
+    transform: translateX(-10%);
+  }
+  50% {
+    transform: translateX(10%);
   }
   100% {
-    opacity: 1;
-    transform: translateX(0);
+    transform: translateX(-10%);
   }
 }
 
-@keyframes float {
+@keyframes cloud-move-right {
+  0% {
+    transform: translateX(10%);
+  }
+  50% {
+    transform: translateX(-15%);
+  }
+  100% {
+    transform: translateX(10%);
+  }
+}
+
+/* 🐦 Bird Flight Arc */
+@keyframes bird-fly {
+  0% {
+    transform: translate(-100px, 20px) scale(0.85);
+  }
+  50% {
+    transform: translate(60vw, -30px) scale(1);
+  }
+  100% {
+    transform: translate(120vw, 10px) scale(0.9);
+  }
+}
+
+/* 🌳 Tree & Leaf Gentle Sway */
+@keyframes tree-sway {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  35% {
+    transform: rotate(2.5deg) skewX(1deg);
+  }
+  70% {
+    transform: rotate(-2deg) skewX(-1deg);
+  }
+}
+
+/* 🌾 Crop Wave in Wind */
+@keyframes crop-wave {
+  0%, 100% {
+    transform: rotate(0deg) skewX(0deg);
+  }
+  50% {
+    transform: rotate(6deg) skewX(3deg);
+  }
+}
+
+/* 🚜 Tractor Subtle Chug / Bounce */
+@keyframes tractor-chug {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-2px) rotate(-0.5deg);
+  }
+  75% {
+    transform: translateY(1px) rotate(0.5deg);
+  }
+}
+
+/* 🔔 Temple Bell Swing */
+@keyframes bell-ring {
+  0%, 100% {
+    transform: rotate(0deg);
+    transform-origin: top center;
+  }
+  25% {
+    transform: rotate(12deg);
+    transform-origin: top center;
+  }
+  75% {
+    transform: rotate(-12deg);
+    transform-origin: top center;
+  }
+}
+
+/* 🪔 Diya Golden Flame Flicker & Glow */
+@keyframes diya-glow {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8));
+  }
+  50% {
+    transform: scale(1.12) translateY(-2px);
+    filter: drop-shadow(0 0 16px rgba(251, 191, 36, 1));
+  }
+}
+
+/* ✨ Floating Marigold Petals & Sparkles */
+@keyframes petal-float {
+  0% {
+    transform: translateY(0) rotate(0deg) translateX(0);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-25px) rotate(180deg) translateX(15px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50px) rotate(360deg) translateX(-10px);
+    opacity: 0;
+  }
+}
+
+/* 👋 Friendly Cartoon Namaste Hand Wave */
+@keyframes wave-arm {
+  0%, 100% {
+    transform: rotate(0deg);
+    transform-origin: bottom right;
+  }
+  25% {
+    transform: rotate(-18deg);
+    transform-origin: bottom right;
+  }
+  75% {
+    transform: rotate(14deg);
+    transform-origin: bottom right;
+  }
+}
+
+/* 🌊 Organic Float */
+@keyframes float-gentle {
   0%, 100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-20px);
+    transform: translateY(-8px);
   }
 }
 
-@keyframes float-delayed {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-15px);
-  }
+/* Animation Classes */
+.animate-cloud-slow {
+  animation: cloud-move-left 25s ease-in-out infinite;
 }
 
-@keyframes fade-in-up {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.animate-cloud-fast {
+  animation: cloud-move-right 18s ease-in-out infinite;
 }
 
-@keyframes scale-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+.animate-bird-fly {
+  animation: bird-fly 30s linear infinite;
 }
 
-/* Apply animations */
-.animate-slide-in-left {
-  animation: slide-in-left 1s ease-out;
+.animate-tree-sway {
+  animation: tree-sway 6s ease-in-out infinite;
+  transform-origin: bottom center;
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+.animate-crop-wave {
+  animation: crop-wave 4s ease-in-out infinite;
+  transform-origin: bottom center;
 }
 
-.animate-float-delayed {
-  animation: float-delayed 3s ease-in-out infinite 0.5s;
+.animate-crop-wave-delayed {
+  animation: crop-wave 4.5s ease-in-out infinite 0.7s;
+  transform-origin: bottom center;
 }
 
-.animate-fade-in-up {
-  animation: fade-in-up 0.8s ease-out;
+.animate-tractor {
+  animation: tractor-chug 1.4s ease-in-out infinite;
 }
 
-.animate-scale-in {
-  animation: scale-in 0.6s ease-out;
+.animate-bell {
+  animation: bell-ring 2.5s ease-in-out infinite;
 }
 
-/* Utility classes */
+.animate-diya {
+  animation: diya-glow 2.5s ease-in-out infinite;
+}
+
+.animate-wave {
+  animation: wave-arm 1.8s ease-in-out infinite;
+}
+
+.animate-float-gentle {
+  animation: float-gentle 4s ease-in-out infinite;
+}
+
+.animate-petal {
+  animation: petal-float 5s ease-in-out infinite;
+}
+
+/* Custom Storybook Shadows and Borders */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .village-border {
+    border: 2px solid #FDE68A;
+    box-shadow: 0 10px 30px -5px rgba(217, 119, 6, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
   }
 
-  /* Shadow variations */
-  .shadow-3xl {
-    box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
+  .village-card {
+    background: #FFFFFF;
+    border-radius: 1.5rem;
+    border: 1.5px solid #FEF3C7;
+    box-shadow: 0 12px 36px -8px rgba(180, 83, 9, 0.07);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* Gradient text */
-  .gradient-text {
-    background: linear-gradient(135deg, #43a047 0%, #1b5e20 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .village-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -10px rgba(180, 83, 9, 0.14);
+    border-color: #FCD34D;
+  }
+
+  .text-shadow-village {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
   }
 }
