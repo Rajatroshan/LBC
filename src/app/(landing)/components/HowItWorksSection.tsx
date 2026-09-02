@@ -1,120 +1,97 @@
 'use client';
 
-const steps = [
+import React from 'react';
+import { Sparkles, CreditCard, ShieldCheck, Wallet, ArrowRight } from 'lucide-react';
+
+const workflowSteps = [
   {
-    number: '01',
-    title: 'Admin Creates Festival',
-    description: 'Set up a new festival with dates and contribution amounts',
-    icon: '🎪',
-    color: 'from-primary-500 to-primary-600',
+    step: '01',
+    title: 'Schedule Festival & Quotas',
+    description: 'Committee sets up the festival (Durga Puja, Diwali, etc.), dates, and fixed contribution quota per family.',
+    icon: Sparkles,
+    badge: 'Step 1 • Planning',
+    color: 'from-amber-500 to-orange-600',
   },
   {
-    number: '02',
-    title: 'Families Contribute',
-    description: 'Community members make their festival contributions',
-    icon: '💵',
-    color: 'from-blue-500 to-blue-600',
+    step: '02',
+    title: 'Record & Issue Provisional Slip',
+    description: 'Members or volunteers submit payments. An amber provisional contribution slip is instantly generated.',
+    icon: CreditCard,
+    badge: 'Step 2 • Collection',
+    color: 'from-primary-600 to-emerald-700',
   },
   {
-    number: '03',
-    title: 'Amount is Recorded',
-    description: 'All payments are logged in real-time with timestamps',
-    icon: '📝',
-    color: 'from-purple-500 to-purple-600',
+    step: '03',
+    title: 'Admin Verification & Treasury Credit',
+    description: 'Admin reviews the verification queue and confirms receipt with 1-click. Master treasury balance updates live.',
+    icon: ShieldCheck,
+    badge: 'Step 3 • Authorization',
+    color: 'from-emerald-600 to-teal-700',
   },
   {
-    number: '04',
-    title: 'Receipts Generated',
-    description: 'Instant digital receipts for every transaction',
-    icon: '🧾',
-    color: 'from-secondary-500 to-secondary-600',
-  },
-  {
-    number: '05',
-    title: 'Everyone Can View',
-    description: 'Full transparency with accessible reports for all',
-    icon: '👀',
-    color: 'from-green-500 to-green-600',
+    step: '04',
+    title: 'Vendor Invoices & Reimbursements',
+    description: 'Track vendor costs and settle out-of-pocket member claims with signed PDF vouchers and complete audit trails.',
+    icon: Wallet,
+    badge: 'Step 4 • Settlement',
+    color: 'from-blue-600 to-indigo-700',
   },
 ];
 
 export default function HowItWorksSection() {
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
+    <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            How It Works
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold mb-3">
+            <span>Simple, Transparent 4-Step Process</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 mb-4">
+            How Festival Management Works in LBC
           </h2>
-          <p className="text-xl text-gray-600">
-            Simple steps to digital festival management
+          <p className="text-base sm:text-lg text-gray-600">
+            From initial festival announcement to final vendor payouts and Sabha reports.
           </p>
         </div>
 
-        {/* Steps */}
-        <div className="max-w-6xl mx-auto">
-          <div className="relative">
-            {/* Connecting Line */}
-            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-primary-300 via-secondary-300 to-green-300 -z-10"></div>
-
-            {/* Steps Grid */}
-            <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-8">
-              {steps.map((step, index) => (
-                <div
-                  key={index}
-                  className="relative"
-                  style={{
-                    animationDelay: `${index * 0.2}s`,
-                  }}
-                >
-                  {/* Step Card */}
-                  <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                    {/* Number Badge */}
-                    <div
-                      className={`absolute -top-4 -right-4 w-12 h-12 bg-gradient-to-br ${step.color} rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg`}
-                    >
-                      {step.number}
+        {/* Workflow Cards */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto relative">
+          {workflowSteps.map((step, idx) => {
+            const IconComp = step.icon;
+            return (
+              <div
+                key={idx}
+                className="bg-white rounded-3xl p-6 border border-gray-200/90 shadow-sm hover:shadow-xl transition-all duration-300 relative flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-2xl font-black text-gray-200">
+                      {step.step}
+                    </span>
+                    <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${step.color} text-white flex items-center justify-center shadow-md`}>
+                      <IconComp className="w-5 h-5" />
                     </div>
-
-                    {/* Icon */}
-                    <div className="text-5xl mb-4 text-center">
-                      {step.icon}
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">
-                      {step.title}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-sm text-gray-600 text-center">
-                      {step.description}
-                    </p>
                   </div>
 
-                  {/* Arrow for Mobile */}
-                  {index < steps.length - 1 && (
-                    <div className="lg:hidden flex justify-center my-4">
-                      <svg
-                        className="w-6 h-6 text-primary-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                        />
-                      </svg>
-                    </div>
-                  )}
+                  <span className="text-[10px] font-extrabold text-primary-700 uppercase tracking-wider block mb-1">
+                    {step.badge}
+                  </span>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {step.title}
+                  </h3>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    {step.description}
+                  </p>
                 </div>
-              ))}
-            </div>
-          </div>
+
+                <div className="pt-4 mt-4 border-t border-gray-100 flex items-center gap-1 text-[11px] font-bold text-gray-400">
+                  <span>Phase {idx + 1}</span>
+                  {idx < 3 && <ArrowRight className="w-3 h-3 text-primary-500 ml-auto" />}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
