@@ -48,6 +48,10 @@ export class ReimbursementService {
       notes: data.notes || '',
       payoutDetails: data.payoutDetails || '',
       status: 'PENDING' as const,
+      requestedByUserId: data.userId,
+      requestedByUserName: data.userName,
+      requestedByUserEmail: data.userEmail,
+      requestedAt: now,
       createdAt: now,
       updatedAt: now,
     };
@@ -98,7 +102,7 @@ export class ReimbursementService {
    */
   async approveRequest(
     requestId: string, 
-    admin: { id: string; name: string }
+    admin: { id: string; name: string; email?: string }
   ): Promise<{ request: ReimbursementRequest; pdfBlob: Blob; receiptNumber: string }> {
     const request = await this.getById(requestId);
     if (!request) {
@@ -113,7 +117,7 @@ export class ReimbursementService {
     const approvedDate = new Date();
 
     // 1. Deduct from Master Account
-    const payoutDescription = `Reimbursement Payout to ${request.userName} (${receiptNumber}) - ${request.notes || 'Out-of-Pocket Expense Settlement'}`;
+    const payoutDescription = `Reimbursement Payout to ${request.userName} (${receiptNumber}) - ${request.notes || 'Out-of-Pocket Expense Settlement'} (Approved by ${admin.name || 'Admin'})`;
     await accountService.deductExpense({
       amount: request.amount,
       description: payoutDescription,
@@ -124,13 +128,14 @@ export class ReimbursementService {
     // 2. Settle Member's Personal Account
     await userAccountService.recordReimbursementPayout(request.userId, request.amount);
 
-    // 3. Update Request status to APPROVED
+    // 3. Update Request status to APPROVED with full audit fields
     const docRef = doc(db, COLLECTIONS.REIMBURSEMENT_REQUESTS, requestId);
     const now = Timestamp.now();
     await updateDoc(docRef, {
       status: 'APPROVED',
       approvedBy: admin.id,
       approvedByName: admin.name || 'Club Administrator',
+      approvedByEmail: admin.email || '',
       approvedAt: now,
       receiptNumber,
       updatedAt: now,
@@ -162,7 +167,7 @@ export class ReimbursementService {
    */
   async rejectRequest(
     requestId: string, 
-    admin: { id: string; name: string },
+    admin: { id: string; name: string; email?: string },
     rejectionReason: string
   ): Promise<ReimbursementRequest> {
     const request = await this.getById(requestId);
@@ -180,6 +185,8 @@ export class ReimbursementService {
       status: 'REJECTED',
       approvedBy: admin.id,
       approvedByName: admin.name || 'Club Administrator',
+      approvedByEmail: admin.email || '',
+      approvedAt: now,
       rejectionReason: rejectionReason || 'Request rejected by administrator.',
       updatedAt: now,
     });
@@ -204,6 +211,7 @@ export class ReimbursementService {
       status: data.status || 'PENDING',
       approvedBy: data.approvedBy || undefined,
       approvedByName: data.approvedByName || undefined,
+      approvedByEmail: data.approvedByEmail || undefined,
       approvedAt: data.approvedAt?.toDate() || undefined,
       receiptNumber: data.receiptNumber || undefined,
       rejectionReason: data.rejectionReason || undefined,

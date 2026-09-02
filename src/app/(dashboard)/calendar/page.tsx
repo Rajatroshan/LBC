@@ -155,20 +155,30 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-800">Festival Calendar</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-5 rounded-3xl border-2 border-amber-200 shadow-sm">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-stone-900 flex items-center gap-2">
+            <span>📅</span>
+            <span>Utsav &amp; Puja Tithi Calendar</span>
+          </h1>
+          <p className="text-xs text-stone-500 font-medium mt-0.5">
+            Village festival schedule, multi-day celebrations, and puja dates
+          </p>
+        </div>
         <div className="flex gap-2">
           <Button
             size="sm"
             variant={view === 'month' ? 'primary' : 'outline'}
             onClick={() => setView('month')}
+            className={`rounded-2xl font-bold text-xs ${view === 'month' ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'border-2 border-amber-300 bg-white'}`}
           >
-            Month
+            Month View
           </Button>
           <Button
             size="sm"
             variant={view === 'year' ? 'primary' : 'outline'}
             onClick={() => setView('year')}
+            className={`rounded-2xl font-bold text-xs ${view === 'year' ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'border-2 border-amber-300 bg-white'}`}
           >
             Year Overview
           </Button>

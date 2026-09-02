@@ -3,6 +3,12 @@ export interface BaseEntity {
   id: string;
   createdAt: Date;
   updatedAt: Date;
+  createdByUserId?: string;
+  createdByUserName?: string;
+  createdByUserEmail?: string;
+  updatedByUserId?: string;
+  updatedByUserName?: string;
+  updatedByUserEmail?: string;
 }
 
 // User Types
@@ -21,6 +27,11 @@ export interface Family extends BaseEntity {
   phone: string;
   address: string;
   isActive: boolean;
+  createdByUserId?: string;
+  createdByUserName?: string;
+  createdByUserEmail?: string;
+  updatedByUserId?: string;
+  updatedByUserName?: string;
 }
 
 // Festival Types
@@ -33,6 +44,11 @@ export interface Festival extends BaseEntity {
   amountPerFamily: number;
   description?: string;
   isActive: boolean;
+  createdByUserId?: string;
+  createdByUserName?: string;
+  createdByUserEmail?: string;
+  updatedByUserId?: string;
+  updatedByUserName?: string;
 }
 
 // Payment Types
@@ -44,11 +60,31 @@ export interface Payment extends BaseEntity {
   status: 'PAID' | 'UNPAID' | 'PENDING';
   receiptNumber?: string;
   notes?: string;
+
+  // Recording Audit Trail (Who initially recorded/submitted)
+  recordedByUserId?: string;
+  recordedByUserName?: string;
+  recordedByUserEmail?: string;
+  recordedByUserRole?: 'ADMIN' | 'USER';
+  recordedAt?: Date;
+
+  // Submitted Info (For backwards compatibility and clarity)
   submittedByUserId?: string;
   submittedByUserName?: string;
+  submittedByUserEmail?: string;
+  submittedByUserRole?: 'ADMIN' | 'USER';
+  submittedAt?: Date;
+
+  // Verification Audit Trail (Who verified and approved it)
   verifiedByUserId?: string;
   verifiedByUserName?: string;
+  verifiedByUserEmail?: string;
+  verifiedByUserRole?: 'ADMIN' | 'USER';
   verifiedAt?: Date;
+
+  // Last Modified Audit Trail
+  updatedByUserId?: string;
+  updatedByUserName?: string;
 }
 
 // Receipt Types
@@ -62,6 +98,9 @@ export interface Receipt extends BaseEntity {
   generatedBy: string;
   pdfUrl?: string;
   isProvisional?: boolean;
+  generatedByUserId?: string;
+  generatedByUserName?: string;
+  generatedByUserEmail?: string;
 }
 
 // Payment Source Types
@@ -79,15 +118,33 @@ export interface Expense extends BaseEntity {
   notes?: string;
   receiptUrl?: string;
   paymentSource?: PaymentSourceType;
+
+  // Creator & Payer Audit Trail
   paidByUserId?: string;
   paidByUserName?: string;
   paidByUserEmail?: string;
+  recordedByUserId?: string;
+  recordedByUserName?: string;
+  recordedByUserEmail?: string;
+  recordedByUserRole?: 'ADMIN' | 'USER';
+  recordedAt?: Date;
+
+  // Reimbursement & Approval Status
   reimbursementStatus?: 'PENDING' | 'REIMBURSED' | 'NONE';
   approvalStatus?: 'APPROVED' | 'PENDING_APPROVAL' | 'REJECTED';
   approvedByUserId?: string;
   approvedByUserName?: string;
+  approvedByUserEmail?: string;
+  approvedByUserRole?: 'ADMIN';
   approvedAt?: Date;
   rejectionReason?: string;
+  reimbursedByUserId?: string;
+  reimbursedByUserName?: string;
+  reimbursedAt?: Date;
+
+  // Last Modified Audit Trail
+  updatedByUserId?: string;
+  updatedByUserName?: string;
 }
 
 // User Personal Account & Ledger
@@ -113,6 +170,7 @@ export interface ReimbursementRequest extends BaseEntity {
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   approvedBy?: string;
   approvedByName?: string;
+  approvedByEmail?: string;
   approvedAt?: Date;
   receiptNumber?: string;
   rejectionReason?: string;

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { Loader } from '@/components/ui/Loader';
 import { ReceiptViewer } from './ReceiptViewer';
 import { formatCurrency, formatDate } from '@/utils';
-import { Download, Eye, CheckCircle2, Clock, AlertCircle, PlusCircle, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Download, Eye, CheckCircle2, Clock, PlusCircle, RefreshCw, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -89,7 +89,8 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
     try {
       const { receipt, pdfBlob } = await paymentController.verifyPayment(payment.id, {
         id: user.id,
-        name: user.name || 'Admin',
+        name: user.name || user.email || 'Admin',
+        email: user.email,
       });
 
       // Download official receipt
@@ -195,14 +196,15 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
   return (
     <div className="space-y-4">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-5 rounded-3xl border-2 border-amber-200 shadow-sm">
         <div>
-          <h2 className="text-xl font-bold text-gray-800">
-            {festivalId ? 'Festival Payments' : 'Chanda & Contribution Payments'}
+          <h2 className="text-xl font-black text-stone-900 flex items-center gap-2">
+            <span>📜</span>
+            <span>{festivalId ? 'Festival Chanda Collection' : 'Gram Chanda & Contribution Register'}</span>
           </h2>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-stone-500 font-medium mt-0.5">
             {isAdmin 
-              ? 'Manage collections, verify member submissions, and issue receipts' 
+              ? 'Manage collections, verify member submissions, and release signed receipts' 
               : 'View contributions and record community chanda payments'}
           </p>
         </div>
@@ -214,15 +216,15 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
             onClick={() => loadPayments(true)}
             isLoading={refreshing}
             disabled={refreshing}
-            className="flex items-center gap-1.5 text-xs text-gray-700"
+            className="flex items-center gap-1.5 text-xs text-stone-700 font-bold rounded-2xl border-2 border-amber-300 bg-white hover:bg-amber-50"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-orange-600 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
           <Link href={APP_ROUTES.PAYMENT_RECORD}>
-            <Button size="sm" className="flex items-center gap-1.5 text-xs">
+            <Button size="sm" className="flex items-center gap-1.5 text-xs font-black rounded-2xl bg-orange-600 hover:bg-orange-700 text-white shadow-sm border border-amber-200">
               <PlusCircle className="w-3.5 h-3.5" />
-              Record Payment
+              + Record Chanda
             </Button>
           </Link>
         </div>
@@ -230,66 +232,61 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
 
       {/* Admin Pending Verification Banner */}
       {isAdmin && pendingPayments.length > 0 && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div className="p-4 bg-amber-50/90 border-2 border-amber-300 rounded-3xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-100 text-amber-800 rounded-lg">
-              <AlertCircle className="w-5 h-5" />
+            <div className="p-2.5 bg-amber-200 text-amber-900 rounded-2xl font-black text-lg">
+              🪔
             </div>
             <div>
-              <p className="text-sm font-bold text-amber-900">
-                {pendingPayments.length} Payment{pendingPayments.length > 1 ? 's' : ''} Awaiting Admin Verification
+              <p className="text-sm font-black text-amber-950">
+                {pendingPayments.length} Chanda Payment{pendingPayments.length > 1 ? 's' : ''} Awaiting Admin Verification
               </p>
-              <p className="text-xs text-amber-700">
-                Members recorded these payments. Verify them to officially credit the Master Account.
+              <p className="text-xs text-amber-800 font-medium">
+                Members recorded these doorstep payments. Verify them to officially credit the Master Account Gullak.
               </p>
             </div>
           </div>
           <Button
             size="sm"
             onClick={() => setActiveFilter('PENDING')}
-            className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold"
+            className="bg-orange-600 hover:bg-orange-700 text-white text-xs font-black rounded-2xl border border-amber-200 shrink-0"
           >
-            View Verification Queue ({pendingPayments.length})
+            Open Verification Queue ({pendingPayments.length})
           </Button>
         </div>
       )}
 
       {/* Filter Tabs */}
-      <div className="flex border-b border-gray-200 gap-4 text-xs font-semibold">
+      <div className="flex border-b-2 border-amber-200 gap-2 text-xs font-bold pb-2">
         <button
           onClick={() => setActiveFilter('ALL')}
-          className={`pb-2.5 transition-colors border-b-2 ${
+          className={`px-3 py-1.5 rounded-xl transition-all ${
             activeFilter === 'ALL'
-              ? 'border-primary-600 text-primary-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'bg-amber-500 text-white font-black shadow-xs'
+              : 'text-stone-600 hover:bg-amber-100'
           }`}
         >
-          All Payments ({payments.length})
+          All Contributions ({payments.length})
         </button>
         <button
           onClick={() => setActiveFilter('VERIFIED')}
-          className={`pb-2.5 transition-colors border-b-2 ${
+          className={`px-3 py-1.5 rounded-xl transition-all ${
             activeFilter === 'VERIFIED'
-              ? 'border-primary-600 text-primary-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'bg-emerald-600 text-white font-black shadow-xs'
+              : 'text-stone-600 hover:bg-amber-100'
           }`}
         >
-          Verified & Paid ({verifiedPayments.length})
+          ✓ Verified Slips ({verifiedPayments.length})
         </button>
         <button
           onClick={() => setActiveFilter('PENDING')}
-          className={`pb-2.5 transition-colors border-b-2 flex items-center gap-1.5 ${
+          className={`px-3 py-1.5 rounded-xl transition-all ${
             activeFilter === 'PENDING'
-              ? 'border-primary-600 text-primary-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'bg-orange-600 text-white font-black shadow-xs'
+              : 'text-stone-600 hover:bg-amber-100'
           }`}
         >
-          Pending Verification ({pendingPayments.length})
-          {pendingPayments.length > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-100 text-amber-800 font-bold">
-              {pendingPayments.length}
-            </span>
-          )}
+          ⏳ Pending Queue ({pendingPayments.length})
         </button>
       </div>
 
@@ -325,7 +322,12 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
 
                 return (
                   <tr key={payment.id} className="hover:bg-gray-50/60 transition-colors">
-                    <td className="px-3.5 py-3 text-gray-500">{formatDate(payment.paidDate)}</td>
+                    <td className="px-3.5 py-3 text-gray-500">
+                      <div>{formatDate(payment.paidDate)}</div>
+                      <div className="text-[10px] text-gray-400 mt-0.5 font-medium">
+                        By: <span className="text-gray-600 font-semibold">{payment.recordedByUserName || payment.submittedByUserName || 'Member'}</span>
+                      </div>
+                    </td>
                     <td className="px-3.5 py-3 font-semibold text-gray-900">
                       {family ? `${family.headName} (${family.phone})` : 'Unknown Family'}
                     </td>
@@ -336,14 +338,21 @@ export const PaymentList: React.FC<PaymentListProps> = ({ festivalId }) => {
                       {formatCurrency(payment.amount)}
                     </td>
                     <td className="px-3.5 py-3">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
-                        isPaid 
-                          ? 'bg-emerald-100 text-emerald-800' 
-                          : 'bg-amber-100 text-amber-800'
-                      }`}>
-                        {isPaid ? <CheckCircle2 className="w-3 h-3 text-emerald-600" /> : <Clock className="w-3 h-3 text-amber-600" />}
-                        {isPaid ? 'PAID (Verified)' : 'UNPAID (Pending Verification)'}
-                      </span>
+                      <div>
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+                          isPaid 
+                            ? 'bg-emerald-100 text-emerald-800' 
+                            : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {isPaid ? <CheckCircle2 className="w-3 h-3 text-emerald-600" /> : <Clock className="w-3 h-3 text-amber-600" />}
+                          {isPaid ? 'PAID (Verified)' : 'UNPAID (Pending)'}
+                        </span>
+                      </div>
+                      {isPaid && payment.verifiedByUserName && (
+                        <div className="text-[10px] text-emerald-700 mt-0.5 font-medium">
+                          Verified by {payment.verifiedByUserName}
+                        </div>
+                      )}
                     </td>
                     <td className="px-3.5 py-3 text-gray-500 font-mono text-[11px]">
                       {payment.receiptNumber || '-'}

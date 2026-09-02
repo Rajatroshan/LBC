@@ -23,11 +23,17 @@ export class FamilyService {
    */
   async create(data: Omit<Family, 'id' | 'createdAt' | 'updatedAt'>): Promise<Family> {
     const now = Timestamp.now();
-    const docRef = await addDoc(this.collectionRef, {
+    const docData: Record<string, unknown> = {
       ...data,
       createdAt: now,
       updatedAt: now,
-    });
+    };
+
+    if (data.createdByUserId) docData.createdByUserId = data.createdByUserId;
+    if (data.createdByUserName) docData.createdByUserName = data.createdByUserName;
+    if (data.createdByUserEmail) docData.createdByUserEmail = data.createdByUserEmail;
+
+    const docRef = await addDoc(this.collectionRef, docData);
 
     const docSnap = await getDoc(docRef);
     return this.toEntity(docSnap);
@@ -115,6 +121,14 @@ export class FamilyService {
       phone: data.phone,
       address: data.address,
       isActive: data.isActive ?? true,
+
+      // Audit Trail
+      createdByUserId: data.createdByUserId,
+      createdByUserName: data.createdByUserName,
+      createdByUserEmail: data.createdByUserEmail,
+      updatedByUserId: data.updatedByUserId,
+      updatedByUserName: data.updatedByUserName,
+
       createdAt: data.createdAt?.toDate() || new Date(),
       updatedAt: data.updatedAt?.toDate() || new Date(),
     };

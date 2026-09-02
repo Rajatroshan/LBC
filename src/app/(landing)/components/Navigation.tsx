@@ -31,30 +31,27 @@ export default function Navigation() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-md py-3'
-          : 'bg-gradient-to-b from-gray-950/80 via-gray-950/40 to-transparent py-4 sm:py-5'
+          ? 'bg-[#FFFDF7]/95 backdrop-blur-md shadow-md py-2.5 border-b-2 border-amber-200'
+          : 'bg-gradient-to-b from-amber-100/90 via-amber-50/50 to-transparent py-3 sm:py-4'
       }`}
     >
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between">
-          {/* Logo */}
+          
+          {/* Logo with Cute Traditional Village Diya */}
           <div 
             onClick={() => scrollToSection('home')} 
-            className="flex items-center space-x-2.5 cursor-pointer"
+            className="flex items-center space-x-2.5 cursor-pointer group"
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 via-primary-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md">
-              <span className="text-white font-black text-xl">L</span>
+            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 via-amber-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-md border-2 border-amber-200 group-hover:scale-105 transition-transform">
+              <span className="text-white font-black text-xl">🪔</span>
             </div>
             <div>
-              <span className={`text-xl sm:text-2xl font-black tracking-tight transition-colors ${
-                isScrolled ? 'text-gray-900' : 'text-white'
-              }`}>
+              <span className="text-xl sm:text-2xl font-black tracking-tight text-stone-900">
                 LBC
               </span>
-              <span className={`hidden sm:inline-block text-[10px] font-bold ml-2 px-1.5 py-0.5 rounded ${
-                isScrolled ? 'bg-primary-50 text-primary-700' : 'bg-white/20 text-emerald-200'
-              }`}>
-                Village Chanda
+              <span className="hidden sm:inline-block text-[10px] font-black ml-2 px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-900">
+                🌾 Apna Gaon
               </span>
             </div>
           </div>
@@ -63,48 +60,38 @@ export default function Navigation() {
           <div className="hidden md:flex items-center space-x-6 lg:space-x-8 text-sm">
             <button
               onClick={() => scrollToSection('home')}
-              className={`font-semibold transition-colors hover:text-primary-500 ${
-                isScrolled ? 'text-gray-700' : 'text-gray-100'
-              }`}
+              className="font-bold transition-colors text-stone-800 hover:text-orange-600"
             >
-              Home
+              Gaon Home
             </button>
             <button
               onClick={() => scrollToSection('features')}
-              className={`font-semibold transition-colors hover:text-primary-500 ${
-                isScrolled ? 'text-gray-700' : 'text-gray-100'
-              }`}
+              className="font-bold transition-colors text-stone-800 hover:text-orange-600"
             >
-              Features
+              Village Features
             </button>
             <button
               onClick={() => scrollToSection('glimpses')}
-              className={`font-semibold transition-colors hover:text-primary-500 ${
-                isScrolled ? 'text-gray-700' : 'text-gray-100'
-              }`}
+              className="font-bold transition-colors text-stone-800 hover:text-orange-600"
             >
-              Glimpses
+              Utsav Glimpses
             </button>
             <button
               onClick={() => scrollToSection('about')}
-              className={`font-semibold transition-colors hover:text-primary-500 ${
-                isScrolled ? 'text-gray-700' : 'text-gray-100'
-              }`}
+              className="font-bold transition-colors text-stone-800 hover:text-orange-600"
             >
-              About
+              About Club
             </button>
             <button
               onClick={() => scrollToSection('developer')}
-              className="font-bold transition-colors text-amber-400 hover:text-amber-300 flex items-center gap-1 bg-amber-400/10 px-2.5 py-1 rounded-full border border-amber-400/30"
+              className="font-black transition-colors text-orange-800 hover:text-orange-900 flex items-center gap-1 bg-amber-100/90 px-3 py-1 rounded-full border-2 border-amber-300 shadow-sm"
             >
-              <Code2 className="w-3.5 h-3.5" />
+              <Code2 className="w-3.5 h-3.5 text-orange-700" />
               <span>Developer</span>
             </button>
             <button
               onClick={() => scrollToSection('contact')}
-              className={`font-semibold transition-colors hover:text-primary-500 ${
-                isScrolled ? 'text-gray-700' : 'text-gray-100'
-              }`}
+              className="font-bold transition-colors text-stone-800 hover:text-orange-600"
             >
               Contact
             </button>
@@ -116,19 +103,15 @@ export default function Navigation() {
             <div className="hidden sm:flex items-center space-x-2.5">
               <button
                 onClick={() => router.push(APP_ROUTES.LOGIN)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                  isScrolled
-                    ? 'text-gray-700 hover:bg-gray-100 border border-gray-200'
-                    : 'text-white border border-white/30 hover:bg-white/10'
-                }`}
+                className="px-4 py-2 rounded-2xl text-xs font-bold transition-all text-stone-800 hover:bg-amber-100/80 border-2 border-amber-300 bg-white"
               >
                 Sign In
               </button>
               <button
                 onClick={() => router.push(APP_ROUTES.LOGIN)}
-                className="px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-gray-950 rounded-xl text-xs font-extrabold transition-all shadow-md hover:shadow-lg flex items-center gap-1.5"
+                className="px-4 py-2 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-600 text-white rounded-2xl text-xs font-black transition-all shadow-md hover:shadow-lg flex items-center gap-1.5 border-2 border-amber-200"
               >
-                <span>Portal Access</span>
+                <span>Village Portal</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -137,11 +120,7 @@ export default function Navigation() {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle Navigation Menu"
-              className={`md:hidden p-2 rounded-xl border transition-colors ${
-                isScrolled
-                  ? 'text-gray-900 border-gray-200 bg-gray-50'
-                  : 'text-white border-white/20 bg-white/10 backdrop-blur-md'
-              }`}
+              className="md:hidden p-2 rounded-2xl border-2 border-amber-300 bg-white text-stone-900 shadow-sm transition-colors"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -151,54 +130,54 @@ export default function Navigation() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-gray-950/95 backdrop-blur-2xl text-white border-b border-gray-800 px-5 pt-4 pb-6 mt-2 space-y-4 shadow-2xl animate-fade-in">
+        <div className="md:hidden bg-[#FFFDF7] text-stone-900 border-b-2 border-amber-300 px-5 pt-4 pb-6 mt-2 space-y-4 shadow-2xl animate-fade-in">
           <div className="grid grid-cols-2 gap-2 text-sm">
             <button
               onClick={() => scrollToSection('home')}
-              className="p-2.5 text-left rounded-xl bg-gray-900 hover:bg-gray-800 font-semibold text-gray-200"
+              className="p-3 text-left rounded-2xl bg-amber-50 hover:bg-amber-100 font-black text-stone-800 border border-amber-200"
             >
-              🏠 Home
+              🌾 Gaon Home
             </button>
             <button
               onClick={() => scrollToSection('features')}
-              className="p-2.5 text-left rounded-xl bg-gray-900 hover:bg-gray-800 font-semibold text-gray-200"
+              className="p-3 text-left rounded-2xl bg-amber-50 hover:bg-amber-100 font-black text-stone-800 border border-amber-200"
             >
               ✨ Features
             </button>
             <button
               onClick={() => scrollToSection('glimpses')}
-              className="p-2.5 text-left rounded-xl bg-gray-900 hover:bg-gray-800 font-semibold text-gray-200"
+              className="p-3 text-left rounded-2xl bg-amber-50 hover:bg-amber-100 font-black text-stone-800 border border-amber-200"
             >
-              🖼️ Glimpses
+              🪔 Utsav Gallery
             </button>
             <button
               onClick={() => scrollToSection('about')}
-              className="p-2.5 text-left rounded-xl bg-gray-900 hover:bg-gray-800 font-semibold text-gray-200"
+              className="p-3 text-left rounded-2xl bg-amber-50 hover:bg-amber-100 font-black text-stone-800 border border-amber-200"
             >
-              📖 About Us
+              📖 About Club
             </button>
             <button
               onClick={() => scrollToSection('developer')}
-              className="col-span-2 p-2.5 text-left rounded-xl bg-gradient-to-r from-amber-500/20 to-primary-500/20 border border-amber-400/40 font-bold text-amber-300 flex items-center justify-between"
+              className="col-span-2 p-3 text-left rounded-2xl bg-gradient-to-r from-amber-100 to-orange-100 border-2 border-amber-300 font-black text-orange-950 flex items-center justify-between"
             >
               <span className="flex items-center gap-2">
-                <Code2 className="w-4 h-4 text-amber-400" />
+                <Code2 className="w-4 h-4 text-orange-700" />
                 Meet Developer (Rajat Sahu)
               </span>
-              <span className="text-[10px] bg-amber-400 text-gray-950 px-2 py-0.5 rounded-full font-extrabold">TechM</span>
+              <span className="text-[10px] bg-orange-600 text-white px-2 py-0.5 rounded-full font-extrabold">Tech Mahindra</span>
             </button>
             <button
               onClick={() => scrollToSection('contact')}
-              className="col-span-2 p-2.5 text-left rounded-xl bg-gray-900 hover:bg-gray-800 font-semibold text-gray-300"
+              className="col-span-2 p-3 text-left rounded-2xl bg-amber-50 hover:bg-amber-100 font-bold text-stone-700 border border-amber-200"
             >
-              📞 Contact & Community Info
+              📞 Village Contacts &amp; Committee Info
             </button>
           </div>
 
-          <div className="pt-2 border-t border-gray-800 flex flex-col gap-2">
+          <div className="pt-2 border-t-2 border-dashed border-amber-200 flex flex-col gap-2">
             <button
               onClick={() => { setMobileMenuOpen(false); router.push(APP_ROUTES.LOGIN); }}
-              className="w-full py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-gray-950 font-black rounded-xl text-sm shadow-lg flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white font-black rounded-2xl text-sm shadow-md flex items-center justify-center gap-2 border-2 border-amber-200"
             >
               <span>Access Member / Admin Portal</span>
               <ArrowRight className="w-4 h-4" />

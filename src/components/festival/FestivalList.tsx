@@ -74,17 +74,22 @@ export const FestivalList: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-5 rounded-3xl border-2 border-amber-200 shadow-sm">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Festivals</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage community pujas, festivals, and subscriptions</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-stone-900 flex items-center gap-2">
+            <span>🪔</span>
+            <span>Village Utsav &amp; Pujas</span>
+          </h1>
+          <p className="text-xs text-stone-500 font-medium mt-0.5">Manage community mandap pujas, festival dates, and family contribution quotas</p>
         </div>
-        <Link href={APP_ROUTES.FESTIVAL_CREATE}>
-          <Button className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Add Festival
-          </Button>
-        </Link>
+        {isAdmin && (
+          <Link href={APP_ROUTES.FESTIVAL_CREATE}>
+            <Button className="flex items-center gap-1.5 text-xs font-black rounded-2xl bg-orange-600 hover:bg-orange-700 text-white shadow-sm border border-amber-200">
+              <Plus className="w-3.5 h-3.5" />
+              + Add New Festival
+            </Button>
+          </Link>
+        )}
       </div>
 
       {loading ? (

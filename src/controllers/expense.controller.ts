@@ -47,6 +47,12 @@ export class ExpenseController {
       approvalStatus = 'PENDING_APPROVAL';
     }
 
+    const recordingUserId = data.paidByUserId;
+    const recordingUserName = data.paidByUserName;
+    const recordingUserEmail = data.paidByUserEmail;
+    const recordingUserRole = isActuallyAdmin ? 'ADMIN' : 'USER';
+    const now = new Date();
+
     const expense = await expenseService.create({
       purpose: data.purpose,
       category: data.category,
@@ -61,11 +67,18 @@ export class ExpenseController {
       paidByUserId: data.paidByUserId,
       paidByUserName: data.paidByUserName,
       paidByUserEmail: data.paidByUserEmail,
+      recordedByUserId: recordingUserId,
+      recordedByUserName: recordingUserName,
+      recordedByUserEmail: recordingUserEmail,
+      recordedByUserRole: recordingUserRole,
+      recordedAt: now,
       reimbursementStatus: paymentSource === 'PERSONAL_OUT_OF_POCKET' ? 'PENDING' : 'NONE',
       approvalStatus,
       approvedByUserId: isActuallyAdmin ? data.paidByUserId : undefined,
       approvedByUserName: isActuallyAdmin ? data.paidByUserName : undefined,
-      approvedAt: isActuallyAdmin ? new Date() : undefined,
+      approvedByUserEmail: isActuallyAdmin ? data.paidByUserEmail : undefined,
+      approvedByUserRole: isActuallyAdmin ? 'ADMIN' : undefined,
+      approvedAt: isActuallyAdmin ? now : undefined,
     });
 
     if (paymentSource === 'PERSONAL_OUT_OF_POCKET' && data.paidByUserId) {
@@ -83,7 +96,7 @@ export class ExpenseController {
     } else if (paymentSource === 'MASTER_ACCOUNT' && isActuallyAdmin) {
       // 2. Paid from Club Master Account by Admin -> Deduct immediately
       try {
-        const description = `Expense: ${data.purpose} - Paid to ${data.paidTo}`;
+        const description = `Expense: ${data.purpose} - Paid to ${data.paidTo} (Recorded by ${data.paidByUserName || 'Admin'})`;
         
         await accountService.deductExpense({
           amount: data.amount,
@@ -107,7 +120,7 @@ export class ExpenseController {
    */
   async approveMasterAccountExpense(
     expenseId: string, 
-    adminUser: { id: string; name: string }
+    adminUser: { id: string; name: string; email?: string }
   ): Promise<Expense> {
     const expense = await this.getExpenseById(expenseId);
 
@@ -116,7 +129,7 @@ export class ExpenseController {
     }
 
     // 1. Deduct from Master Account
-    const description = `Approved Expense: ${expense.purpose} - Paid to ${expense.paidTo}`;
+    const description = `Approved Expense: ${expense.purpose} - Paid to ${expense.paidTo} (Approved by ${adminUser.name || 'Admin'})`;
     await accountService.deductExpense({
       amount: expense.amount,
       description,
@@ -124,13 +137,17 @@ export class ExpenseController {
       date: expense.expenseDate,
     });
 
-    // 2. Update expense status in Firestore
+    // 2. Update expense status in Firestore with audit trail
     const approvedAt = new Date();
     await expenseService.update(expenseId, {
       approvalStatus: 'APPROVED',
       approvedByUserId: adminUser.id,
       approvedByUserName: adminUser.name,
+      approvedByUserEmail: adminUser.email || '',
+      approvedByUserRole: 'ADMIN',
       approvedAt,
+      updatedByUserId: adminUser.id,
+      updatedByUserName: adminUser.name,
     });
 
     return await this.getExpenseById(expenseId);
@@ -141,14 +158,20 @@ export class ExpenseController {
    */
   async rejectMasterAccountExpense(
     expenseId: string, 
-    adminUser: { id: string; name: string },
+    adminUser: { id: string; name: string; email?: string },
     reason = 'Declined by administrator'
   ): Promise<void> {
+    const now = new Date();
     await expenseService.update(expenseId, {
       approvalStatus: 'REJECTED',
       approvedByUserId: adminUser.id,
       approvedByUserName: adminUser.name,
+      approvedByUserEmail: adminUser.email || '',
+      approvedByUserRole: 'ADMIN',
+      approvedAt: now,
       rejectionReason: reason,
+      updatedByUserId: adminUser.id,
+      updatedByUserName: adminUser.name,
     });
   }
 

@@ -10,6 +10,9 @@ export class FestivalController {
     isMultiDay?: boolean;
     amountPerFamily: number;
     description?: string;
+    createdByUserId?: string;
+    createdByUserName?: string;
+    createdByUserEmail?: string;
   }): Promise<Festival> {
     // Validation
     if (!data.name || !data.date || !data.amountPerFamily) {
@@ -24,6 +27,9 @@ export class FestivalController {
       ...data,
       type: data.type || '',
       isActive: true,
+      createdByUserId: data.createdByUserId,
+      createdByUserName: data.createdByUserName,
+      createdByUserEmail: data.createdByUserEmail,
     });
   }
 
