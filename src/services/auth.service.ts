@@ -9,10 +9,24 @@ import {
   GoogleAuthProvider,
   GithubAuthProvider
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { 
+  doc, 
+  setDoc, 
+  getDoc, 
+  updateDoc, 
+  collection, 
+  query, 
+  getDocs, 
+  orderBy, 
+  Timestamp 
+} from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { User } from '../models';
 import { COLLECTIONS } from '@/constants';
+
+export const PRIMARY_ADMIN_EMAILS = [
+  'rajatroshan2002@gmail.com'
+];
 
 export class AuthService {
   /**
@@ -27,7 +41,7 @@ export class AuthService {
    * Seamless single-platform authentication:
    * 1. Attempts sign in with email & password.
    * 2. If the user doesn't exist yet, automatically creates the account,
-   *    sets up the profile, and initializes the Firestore user record.
+   *    sets up the profile, and initializes the Firestore user record with PENDING_APPROVAL.
    */
   async loginOrRegister(
     email: string, 
@@ -95,7 +109,7 @@ export class AuthService {
   }
 
   /**
-   * Register new user
+   * Register new user (default approvalStatus is PENDING_APPROVAL)
    */
   async register(email: string, password: string, name: string): Promise<FirebaseUser> {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -141,14 +155,17 @@ export class AuthService {
   async syncOAuthUserDocument(user: FirebaseUser): Promise<void> {
     const docRef = doc(db, COLLECTIONS.USERS, user.uid);
     const docSnap = await getDoc(docRef);
+    const email = user.email || '';
+    const isPrimaryAdmin = PRIMARY_ADMIN_EMAILS.includes(email.toLowerCase());
 
     if (!docSnap.exists()) {
       // First time login - create user document
       const now = Timestamp.now();
       await setDoc(docRef, {
-        email: user.email || '',
-        name: user.displayName || user.email?.split('@')[0] || 'User',
-        role: 'USER',
+        email,
+        name: user.displayName || email.split('@')[0] || 'User',
+        role: isPrimaryAdmin ? 'ADMIN' : 'USER',
+        approvalStatus: isPrimaryAdmin ? 'APPROVED' : 'PENDING_APPROVAL',
         photoURL: user.photoURL || '',
         phone: user.phoneNumber || '',
         createdAt: now,
@@ -160,6 +177,10 @@ export class AuthService {
       const updates: Record<string, unknown> = {
         updatedAt: Timestamp.now(),
       };
+      if (isPrimaryAdmin && data.role !== 'ADMIN') {
+        updates.role = 'ADMIN';
+        updates.approvalStatus = 'APPROVED';
+      }
       if (!data.photoURL && user.photoURL) {
         updates.photoURL = user.photoURL;
       }
@@ -192,7 +213,7 @@ export class AuthService {
   }
 
   /**
-   * Get user document from Firestore
+   * Get user document from Firestore with approvalStatus mapping
    */
   async getUserDocument(uid: string): Promise<User | null> {
     const docRef = doc(db, COLLECTIONS.USERS, uid);
@@ -201,13 +222,25 @@ export class AuthService {
     if (!docSnap.exists()) return null;
 
     const data = docSnap.data();
+    const isPrimaryAdmin = PRIMARY_ADMIN_EMAILS.includes((data.email || '').toLowerCase());
+    const role = isPrimaryAdmin ? 'ADMIN' : (data.role || 'USER');
+    const approvalStatus = isPrimaryAdmin 
+      ? 'APPROVED' 
+      : (data.approvalStatus || (data.role === 'ADMIN' ? 'APPROVED' : 'PENDING_APPROVAL'));
+
     return {
       id: docSnap.id,
       email: data.email,
       name: data.name,
-      role: data.role,
+      role,
       phone: data.phone,
       photoURL: data.photoURL,
+      approvalStatus,
+      approvedByUserId: data.approvedByUserId,
+      approvedByUserName: data.approvedByUserName,
+      approvedByUserEmail: data.approvedByUserEmail,
+      approvedAt: data.approvedAt?.toDate(),
+      rejectionReason: data.rejectionReason,
       createdAt: data.createdAt?.toDate() || new Date(),
       updatedAt: data.updatedAt?.toDate() || new Date(),
     };
@@ -218,12 +251,83 @@ export class AuthService {
    */
   private async createUserDocument(uid: string, email: string, name: string): Promise<void> {
     const now = Timestamp.now();
+    const isPrimaryAdmin = PRIMARY_ADMIN_EMAILS.includes(email.toLowerCase());
     await setDoc(doc(db, COLLECTIONS.USERS, uid), {
       email,
       name,
-      role: 'USER', // Default role
+      role: isPrimaryAdmin ? 'ADMIN' : 'USER',
+      approvalStatus: isPrimaryAdmin ? 'APPROVED' : 'PENDING_APPROVAL',
       createdAt: now,
       updatedAt: now,
+    });
+  }
+
+  /**
+   * Fetch all users from Firestore (For Admin Member Management)
+   */
+  async getAllUsers(): Promise<User[]> {
+    try {
+      const q = query(collection(db, COLLECTIONS.USERS), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(docSnap => {
+        const data = docSnap.data();
+        const isPrimaryAdmin = PRIMARY_ADMIN_EMAILS.includes((data.email || '').toLowerCase());
+        const role = isPrimaryAdmin ? 'ADMIN' : (data.role || 'USER');
+        const approvalStatus = isPrimaryAdmin 
+          ? 'APPROVED' 
+          : (data.approvalStatus || (data.role === 'ADMIN' ? 'APPROVED' : 'PENDING_APPROVAL'));
+
+        return {
+          id: docSnap.id,
+          email: data.email || '',
+          name: data.name || 'User',
+          role,
+          phone: data.phone,
+          photoURL: data.photoURL,
+          approvalStatus,
+          approvedByUserId: data.approvedByUserId,
+          approvedByUserName: data.approvedByUserName,
+          approvedByUserEmail: data.approvedByUserEmail,
+          approvedAt: data.approvedAt?.toDate(),
+          rejectionReason: data.rejectionReason,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+        };
+      });
+    } catch (err) {
+      console.error('Failed to get all users:', err);
+      return [];
+    }
+  }
+
+  /**
+   * Approve a pending member
+   */
+  async approveUser(userId: string, adminUser: { id: string; name: string; email: string }): Promise<void> {
+    const docRef = doc(db, COLLECTIONS.USERS, userId);
+    await updateDoc(docRef, {
+      approvalStatus: 'APPROVED',
+      approvedByUserId: adminUser.id,
+      approvedByUserName: adminUser.name,
+      approvedByUserEmail: adminUser.email,
+      approvedAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    });
+  }
+
+  /**
+   * Reject a member registration
+   */
+  async rejectUser(userId: string, reason: string, adminUser: { id: string; name: string; email: string }): Promise<void> {
+    const docRef = doc(db, COLLECTIONS.USERS, userId);
+    await updateDoc(docRef, {
+      approvalStatus: 'REJECTED',
+      rejectionReason: reason || 'Not approved by village committee admin',
+      approvedByUserId: adminUser.id,
+      approvedByUserName: adminUser.name,
+      approvedByUserEmail: adminUser.email,
+      approvedAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
     });
   }
 }

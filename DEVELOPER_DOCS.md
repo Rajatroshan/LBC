@@ -257,6 +257,12 @@ Stores registered committee members and village administrators.
 * `role`: `'ADMIN' | 'USER'`
 * `phone`: String (Optional)
 * `photoURL`: String (Google Profile avatar URL)
+* `approvalStatus`: `'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED'` (First-time registrants default to `PENDING_APPROVAL`, primary admin defaults to `APPROVED`)
+* `approvedByUserId`: String (Admin ID who approved the user)
+* `approvedByUserName`: String (Admin Name who approved the user)
+* `approvedByUserEmail`: String (Admin Email who approved the user)
+* `approvedAt`: Firestore Timestamp
+* `rejectionReason`: String (Optional justification if rejected)
 * `createdAt`, `updatedAt`: Firestore Timestamps
 
 ### 2. `families` Collection
@@ -566,6 +572,48 @@ sequenceDiagram
 
     Admin->>RepUI: Clicks "Download Signed Sabha Report PDF"
     RepUI-->>Admin: Generates official multi-page village balance sheet ready for meeting
+```
+
+---
+
+### 7.5 Member Registration & Administrative Approval Lifecycle
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Applicant as New Member / Kisan
+    actor Admin as Committee Admin (Rajat Kumar Sahu)
+    participant UI as Login / Register Portal (/auth/login)
+    participant Svc as AuthService & Cloud Firestore
+    participant Hub as Member Approvals Hub (/members)
+    participant MailAPI as Next.js Mail Route (/api/mail/approve-member)
+
+    Applicant->>UI: Enters Email & Password or clicks "Continue with Google"
+    UI->>Svc: register() / loginWithGoogle()
+    
+    alt Applicant is Not Primary Admin
+        Svc->>Svc: Create User record with approvalStatus = 'PENDING_APPROVAL'
+        Svc->>UI: Throws PENDING_APPROVAL & signs out Firebase session
+        UI-->>Applicant: Displays "Admin Approval Pending" card with Admin contact info
+    end
+
+    Note over Admin,Hub: Administrative Review in Dashboard
+    Admin->>Hub: Navigates to /members "Pending Queue"
+    Hub-->>Admin: Displays applicant cards (Name, Email, Registered Date)
+    Admin->>Hub: Clicks [✅ Approve & Send Mail]
+    
+    Hub->>Svc: approveUser(applicantId, adminUser)
+    Svc->>Svc: Update Firestore user doc (approvalStatus = 'APPROVED', approvedAt = now)
+    
+    Hub->>MailAPI: POST /api/mail/approve-member { memberEmail, memberName, adminName }
+    MailAPI-->>Applicant: Dispatches personalized HTML welcome email with direct login link
+    Hub-->>Admin: Displays success toast: "Member Approved! Confirmation email sent."
+
+    Note over Applicant,UI: Post-Approval Member Login
+    Applicant->>UI: Logs in with registered credentials
+    UI->>Svc: Authenticates session
+    Svc-->>UI: Returns active user profile (approvalStatus == 'APPROVED')
+    UI-->>Applicant: Seamless redirect to Mandap Dashboard (/dashboard)
 ```
 
 ---

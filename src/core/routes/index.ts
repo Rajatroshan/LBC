@@ -36,6 +36,9 @@ export const APP_ROUTES = {
   REPORTS: '/reports',
   REPORT_FESTIVAL: (festivalId: string) => `/reports/festival/${festivalId}`,
   
+  // Member approvals route (Admin only)
+  MEMBERS: '/members',
+
   // Settings routes
   SETTINGS: '/settings',
 } as const;

@@ -79,7 +79,7 @@ export default function Footer() {
                 <span>📍</span> Luhuren Bae Club Community Mandap
               </li>
               <li className="flex items-center gap-1.5">
-                <span>🌾</span> Village: Luhuren, Odisha, India
+                <span>🌾</span> Village: Luhurachati,Pandakipali, Odisha, India
               </li>
               <li className="text-[11px] text-amber-300/80 pt-2 font-semibold flex items-center gap-1">
                 <span>🛡️</span> 100% Tamper-Evident Safety Audit Trails
