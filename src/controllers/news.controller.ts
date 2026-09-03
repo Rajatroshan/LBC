@@ -11,6 +11,7 @@ export class NewsController {
     content: string;
     category: NewsCategory;
     isPinned?: boolean;
+    isActive?: boolean;
     eventDate?: Date;
     location?: string;
     authorId: string;
@@ -39,6 +40,7 @@ export class NewsController {
       content: data.content.trim(),
       category: data.category,
       isPinned: data.isPinned || false,
+      isActive: data.isActive !== undefined ? data.isActive : true,
       eventDate: data.eventDate,
       location: data.location?.trim(),
       authorId: data.authorId,

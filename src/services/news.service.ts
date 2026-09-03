@@ -33,6 +33,7 @@ export class NewsService {
       imageUrl: data.imageUrl || undefined,
       imageThumbnailUrl: data.imageThumbnailUrl || undefined,
       isPinned: data.isPinned || false,
+      isActive: data.isActive !== false, // Defaults to true
       eventDate: data.eventDate ? (data.eventDate as Timestamp).toDate() : undefined,
       location: data.location || undefined,
       authorId: data.authorId || '',
@@ -62,6 +63,7 @@ export class NewsService {
       content: data.content,
       category: data.category,
       isPinned: data.isPinned || false,
+      isActive: data.isActive !== undefined ? data.isActive : true,
       authorId: data.authorId,
       authorName: data.authorName,
       authorRole: data.authorRole,
@@ -166,6 +168,7 @@ export class NewsService {
     if (data.category !== undefined) updateData.category = data.category;
     if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
     if (data.isPinned !== undefined) updateData.isPinned = data.isPinned;
+    if (data.isActive !== undefined) updateData.isActive = data.isActive;
     if (data.location !== undefined) updateData.location = data.location;
     if (data.eventDate !== undefined) {
       updateData.eventDate = data.eventDate ? Timestamp.fromDate(data.eventDate) : null;
