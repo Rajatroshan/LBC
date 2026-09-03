@@ -106,5 +106,13 @@ service cloud.firestore {
       allow update: if false; // Transactions are immutable
       allow delete: if isAdmin();
     }
+
+    // 12. News Posts collection (Gaon Samachar - Public Read & Reactions)
+    match /news_posts/{postId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() || true; // Allow public reactions
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+    }
   }
 }

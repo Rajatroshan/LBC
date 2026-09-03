@@ -17,6 +17,7 @@ import {
   Wallet,
   Receipt,
   UserCheck,
+  Newspaper,
   X
 } from 'lucide-react';
 
@@ -42,6 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { label: 'Record Chanda', emoji: '📜', href: APP_ROUTES.PAYMENTS, Icon: CreditCard, adminOnly: false },
     { label: 'Record Expense', emoji: '🏺', href: APP_ROUTES.EXPENSES, Icon: Receipt, adminOnly: false },
     { label: 'Reimbursements', emoji: '👛', href: APP_ROUTES.REIMBURSEMENTS, Icon: Wallet, adminOnly: false },
+    { label: 'Gaon Samachar', emoji: '📰', href: APP_ROUTES.NEWS, Icon: Newspaper, adminOnly: false },
     { label: 'Utsav Calendar', emoji: '📅', href: APP_ROUTES.CALENDAR, Icon: CalendarDays, adminOnly: false },
     { label: 'Sabha Reports', emoji: '📊', href: APP_ROUTES.REPORTS, Icon: BarChart3, adminOnly: true },
     { label: 'Member Approvals', emoji: '👥', href: APP_ROUTES.MEMBERS, Icon: UserCheck, adminOnly: true },

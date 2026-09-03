@@ -276,3 +276,46 @@ export interface DashboardStats {
   upcomingFestivalsList: Festival[];
   recentTransactions: Transaction[];
 }
+
+// ==========================================
+// 📰 GAON SAMACHAR & NOTICE BOARD TYPES
+// ==========================================
+export type NewsCategory = 
+  | 'PUJA_UPDATE' 
+  | 'SABHA_NOTICE' 
+  | 'DEVELOPMENT' 
+  | 'FESTIVAL_SCHEDULE' 
+  | 'YOUTH_EVENT' 
+  | 'EMERGENCY'
+  | 'GENERAL';
+
+export interface NewsReactions {
+  namaste: number;
+  diya: number;
+  heart: number;
+  celebration: number;
+}
+
+export interface NewsPost extends BaseEntity {
+  title: string;
+  content: string;
+  category: NewsCategory;
+  imageUrl?: string;
+  imageThumbnailUrl?: string;
+  isPinned: boolean;
+  eventDate?: Date;
+  location?: string;
+  authorId: string;
+  authorName: string;
+  authorRole: 'ADMIN' | 'USER';
+  authorEmail?: string;
+  reactions: NewsReactions;
+  viewsCount?: number;
+}
+
+export interface NewsPostFilter {
+  category?: NewsCategory;
+  isPinned?: boolean;
+  authorId?: string;
+  search?: string;
+}
