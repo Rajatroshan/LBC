@@ -7,6 +7,7 @@ import { APP_ROUTES } from '@/core/routes';
 import { Loader } from '@/components/ui/Loader';
 import Navigation from './(landing)/components/Navigation';
 import HeroSection from './(landing)/components/HeroSection';
+import PublicTransparencyHub from './(landing)/components/PublicTransparencyHub';
 import GlimpsesSection from './(landing)/components/GlimpsesSection';
 import FeaturesSection from './(landing)/components/FeaturesSection';
 import WhoIsThisForSection from './(landing)/components/WhoIsThisForSection';
@@ -37,7 +38,7 @@ export default function HomePage() {
     );
   }
 
-  // If not logged in, render the public landing page
+  // If not logged in, render the public landing page with live transparency hub
   return (
     <div className="min-h-screen bg-white">
       {/* Sticky Navigation */}
@@ -45,6 +46,9 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <HeroSection />
+
+      {/* ⭐ 100% Khula Hisab - Live Public Transparency Portal */}
+      <PublicTransparencyHub />
 
       {/* Glimpses Section (Screenshots) */}
       <GlimpsesSection />
