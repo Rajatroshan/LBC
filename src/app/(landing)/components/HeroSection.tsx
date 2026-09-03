@@ -45,7 +45,9 @@ export default function HeroSection() {
       className="relative min-h-screen flex flex-col justify-between overflow-hidden bg-gradient-to-b from-amber-100/70 via-orange-50/60 to-emerald-50/80 text-stone-900 pt-20 sm:pt-24 pb-12 select-none"
     >
       {/* 🌸 Traditional Doorway Marigold Toran Garland */}
-      <MarigoldToran className="absolute top-16 left-0 right-0 z-20 opacity-90" />
+      <div className="w-full relative z-10 pt-1 pb-2">
+        <MarigoldToran className="opacity-90" />
+      </div>
 
       {/* 🌤️ Animated Sky with Slow Clouds & Flying Birds */}
       <CartoonClouds className="z-0" />

@@ -21,25 +21,25 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // 2. Families collection (Gram Parivar)
+    // 2. Families collection (Gram Parivar - Public Read for 100% Khula Hisab transparency)
     match /families/{familyId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow create: if isAuthenticated();
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
     }
     
-    // 3. Festivals collection
+    // 3. Festivals collection (Public Read)
     match /festivals/{festivalId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow create: if isAdmin();
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
     
-    // 4. Payments collection (Chanda Contributions)
+    // 4. Payments collection (Chanda Contributions - Public Read)
     match /payments/{paymentId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow create: if isAuthenticated();
       allow update: if isAdmin();
       allow delete: if isAdmin();
@@ -53,9 +53,9 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // 6. Expenses collection (Vendor bills and Out-of-pocket expenses)
+    // 6. Expenses collection (Vendor bills - Public Read for transparency)
     match /expenses/{expenseId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow create: if isAuthenticated();
       allow update: if isAdmin();
       allow delete: if isAdmin();
@@ -91,9 +91,9 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // 10. Account collection (Treasury balance)
+    // 10. Account collection (Treasury balance - Public Read)
     match /account/{accountId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow create: if isAdmin();
       allow update: if isAdmin();
       allow delete: if false; // Never delete treasury
