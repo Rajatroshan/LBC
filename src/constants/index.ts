@@ -69,7 +69,29 @@ export const COLLECTIONS = {
   TRANSACTIONS: 'transactions',
   USER_ACCOUNTS: 'user_accounts',
   REIMBURSEMENT_REQUESTS: 'reimbursement_requests',
+  NEWS_POSTS: 'news_posts',
 } as const;
+
+// News Categories & Display Labels
+export const NEWS_CATEGORY_LABELS: Record<string, string> = {
+  PUJA_UPDATE: 'Puja & Mandap Updates',
+  SABHA_NOTICE: 'Gram Sabha Notices',
+  DEVELOPMENT: 'Village Development Work',
+  FESTIVAL_SCHEDULE: 'Festival Schedule & Tithi',
+  YOUTH_EVENT: 'Youth & Sports Events',
+  EMERGENCY: 'Emergency & Urgent Alert',
+  GENERAL: 'General Village News',
+};
+
+export const NEWS_CATEGORY_ICONS: Record<string, string> = {
+  PUJA_UPDATE: '🪔',
+  SABHA_NOTICE: '📢',
+  DEVELOPMENT: '🏗️',
+  FESTIVAL_SCHEDULE: '📅',
+  YOUTH_EVENT: '🏏',
+  EMERGENCY: '🚨',
+  GENERAL: '🌾',
+};
 
 // App Constants
 export const APP_CONSTANTS = {

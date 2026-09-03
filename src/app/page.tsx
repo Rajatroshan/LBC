@@ -8,6 +8,7 @@ import { Loader } from '@/components/ui/Loader';
 import Navigation from './(landing)/components/Navigation';
 import HeroSection from './(landing)/components/HeroSection';
 import PublicTransparencyHub from './(landing)/components/PublicTransparencyHub';
+import VillageNewsFeed from './(landing)/components/VillageNewsFeed';
 import GlimpsesSection from './(landing)/components/GlimpsesSection';
 import FeaturesSection from './(landing)/components/FeaturesSection';
 import WhoIsThisForSection from './(landing)/components/WhoIsThisForSection';
@@ -49,6 +50,9 @@ export default function HomePage() {
 
       {/* ⭐ 100% Khula Hisab - Live Public Transparency Portal */}
       <PublicTransparencyHub />
+
+      {/* 📰 Gaon Samachar - Village Notices & Public Reaction Board */}
+      <VillageNewsFeed />
 
       {/* Glimpses Section (Screenshots) */}
       <GlimpsesSection />

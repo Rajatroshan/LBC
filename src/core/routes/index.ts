@@ -39,6 +39,9 @@ export const APP_ROUTES = {
   // Member approvals route (Admin only)
   MEMBERS: '/members',
 
+  // News & Notice Board routes
+  NEWS: '/news',
+
   // Settings routes
   SETTINGS: '/settings',
 } as const;
