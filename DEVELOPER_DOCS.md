@@ -49,7 +49,8 @@ LBC Mandap is an enterprise-grade village community fund management platform eng
 | **UI & Design** | **Tailwind CSS 3.x** | Responsive design, custom Indian Village theme palette |
 | **Icons** | **Lucide React** | Scalable, clean SVG icons throughout application |
 | **Backend & Auth** | **Firebase 10.x (Client SDK)** | Google OAuth, Email/Password auth, session management |
-| **Database** | **Cloud Firestore (NoSQL)** | Document store for collections, subcollections, transactions |
+| **PWA & Offline** | **Service Worker & Web Manifest** | Offline asset caching, 1-tap mobile installation, standalone viewport |
+| **Email Engine** | **Nodemailer** | Automated HTML member approval emails with SMTP support |
 | **Architecture** | **Layered Clean Architecture (MVC)** | Models $\rightarrow$ Services $\rightarrow$ Controllers $\rightarrow$ Contexts $\rightarrow$ UI Components |
 
 ---
