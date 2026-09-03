@@ -32,6 +32,7 @@ export default function NewsManagementPage() {
   const [content, setContent] = useState('');
   const [category, setCategory] = useState<NewsCategory>('PUJA_UPDATE');
   const [isPinned, setIsPinned] = useState(false);
+  const [isActive, setIsActive] = useState(true);
   const [location, setLocation] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -60,6 +61,7 @@ export default function NewsManagementPage() {
     setContent('');
     setCategory('PUJA_UPDATE');
     setIsPinned(false);
+    setIsActive(true);
     setLocation('');
     setEventDate('');
     setImageFile(null);
@@ -73,11 +75,30 @@ export default function NewsManagementPage() {
     setContent(post.content);
     setCategory(post.category);
     setIsPinned(post.isPinned);
+    setIsActive(post.isActive !== false);
     setLocation(post.location || '');
     setEventDate(post.eventDate ? post.eventDate.toISOString().split('T')[0] : '');
     setImageFile(null);
     setImagePreview(post.imageUrl || null);
     setModalOpen(true);
+  };
+
+  const handleToggleActive = async (postId: string, currentStatus: boolean) => {
+    try {
+      const newStatus = !currentStatus;
+      await newsController.updatePost(postId, { isActive: newStatus });
+      setPosts((prev) =>
+        prev.map((p) => (p.id === postId ? { ...p, isActive: newStatus } : p))
+      );
+      toast.success(
+        newStatus
+          ? 'Notice activated (will appear on homepage top bar)'
+          : 'Notice deactivated (removed from homepage top bar)',
+        'Status Updated'
+      );
+    } catch {
+      toast.error('Failed to update status', 'Error');
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,6 +124,7 @@ export default function NewsManagementPage() {
           content: content.trim(),
           category,
           isPinned,
+          isActive,
           location: location.trim() || undefined,
           eventDate: eventDate ? new Date(eventDate) : undefined,
           imageFile,
@@ -114,6 +136,7 @@ export default function NewsManagementPage() {
           content: content.trim(),
           category,
           isPinned,
+          isActive,
           location: location.trim() || undefined,
           eventDate: eventDate ? new Date(eventDate) : undefined,
           authorId: user?.id || 'admin',
@@ -122,7 +145,7 @@ export default function NewsManagementPage() {
           authorEmail: user?.email,
           imageFile,
         });
-        toast.success('Announcement published to homepage!', 'Published');
+        toast.success('Announcement published successfully!', 'Published');
       }
 
       setModalOpen(false);
@@ -276,6 +299,19 @@ export default function NewsManagementPage() {
                         </span>
                       )}
 
+                      <button
+                        type="button"
+                        onClick={() => handleToggleActive(post.id, post.isActive !== false)}
+                        className={`px-2 py-0.5 rounded-full text-[9px] font-black border transition-all cursor-pointer ${
+                          post.isActive !== false
+                            ? 'bg-emerald-100 text-emerald-900 border-emerald-300 hover:bg-emerald-200'
+                            : 'bg-stone-200 text-stone-700 border-stone-300 hover:bg-stone-300'
+                        }`}
+                        title="Click to toggle Homepage Notice Status"
+                      >
+                        {post.isActive !== false ? '🟢 Active on Homepage' : '⚪ Inactive (Removed)'}
+                      </button>
+
                       <span className="text-[11px] text-stone-500 font-semibold">
                         {formatDate(post.createdAt)}
                       </span>
@@ -304,26 +340,25 @@ export default function NewsManagementPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-                  <Button
-                    variant="outline"
-                    size="sm"
+                <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                  <button
+                    type="button"
                     onClick={() => openEditModal(post)}
-                    className="rounded-xl border-amber-300 text-stone-800 font-bold text-xs hover:bg-amber-50"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border-2 border-amber-300 bg-white hover:bg-amber-50 text-stone-800 font-black text-xs transition-all shadow-2xs hover:scale-102 active:scale-95 whitespace-nowrap cursor-pointer"
                   >
-                    <Edit3 className="w-3.5 h-3.5 mr-1" />
-                    <span>Edit</span>
-                  </Button>
+                    <Edit3 className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span>Edit Notice</span>
+                  </button>
 
                   {(isAdmin || post.authorId === user?.id) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <button
+                      type="button"
                       onClick={() => handleDelete(post.id, post.title)}
-                      className="rounded-xl border-rose-200 text-rose-700 hover:bg-rose-50 font-bold text-xs"
+                      className="p-2 rounded-xl border-2 border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-xs transition-all shadow-2xs hover:scale-102 active:scale-95 cursor-pointer flex items-center justify-center"
+                      title="Delete notice"
                     >
-                      <Trash2 className="w-3.5 h-3.5 text-rose-600" />
-                    </Button>
+                      <Trash2 className="w-4 h-4 text-rose-600" />
+                    </button>
                   )}
                 </div>
               </div>
@@ -465,6 +500,33 @@ export default function NewsManagementPage() {
                     </button>
                   </div>
                 )}
+              </div>
+
+              {/* Active Status on Homepage Toggle */}
+              <div className="p-3.5 rounded-2xl bg-amber-50/80 border-2 border-amber-300 flex items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-black text-stone-900 flex items-center gap-1.5">
+                    <span>{isActive ? '🟢' : '⚪'}</span>
+                    <span>Homepage Notice Status: {isActive ? 'ACTIVE' : 'INACTIVE'}</span>
+                  </span>
+                  <p className="text-[10px] text-stone-600 font-medium">
+                    {isActive 
+                      ? 'Notice will display on homepage top bar (if urgent/sabha/pinned).' 
+                      : 'Inactive notices are archived and removed from the homepage.'}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsActive(!isActive)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black border transition-all shrink-0 cursor-pointer ${
+                    isActive
+                      ? 'bg-emerald-600 text-white border-emerald-700 shadow-2xs hover:bg-emerald-700'
+                      : 'bg-stone-200 text-stone-700 border-stone-300 hover:bg-stone-300'
+                  }`}
+                >
+                  {isActive ? 'Active (Live)' : 'Inactive (Turn Off)'}
+                </button>
               </div>
 
               {/* Pin to Top Checkbox */}

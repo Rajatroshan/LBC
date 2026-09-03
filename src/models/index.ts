@@ -311,6 +311,7 @@ export interface NewsPost extends BaseEntity {
   imageUrl?: string;
   imageThumbnailUrl?: string;
   isPinned: boolean;
+  isActive?: boolean;
   eventDate?: Date;
   location?: string;
   authorId: string;

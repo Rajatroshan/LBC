@@ -16,9 +16,11 @@ export default function TopImportantNoticeBar() {
       try {
         const posts = await newsController.getAllPosts();
         
-        // ONLY match if explicitly Pinned, Emergency/Urgent Alert, or Gram Sabha Notice
+        // ONLY match if active AND (explicitly Pinned, Emergency/Urgent Alert, or Gram Sabha Notice)
         const important = posts.find(
-          (p) => p.isPinned || p.category === 'EMERGENCY' || p.category === 'SABHA_NOTICE'
+          (p) =>
+            p.isActive !== false &&
+            (p.isPinned || p.category === 'EMERGENCY' || p.category === 'SABHA_NOTICE')
         );
 
         if (important) {
