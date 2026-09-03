@@ -434,4 +434,24 @@ export const VerticalToranWireDivider: React.FC<{ className?: string }> = ({ cla
   </div>
 );
 
-
+/**
+ * 🛕 Animated Indian Temple + Pujari Avatar Illustration Component
+ */
+export const AnimatedTempleAvatar: React.FC<{ size?: number; className?: string }> = ({ 
+  size = 56, 
+  className = '' 
+}) => (
+  <div 
+    className={`inline-flex items-center justify-center shrink-0 ${className}`} 
+    style={{ width: size, height: size }}
+  >
+    {/* eslint-disable-next-line @next/next/no-img-element */}
+    <img 
+      src="/icons/icon.svg" 
+      alt="LBC Mandap & Temple Avatar" 
+      width={size} 
+      height={size} 
+      className="w-full h-full object-contain filter drop-shadow-md hover:scale-105 transition-transform duration-300"
+    />
+  </div>
+);
