@@ -29,10 +29,10 @@ export default function Navigation() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-[#FFFDF7]/98 backdrop-blur-md shadow-md py-2 border-b-2 border-amber-300'
-          : 'bg-[#FFFDF7]/90 backdrop-blur-xs py-2.5 sm:py-3 border-b border-amber-200/80 shadow-xs'
+          ? 'bg-[#FFFDF7]/95 backdrop-blur-md shadow-md py-2.5 border-b-2 border-amber-300'
+          : 'bg-gradient-to-b from-amber-100/95 via-amber-100/60 to-transparent py-3 sm:py-4'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
