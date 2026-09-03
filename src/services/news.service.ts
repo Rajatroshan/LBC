@@ -15,7 +15,7 @@ import {
   DocumentSnapshot
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { NewsPost, NewsPostFilter, NewsReactions } from '../models';
+import { NewsPost, NewsPostFilter, NewsReactions, NewsComment } from '../models';
 import { COLLECTIONS } from '@/constants';
 
 export class NewsService {
@@ -45,6 +45,7 @@ export class NewsService {
         heart: data.reactions?.heart || 0,
         celebration: data.reactions?.celebration || 0,
       },
+      commentsCount: data.commentsCount || 0,
       viewsCount: data.viewsCount || 0,
       createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
       updatedAt: data.updatedAt ? (data.updatedAt as Timestamp).toDate() : new Date(),
@@ -199,6 +200,59 @@ export class NewsService {
     await updateDoc(docRef, {
       viewsCount: increment(1),
     }).catch(() => {});
+  }
+
+  /**
+   * Add a comment to a news post
+   */
+  async addComment(postId: string, authorName: string, content: string): Promise<NewsComment> {
+    const commentsRef = collection(db, COLLECTIONS.NEWS_POSTS, postId, 'comments');
+    const now = Timestamp.now();
+    
+    const commentDoc = await addDoc(commentsRef, {
+      authorName: authorName.trim() || 'Village Resident',
+      content: content.trim(),
+      createdAt: now,
+    });
+
+    // Increment commentsCount on parent post
+    const postDocRef = doc(db, COLLECTIONS.NEWS_POSTS, postId);
+    await updateDoc(postDocRef, {
+      commentsCount: increment(1),
+    }).catch(() => {});
+
+    return {
+      id: commentDoc.id,
+      postId,
+      authorName: authorName.trim() || 'Village Resident',
+      content: content.trim(),
+      createdAt: now.toDate(),
+    };
+  }
+
+  /**
+   * Fetch comments for a post
+   */
+  async getComments(postId: string): Promise<NewsComment[]> {
+    try {
+      const commentsRef = collection(db, COLLECTIONS.NEWS_POSTS, postId, 'comments');
+      const q = query(commentsRef, orderBy('createdAt', 'asc'));
+      const snap = await getDocs(q);
+      
+      return snap.docs.map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          postId,
+          authorName: data.authorName || 'Village Resident',
+          content: data.content || '',
+          createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
+        };
+      });
+    } catch (error) {
+      console.warn('[NewsService] Failed to load comments:', error);
+      return [];
+    }
   }
 }
 

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { APP_ROUTES } from '@/core/routes';
 import { Menu, X, Code2, ArrowRight } from 'lucide-react';
 
@@ -9,6 +9,7 @@ export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,13 +20,46 @@ export default function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToSection = (id: string) => {
+  const scrollToSection = useCallback((id: string) => {
     setMobileMenuOpen(false);
+
+    if (pathname !== '/') {
+      router.push(`/#${id}`);
+      return;
+    }
+
+    if (id === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
     }
-  };
+  }, [pathname, router]);
+
+  // Handle hash scroll on initial landing from external/other pages
+  useEffect(() => {
+    if (pathname === '/' && typeof window !== 'undefined' && window.location.hash) {
+      const hashId = window.location.hash.replace('#', '');
+      setTimeout(() => {
+        const el = document.getElementById(hashId);
+        if (el) {
+          const headerOffset = 80;
+          const elementPosition = el.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+        }
+      }, 200);
+    }
+  }, [pathname]);
 
   return (
     <header
@@ -39,7 +73,7 @@ export default function Navigation() {
         <div className="flex items-center justify-between gap-2 sm:gap-4 h-12">
           
           {/* 1. Left Group: Logo + Left-Aligned Menu Links */}
-          <div className="flex items-center gap-4 xl:gap-6 min-w-0">
+          <div className="flex items-center gap-3 xl:gap-6 min-w-0">
             {/* Logo & Village Badge */}
             <div 
               onClick={() => scrollToSection('home')} 
@@ -61,58 +95,66 @@ export default function Navigation() {
             {/* Desktop Menu Links (Shifted Left, Compact Spacing) */}
             <nav className="hidden lg:flex items-center gap-2.5 xl:gap-4 text-xs xl:text-sm font-bold text-stone-700 whitespace-nowrap">
               <button
+                type="button"
                 onClick={() => scrollToSection('home')}
-                className="hover:text-orange-600 transition-colors px-1"
+                className="hover:text-orange-600 transition-colors px-1 cursor-pointer"
               >
                 Home
               </button>
               
               <button
+                type="button"
                 onClick={() => scrollToSection('khula-hisab')}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 font-black border border-amber-300 hover:bg-amber-200 transition-colors text-xs"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 font-black border border-amber-300 hover:bg-amber-200 transition-colors text-xs cursor-pointer"
               >
                 <span>📜 Khula Hisab</span>
               </button>
 
               <button
-                onClick={() => scrollToSection('gaon-samachar')}
-                className="hover:text-orange-600 transition-colors px-1"
+                type="button"
+                onClick={() => router.push('/samachar')}
+                className="hover:text-orange-600 transition-colors px-1 cursor-pointer"
               >
                 📰 Samachar
               </button>
 
               <button
+                type="button"
                 onClick={() => scrollToSection('features')}
-                className="hover:text-orange-600 transition-colors px-1"
+                className="hover:text-orange-600 transition-colors px-1 cursor-pointer"
               >
                 Features
               </button>
 
               <button
+                type="button"
                 onClick={() => scrollToSection('glimpses')}
-                className="hover:text-orange-600 transition-colors px-1"
+                className="hover:text-orange-600 transition-colors px-1 cursor-pointer"
               >
                 Utsav Gallery
               </button>
 
               <button
+                type="button"
                 onClick={() => scrollToSection('about')}
-                className="hover:text-orange-600 transition-colors px-1"
+                className="hover:text-orange-600 transition-colors px-1 cursor-pointer"
               >
                 About Club
               </button>
 
               <button
+                type="button"
                 onClick={() => scrollToSection('developer')}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-900 font-extrabold border border-orange-300 hover:bg-orange-200 transition-colors text-xs"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-900 font-extrabold border border-orange-300 hover:bg-orange-200 transition-colors text-xs cursor-pointer"
               >
                 <Code2 className="w-3 h-3 text-orange-700" />
                 <span>Developer</span>
               </button>
 
               <button
+                type="button"
                 onClick={() => scrollToSection('contact')}
-                className="hover:text-orange-600 transition-colors px-1"
+                className="hover:text-orange-600 transition-colors px-1 cursor-pointer"
               >
                 Contact
               </button>
@@ -123,16 +165,18 @@ export default function Navigation() {
           <div className="flex items-center gap-2 shrink-0 ml-auto">
             {/* Desktop Sign In Button */}
             <button
+              type="button"
               onClick={() => router.push(APP_ROUTES.LOGIN)}
-              className="hidden sm:inline-flex items-center justify-center h-9 px-3.5 rounded-xl text-xs font-black text-stone-800 bg-white hover:bg-amber-50 border-2 border-amber-300 shadow-2xs transition-all active:scale-95"
+              className="hidden sm:inline-flex items-center justify-center h-9 px-3.5 rounded-xl text-xs font-black text-stone-800 bg-white hover:bg-amber-50 border-2 border-amber-300 shadow-2xs transition-all active:scale-95 cursor-pointer"
             >
               Sign In
             </button>
 
             {/* Desktop Portal CTA Button */}
             <button
+              type="button"
               onClick={() => router.push(APP_ROUTES.LOGIN)}
-              className="hidden sm:inline-flex items-center justify-center h-9 px-4 rounded-xl text-xs font-black text-white bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 border border-amber-300 shadow-sm transition-all gap-1.5 hover:scale-102 active:scale-95 shrink-0"
+              className="hidden sm:inline-flex items-center justify-center h-9 px-4 rounded-xl text-xs font-black text-white bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 border border-amber-300 shadow-sm transition-all gap-1.5 hover:scale-102 active:scale-95 shrink-0 cursor-pointer"
             >
               <span>Village Portal</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -140,80 +184,96 @@ export default function Navigation() {
 
             {/* Mobile Hamburger Toggle */}
             <button
+              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle Navigation Menu"
-              className="lg:hidden p-2 rounded-xl border-2 border-amber-300 bg-white text-stone-900 shadow-2xs transition-colors"
+              className="lg:hidden p-2 rounded-xl text-stone-700 hover:bg-amber-100 border border-amber-300 transition-colors"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 text-orange-700" /> : <Menu className="w-5 h-5 text-orange-700" />}
             </button>
           </div>
 
         </div>
       </div>
 
-      {/* Mobile Menu Drawer */}
+      {/* 3. Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#FFFDF7] text-stone-900 border-b-2 border-amber-300 px-4 pt-3 pb-5 mt-2 space-y-3 shadow-2xl animate-fade-in">
-          <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="lg:hidden bg-[#FFFDF7]/98 border-b-2 border-amber-300 backdrop-blur-md px-4 py-4 space-y-2 animate-in slide-in-from-top-2 duration-200 shadow-lg">
+          <div className="flex flex-col space-y-2 text-sm font-bold text-stone-700">
             <button
+              type="button"
               onClick={() => scrollToSection('home')}
               className="p-3 text-left rounded-xl bg-amber-50 hover:bg-amber-100 font-black text-stone-800 border border-amber-200"
             >
-              🌾 Gaon Home
+              🏠 Gaon Home
             </button>
             <button
+              type="button"
               onClick={() => scrollToSection('khula-hisab')}
               className="p-3 text-left rounded-xl bg-amber-200 hover:bg-amber-300 font-black text-amber-950 border-2 border-amber-400 shadow-2xs"
             >
               📜 100% Khula Hisab
             </button>
             <button
-              onClick={() => scrollToSection('gaon-samachar')}
+              type="button"
+              onClick={() => { setMobileMenuOpen(false); router.push('/samachar'); }}
               className="p-3 text-left rounded-xl bg-orange-100 hover:bg-orange-200 font-black text-orange-950 border border-orange-300 shadow-2xs"
             >
-              📰 Gaon Samachar
+              📰 Gaon Samachar (Social Feed)
             </button>
             <button
+              type="button"
               onClick={() => scrollToSection('features')}
               className="p-3 text-left rounded-xl bg-amber-50 hover:bg-amber-100 font-black text-stone-800 border border-amber-200"
             >
-              ✨ Features
+              ⚡ Features
             </button>
             <button
+              type="button"
               onClick={() => scrollToSection('glimpses')}
               className="p-3 text-left rounded-xl bg-amber-50 hover:bg-amber-100 font-black text-stone-800 border border-amber-200"
             >
               🪔 Utsav Gallery
             </button>
             <button
+              type="button"
               onClick={() => scrollToSection('about')}
               className="p-3 text-left rounded-xl bg-amber-50 hover:bg-amber-100 font-black text-stone-800 border border-amber-200"
             >
-              📖 About Club
+              🌾 About Club
             </button>
             <button
+              type="button"
               onClick={() => scrollToSection('developer')}
-              className="p-3 text-left rounded-xl bg-orange-100 border border-orange-300 font-black text-orange-950 flex items-center justify-between"
+              className="p-3 text-left rounded-xl bg-orange-100 hover:bg-orange-200 font-black text-orange-900 border border-orange-300 flex items-center gap-1.5"
             >
-              <span>👨💻 Developer</span>
-              <span className="text-[9px] bg-orange-600 text-white px-1.5 py-0.5 rounded font-extrabold">Rajat Sahu</span>
+              <Code2 className="w-4 h-4 text-orange-700" />
+              <span>Developer Details</span>
             </button>
             <button
+              type="button"
               onClick={() => scrollToSection('contact')}
-              className="col-span-2 p-3 text-left rounded-xl bg-amber-50 hover:bg-amber-100 font-bold text-stone-700 border border-amber-200"
+              className="p-3 text-left rounded-xl bg-amber-50 hover:bg-amber-100 font-black text-stone-800 border border-amber-200"
             >
-              📞 Village Contacts &amp; Committee Info
+              📞 Contact
             </button>
-          </div>
 
-          <div className="pt-2 border-t-2 border-dashed border-amber-200 flex flex-col gap-2">
-            <button
-              onClick={() => { setMobileMenuOpen(false); router.push(APP_ROUTES.LOGIN); }}
-              className="w-full py-3 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white font-black rounded-xl text-xs shadow-md flex items-center justify-center gap-2 border border-amber-200"
-            >
-              <span>🔑 Sign In to Village Portal</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <div className="pt-2 border-t border-amber-200 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => router.push(APP_ROUTES.LOGIN)}
+                className="w-full py-3 rounded-xl bg-white text-stone-900 font-black text-xs border-2 border-amber-300 text-center shadow-xs"
+              >
+                Sign In to Member Account
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push(APP_ROUTES.LOGIN)}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white font-black text-xs text-center shadow-md border border-amber-200"
+              >
+                Enter Village Portal →
+              </button>
+            </div>
           </div>
         </div>
       )}
