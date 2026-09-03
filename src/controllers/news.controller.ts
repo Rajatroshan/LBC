@@ -107,6 +107,23 @@ export class NewsController {
     await newsService.addReaction(postId, reactionType);
     return { success: true, alreadyReacted: false };
   }
+
+  /**
+   * Add a comment to a news post
+   */
+  async addComment(postId: string, authorName: string, content: string) {
+    if (!content.trim()) {
+      throw new Error('Comment content cannot be empty');
+    }
+    return await newsService.addComment(postId, authorName || 'Village Resident', content.trim());
+  }
+
+  /**
+   * Get all comments for a post
+   */
+  async getComments(postId: string) {
+    return await newsService.getComments(postId);
+  }
 }
 
 export const newsController = new NewsController();

@@ -1,4 +1,4 @@
-rules_version = '2';
+New like a champion between Southern Mone you are in good hands react empty, color Judy.rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
@@ -111,8 +111,16 @@ service cloud.firestore {
     match /news_posts/{postId} {
       allow read: if true;
       allow create: if isAuthenticated();
-      allow update: if isAuthenticated() || true; // Allow public reactions
+      allow update: if isAuthenticated() || true; // Allow public reactions & comment counter increments
       allow delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if true; // Public residents can leave comments & wishes
+        allow update: if false;
+        allow delete: if isAdmin();
+      }
     }
   }
 }

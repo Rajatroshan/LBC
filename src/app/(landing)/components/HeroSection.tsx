@@ -23,6 +23,7 @@ import {
   CartoonDiya, 
   MarigoldToran 
 } from './VillageIllustrations';
+import TopImportantNoticeBar from './TopImportantNoticeBar';
 
 export default function HeroSection() {
   const router = useRouter();
@@ -42,8 +43,11 @@ export default function HeroSection() {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex flex-col justify-between overflow-hidden bg-gradient-to-b from-amber-100/70 via-orange-50/60 to-emerald-50/80 text-stone-900 pt-20 sm:pt-24 pb-12 select-none"
+      className="relative min-h-screen flex flex-col justify-between overflow-hidden bg-gradient-to-b from-amber-100/70 via-orange-50/60 to-emerald-50/80 text-stone-900 pt-16 sm:pt-20 pb-12 select-none"
     >
+      {/* 📢 Top Announcement / Important Notice Bar */}
+      <TopImportantNoticeBar />
+
       {/* 🌸 Traditional Doorway Marigold Toran Garland */}
       <div className="w-full relative z-10 pt-1 pb-2">
         <MarigoldToran className="opacity-90" />

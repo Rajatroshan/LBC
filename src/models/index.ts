@@ -296,6 +296,14 @@ export interface NewsReactions {
   celebration: number;
 }
 
+export interface NewsComment {
+  id: string;
+  postId: string;
+  authorName: string;
+  content: string;
+  createdAt: Date;
+}
+
 export interface NewsPost extends BaseEntity {
   title: string;
   content: string;
@@ -310,6 +318,7 @@ export interface NewsPost extends BaseEntity {
   authorRole: 'ADMIN' | 'USER';
   authorEmail?: string;
   reactions: NewsReactions;
+  commentsCount?: number;
   viewsCount?: number;
 }
 
@@ -319,3 +328,4 @@ export interface NewsPostFilter {
   authorId?: string;
   search?: string;
 }
+
