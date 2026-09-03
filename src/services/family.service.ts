@@ -51,6 +51,20 @@ export class FamilyService {
   }
 
   /**
+   * Find active family by mobile number (for uniqueness check)
+   */
+  async getByPhone(phone: string): Promise<Family | null> {
+    const q = query(
+      this.collectionRef, 
+      where('phone', '==', phone),
+      where('isActive', '==', true)
+    );
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return null;
+    return this.toEntity(snapshot.docs[0]);
+  }
+
+  /**
    * Get all families with optional filters
    */
   async getAll(filter?: FamilyFilter): Promise<Family[]> {
